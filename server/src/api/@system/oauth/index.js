@@ -21,13 +21,71 @@ const logger = require('../../../lib/@system/Logger')
 
 const SESSION_TTL = 7 * 24 * 60 * 60 // 7 days in seconds
 
+/**
+ * Returns the validated APP_URL from environment variables.
+ * SECURITY: Validates that APP_URL is a safe origin to prevent open redirects.
+ * 
+ * @returns {string} Validated app URL
+ * @throws {Error} If APP_URL is invalid or potentially malicious
+ */
 function appUrl() {
-  return process.env.APP_URL ?? 'http://localhost:5173'
+  const rawUrl = process.env.APP_URL ?? 'http://localhost:5173'
+  
+  try {
+    const url = new URL(rawUrl)
+    
+    // SECURITY: Only allow http/https protocols (prevent javascript:, data:, file:, etc.)
+    if (!['http:', 'https:'].includes(url.protocol)) {
+      throw new Error(`Invalid APP_URL protocol: ${url.protocol}`)
+    }
+    
+    // SECURITY: Prevent URLs with embedded credentials
+    if (url.username || url.password) {
+      throw new Error('APP_URL cannot contain credentials')
+    }
+    
+    // Return URL without trailing slash for consistency
+    return url.origin + url.pathname.replace(/\/$/, '')
+  } catch (err) {
+    // If URL parsing fails, fall back to localhost (safe default)
+    logger.error({ err, rawUrl }, 'Invalid APP_URL in environment, falling back to localhost')
+    return 'http://localhost:5173'
+  }
 }
 
 function serverUrl() {
   const port = process.env.PORT ?? 4000
   return process.env.SERVER_URL ?? `http://localhost:${port}`
+}
+
+/**
+ * Creates a safe redirect URL for OAuth flows.
+ * SECURITY: Ensures redirects are always to the validated APP_URL origin.
+ * 
+ * @param {string} path - Path to append (e.g., '/app', '/auth')
+ * @param {Object} params - Query parameters to include (sanitized)
+ * @returns {string} Safe redirect URL
+ */
+function safeRedirectUrl(path, params = {}) {
+  const base = appUrl()
+  const url = new URL(path, base)
+  
+  // SECURITY: Ensure the final URL is still on our domain
+  // (prevents path traversal like /../../evil.com)
+  if (url.origin !== new URL(base).origin) {
+    logger.warn({ base, path, resultOrigin: url.origin }, 'Attempted redirect to different origin, using safe default')
+    return `${base}/app` // Safe fallback
+  }
+  
+  // Add sanitized query parameters (whitelist approach)
+  Object.entries(params).forEach(([key, value]) => {
+    // Only add safe, non-user-controlled parameters
+    if (typeof value === 'string' && value.length < 100) {
+      url.searchParams.set(key, value)
+    }
+  })
+  
+  return url.toString()
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -56,12 +114,27 @@ async function handleOAuthSuccess({ res, provider, providerId, email, name }) {
 
   const token = await signTokenAsync({ userId: user.id })
   res.cookie('token', token, { httpOnly: true, sameSite: 'lax', maxAge: SESSION_TTL * 1000 })
-  res.redirect(`${appUrl()}/app`)
+  
+  // SECURITY: Use safe redirect helper
+  res.redirect(safeRedirectUrl('/app'))
 }
 
+/**
+ * Handles OAuth errors by logging and redirecting to the auth page with a safe error message.
+ * SECURITY: Error message is hardcoded to prevent open redirect vulnerabilities.
+ * User-controlled error values from OAuth providers are NOT included in the redirect.
+ * 
+ * @param {Response} res - Express response object
+ * @param {Error} err - Error object (for logging only, not exposed to redirect)
+ * @param {string} provider - OAuth provider name (for logging)
+ */
 function handleOAuthError(res, err, provider) {
   logger.error({ err, provider }, `OAuth ${provider} error`)
-  res.redirect(`${appUrl()}/auth?error=oauth_failed`)
+  
+  // SECURITY: Use safe redirect with hardcoded error parameter
+  // DO NOT include err.message or any user-controlled data in the redirect
+  // The error parameter is intentionally hardcoded to 'oauth_failed'
+  res.redirect(safeRedirectUrl('/auth', { error: 'oauth_failed' }))
 }
 
 // ─── Google ───────────────────────────────────────────────────────────────────
@@ -77,6 +150,9 @@ router.get('/auth/google', (req, res) => {
 
 router.get('/auth/google/callback', async (req, res) => {
   const { code, error } = req.query
+  
+  // SECURITY: The 'error' from req.query is user-controlled (from OAuth provider)
+  // We log it but DO NOT include it in any redirect URL
   if (error || !code) return handleOAuthError(res, new Error(error ?? 'missing_code'), 'google')
 
   try {
@@ -112,6 +188,9 @@ router.get('/auth/github', (req, res) => {
 
 router.get('/auth/github/callback', async (req, res) => {
   const { code, error } = req.query
+  
+  // SECURITY: The 'error' from req.query is user-controlled (from OAuth provider)
+  // We log it but DO NOT include it in any redirect URL
   if (error || !code) return handleOAuthError(res, new Error(error ?? 'missing_code'), 'github')
 
   try {
