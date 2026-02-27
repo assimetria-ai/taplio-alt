@@ -8,11 +8,12 @@ function timingSafeCompare(a, b) {
   if (typeof a !== 'string' || typeof b !== 'string') return false
   const bufA = Buffer.from(a)
   const bufB = Buffer.from(b)
-  if (bufA.length !== bufB.length) {
-    crypto.timingSafeEqual(bufA, bufA)
-    return false
-  }
-  return crypto.timingSafeEqual(bufA, bufB)
+  const maxLen = Math.max(bufA.length, bufB.length)
+  const paddedA = Buffer.alloc(maxLen)
+  const paddedB = Buffer.alloc(maxLen)
+  bufA.copy(paddedA)
+  bufB.copy(paddedB)
+  return crypto.timingSafeEqual(paddedA, paddedB) && bufA.length === bufB.length
 }
 
 // GET /api/errors/stats
