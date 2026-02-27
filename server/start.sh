@@ -9,7 +9,7 @@ node src/db/migrations/@system/run.js || {
   echo "=== Migrations failed — clearing schema_migrations and retrying ==="
   node -e "
     const {Sequelize}=require('sequelize');
-    const s=new Sequelize(process.env.DATABASE_URL,{dialectOptions:{ssl:{require:true,rejectUnauthorized:false}}});
+    const s=new Sequelize(process.env.DATABASE_URL,{dialectOptions:{ssl:process.env.NODE_ENV==='production'?{require:true}:false}});
     s.query('DROP TABLE IF EXISTS schema_migrations').then(()=>{console.log('Dropped schema_migrations');process.exit(0)}).catch(e=>{console.error(e);process.exit(1)})
   "
   node src/db/migrations/@system/run.js

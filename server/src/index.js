@@ -14,12 +14,16 @@ require('dotenv').config()
     log(`Migrations failed (${e.message}) — clearing schema_migrations and retrying`)
     try {
       const { Client } = require('pg')
-      const client = new Client({ connectionString: process.env.DATABASE_URL, ssl: { rejectUnauthorized: false } })
+      const _sslCfg = process.env.NODE_ENV === 'production'
+        ? (process.env.DB_SSL_CA ? { ca: require('fs').readFileSync(process.env.DB_SSL_CA) } : true)
+        : undefined
+      const client = new Client({ connectionString: process.env.DATABASE_URL, ssl: _sslCfg })
       // sync drop via spawnSync
       const { spawnSync } = require('child_process')
       spawnSync('node', ['-e', `
         const {Client}=require('pg');
-        const c=new Client({connectionString:process.env.DATABASE_URL,ssl:{rejectUnauthorized:false}});
+        const ssl=process.env.NODE_ENV==='production'?(process.env.DB_SSL_CA?{ca:require('fs').readFileSync(process.env.DB_SSL_CA)}:true):undefined;
+        const c=new Client({connectionString:process.env.DATABASE_URL,ssl});
         c.connect().then(()=>c.query('DROP TABLE IF EXISTS schema_migrations')).then(()=>c.end()).catch(e=>{console.error(e);process.exit(1)});
       `], { stdio: 'inherit', env: process.env })
     } catch (_) {}
