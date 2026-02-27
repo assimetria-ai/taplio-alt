@@ -13,19 +13,8 @@ function isOriginAllowed(origin) {
     return process.env.NODE_ENV !== 'production'
   }
 
-  // Exact match
+  // Exact match only — wildcard subdomain matching removed (SEC-1500: attacker-registered subdomain risk)
   if (ALLOWED_ORIGINS.includes(origin)) return true
-
-  // Allow any subdomain of the APP_URL host in production
-  if (process.env.APP_URL) {
-    try {
-      const appHost = new URL(process.env.APP_URL).hostname
-      const originHost = new URL(origin).hostname
-      if (originHost === appHost || originHost.endsWith(`.${appHost}`)) return true
-    } catch {
-      // malformed URL — deny
-    }
-  }
 
   return false
 }

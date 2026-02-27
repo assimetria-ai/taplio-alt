@@ -43,13 +43,25 @@ router.get('/search', authenticate, async (req, res, next) => {
 
     const parsedLimit  = Math.min(parseInt(limit ?? '20', 10) || 20, 100)
     const parsedOffset = Math.max(parseInt(offset ?? '0', 10) || 0, 0)
-    const sortRules    = sort ? sort.split(',').map((s) => s.trim()).filter(Boolean) : undefined
-    const attrs        = fields ? fields.split(',').map((f) => f.trim()).filter(Boolean) : undefined
+
+    // Validate sort rules: each must be "fieldname:asc" or "fieldname:desc" (SEC-1502)
+    const SORT_RULE_RE = /^[\w.]+:(asc|desc)$/i
+    const rawSortRules = sort ? sort.split(',').map((s) => s.trim()).filter(Boolean) : []
+    const invalidSort  = rawSortRules.find((r) => !SORT_RULE_RE.test(r))
+    if (invalidSort) throw new ValidationError(`Invalid sort rule: "${invalidSort}". Expected "field:asc" or "field:desc".`)
+    const sortRules = rawSortRules.length ? rawSortRules : undefined
+
+    // Validate filter string: length-cap and reject null bytes / obvious injection patterns (SEC-1502)
+    if (filters && filters.length > 1024) throw new ValidationError('filters param exceeds 1024 character limit')
+    if (filters && /\x00/.test(filters)) throw new ValidationError('filters param contains invalid characters')
+    const safeFilters = filters ? String(filters) : undefined
+
+    const attrs = fields ? fields.split(',').map((f) => f.trim()).filter(Boolean) : undefined
 
     const result = await Search.search({
       index: index.trim(),
       query: String(q),
-      filters: filters ? String(filters) : undefined,
+      filters: safeFilters,
       sort:    sortRules,
       limit:   parsedLimit,
       offset:  parsedOffset,

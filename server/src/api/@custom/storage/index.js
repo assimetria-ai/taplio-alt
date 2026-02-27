@@ -19,8 +19,8 @@ const { PresignBody, FileIdParams, ConfirmUploadBody } = require('../../../lib/@
 // ── Allowed MIME types (restrict to safe set) ─────────────────────────────────
 
 const ALLOWED_MIME_TYPES = new Set([
-  // Images
-  'image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml', 'image/avif',
+  // Images — SVG excluded: can embed JavaScript, XSS vector when served from same origin
+  'image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/avif',
   // Documents
   'application/pdf',
   'application/msword',
