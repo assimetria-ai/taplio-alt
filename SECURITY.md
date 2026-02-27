@@ -265,8 +265,8 @@ Attacker compromises Product A → Obtains keys
 **Before (INSECURE):**
 ```bash
 # server/.env
-JWT_PRIVATE_KEY=-----BEGIN PRIVATE KEY-----\nMIIEvAIBADANBg...
-JWT_PUBLIC_KEY=-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhki...
+JWT_PRIVATE_KEY=<redacted-old-hardcoded-rsa-private-key>
+JWT_PUBLIC_KEY=<redacted-old-hardcoded-rsa-public-key>
 ENCRYPT_KEY=<redacted-old-hardcoded-key>
 ENCRYPT_IV=<redacted-old-hardcoded-iv>
 ```
@@ -1183,8 +1183,8 @@ server/.env.backup-insecure
 
 **File Contents:**
 ```bash
-JWT_PRIVATE_KEY=-----BEGIN PRIVATE KEY-----\n[Old 2048-bit RSA key]...
-JWT_PUBLIC_KEY=-----BEGIN PUBLIC KEY-----\n[Old 2048-bit RSA key]...
+JWT_PRIVATE_KEY=<redacted-old-hardcoded-rsa-private-key>
+JWT_PUBLIC_KEY=<redacted-old-hardcoded-rsa-public-key>
 ENCRYPT_KEY=<redacted-old-hardcoded-key>  # Old hardcoded
 ENCRYPT_IV=<redacted-old-hardcoded-iv>  # Old hardcoded
 ```
