@@ -12,6 +12,11 @@ const customRoutes = require('./routes/@custom')
 
 const app = express()
 
+// /healthz is registered before all middleware (including CORS) so that infrastructure
+// health probes with no Origin header reach it without triggering CORS rejection.
+// This is the only path permitted to bypass CORS in production.
+app.get('/healthz', (_req, res) => res.status(200).json({ status: 'ok' }))
+
 app.use(securityHeaders)
 app.use(cors)
 app.use(compression())

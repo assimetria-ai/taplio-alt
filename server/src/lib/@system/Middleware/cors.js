@@ -7,11 +7,10 @@ const ALLOWED_ORIGINS = [
 ].filter(Boolean)
 
 function isOriginAllowed(origin) {
-  // In production, deny requests with no Origin header (blocks server-to-server CORS bypass).
-  // In development, allow no-origin for curl, Postman, and local tooling convenience.
-  if (!origin) { // Allow healthchecks, server-to-server, curl
-    return true // was: only in dev. Now: allow for healthcheck probes
-  }
+  // Allow no-origin requests (curl, Postman, server-to-server) in development only.
+  // In production, no-origin requests are denied to prevent CORS bypass via cookie-based auth.
+  // Production healthchecks must use the /healthz path, which is registered before CORS middleware.
+  if (!origin) return process.env.NODE_ENV === 'development'
 
   // Exact match only — wildcard subdomain matching removed (SEC-1500: attacker-registered subdomain risk)
   if (ALLOWED_ORIGINS.includes(origin)) return true
