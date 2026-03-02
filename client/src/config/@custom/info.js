@@ -3,7 +3,8 @@
 // This file is NEVER overwritten during template sync.
 
 export const customInfo = {
-  // name: 'MyProduct',
-  // tagline: 'The best product for your workflow',
-  // url: 'https://myproduct.com',
-  // supportEmail: 'support@myproduct.com' }
+  name: 'Splice',
+  tagline: 'Visual workflow builder and integration platform.',
+  url: import.meta.env.VITE_APP_URL ?? 'https://splice.so',
+  supportEmail: 'support@splice.com',
+}
