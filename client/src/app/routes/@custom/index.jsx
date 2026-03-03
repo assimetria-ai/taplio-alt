@@ -5,6 +5,7 @@ import { BrandSettingsPage } from '../../pages/app/@custom/BrandSettingsPage'
 import { ChatbasePage } from '../../pages/app/@custom/ChatbasePage'
 import { EmailTrackingPage } from '../../pages/app/@custom/EmailTrackingPage'
 import { EmailPreviewPage } from '../../pages/app/@custom/EmailPreviewPage'
+import { ClipLibraryPage } from '../../pages/app/@custom/ClipLibraryPage'
 import { PrivateRoute } from '@/app/components/@system/PrivateRoute/PrivateRoute'
 
 // @custom — add your product-specific routes here.
@@ -61,6 +62,15 @@ export const customRoutes = [
     element={
       <PrivateRoute role="admin">
         <EmailPreviewPage />
+      </PrivateRoute>
+    }
+  />,
+  <Route
+    key="clip-library"
+    path="/app/library"
+    element={
+      <PrivateRoute>
+        <ClipLibraryPage />
       </PrivateRoute>
     }
   />,
