@@ -315,8 +315,8 @@ function validate() {
     )
   }
 
-  // In production, verify the configured keys look like real PEM material
-  if (isProd) {
+  // In all non-test environments, verify the configured keys look like real PEM material
+  if (env !== 'test') {
     const fs = require('fs')
 
     function readOrInline(fileVar, inlineVar, label) {
