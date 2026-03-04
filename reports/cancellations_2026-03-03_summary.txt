@@ -1,0 +1,22 @@
+🚨 **Daily Cancellation Report — 2026-03-03**
+
+📊 **Overview:**
+• Total cancellations: 12
+• Average subscription length: 47 days
+
+🎯 **Top Issues:**
+• Zero activation (never submitted): 4 (33.3%)
+• Low results (few placements): 3 (25.0%)
+• Billing/price concern: 2 (16.7%)
+
+⚠️ **Key Findings:**
+• 4 users never submitted (activation failure)
+• 3 users got poor results despite trying
+• 5 opened support tickets before canceling
+
+💡 **Recommendations:**
+• **Urgent:** High zero-activation rate. Improve onboarding flow + send activation emails.
+• Review placement algorithm — users are trying but not getting results.
+• Address Spotify artificial streaming concerns in marketing/FAQ.
+
+📄 Full report attached as PDF.
