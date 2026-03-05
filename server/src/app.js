@@ -7,6 +7,7 @@ const pinoHttp = require('pino-http')
 
 const logger = require('./lib/@system/Logger')
 const { cors, securityHeaders } = require('./lib/@system/Middleware')
+const { apiLimiter } = require('./lib/@system/RateLimit')
 const systemRoutes = require('./routes/@system')
 const customRoutes = require('./routes/@custom')
 
@@ -26,6 +27,9 @@ app.use(cookieParser())
 if (process.env.NODE_ENV !== 'test') {
   app.use(pinoHttp({ logger }))
 }
+
+// General rate limiting for all API routes (baseline DoS protection)
+app.use('/api', apiLimiter)
 
 // Routes
 app.use('/api', systemRoutes)

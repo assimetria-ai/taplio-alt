@@ -150,7 +150,16 @@ const integrationTestLimiter = createLimiter({
   message: 'Too many integration test requests. Please try again later.',
 })
 
+/** General API rate limiter: 100 requests per minute — baseline DoS protection for all endpoints */
+const apiLimiter = createLimiter({
+  windowMs: 60 * 1000,
+  max: 100,
+  prefix: 'rl:api:',
+  message: 'Too many requests. Please slow down and try again later.',
+})
+
 module.exports = {
+  apiLimiter,
   loginLimiter,
   registerLimiter,
   passwordResetLimiter,
