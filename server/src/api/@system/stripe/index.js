@@ -161,6 +161,7 @@ async function handleWebhookEvent(event) {
       await SubscriptionRepo.upsertByStripeSubscriptionId({
         user_id: Number(userId),
         stripe_subscription_id: stripeSubscription.id,
+        stripe_customer_id: obj.customer,
         stripe_price_id: item.price.id,
         status: stripeSubscription.status,
         current_period_start: new Date(stripeSubscription.current_period_start * 1000),
@@ -185,6 +186,7 @@ async function handleWebhookEvent(event) {
       await SubscriptionRepo.upsertByStripeSubscriptionId({
         user_id: userId,
         stripe_subscription_id: obj.id,
+        stripe_customer_id: obj.customer,
         stripe_price_id: item?.price?.id,
         status: obj.status,
         current_period_start: new Date(obj.current_period_start * 1000),
@@ -205,6 +207,7 @@ async function handleWebhookEvent(event) {
 
       const item = obj.items.data[0]
       await SubscriptionRepo.update(existing.id, {
+        stripe_customer_id: obj.customer,
         stripe_price_id: item?.price?.id,
         status: obj.status,
         current_period_start: new Date(obj.current_period_start * 1000),
@@ -250,6 +253,7 @@ async function handleWebhookEvent(event) {
       // Fetch fresh subscription to get updated period dates
       const freshSub = await stripe.subscriptions.retrieve(subId)
       await SubscriptionRepo.update(existing.id, {
+        stripe_customer_id: freshSub.customer,
         status: freshSub.status,
         current_period_start: new Date(freshSub.current_period_start * 1000),
         current_period_end: new Date(freshSub.current_period_end * 1000),
