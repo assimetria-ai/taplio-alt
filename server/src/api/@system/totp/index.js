@@ -15,6 +15,7 @@ const QRCode = require('qrcode')
 const bcrypt = require('bcryptjs')
 const { validate } = require('../../../lib/@system/Validation')
 const { EnableTotpBody, DisableTotpBody } = require('../../../lib/@system/Validation/schemas/@system/totp')
+const { totpSetupLimiter, totpEnableLimiter } = require('../../../lib/@system/RateLimit')
 
 const APP_NAME = process.env.APP_NAME ?? 'ProductTemplate'
 
@@ -63,7 +64,7 @@ router.get('/users/me/2fa/status', authenticate, async (req, res, next) => {
 
 // ─── POST /api/users/me/2fa/setup ────────────────────────────────────────────
 
-router.post('/users/me/2fa/setup', authenticate, async (req, res, next) => {
+router.post('/users/me/2fa/setup', authenticate, totpSetupLimiter, async (req, res, next) => {
   try {
     const user = await db.oneOrNone('SELECT * FROM users WHERE id = $1', [req.user.id])
     if (user.totp_enabled) {
@@ -102,7 +103,7 @@ router.post('/users/me/2fa/setup', authenticate, async (req, res, next) => {
 
 // ─── POST /api/users/me/2fa/enable ───────────────────────────────────────────
 
-router.post('/users/me/2fa/enable', authenticate, validate({ body: EnableTotpBody }), async (req, res, next) => {
+router.post('/users/me/2fa/enable', authenticate, totpEnableLimiter, validate({ body: EnableTotpBody }), async (req, res, next) => {
   try {
     const { code } = req.body
 
@@ -136,7 +137,7 @@ router.post('/users/me/2fa/enable', authenticate, validate({ body: EnableTotpBod
 
 // ─── POST /api/users/me/2fa/disable ──────────────────────────────────────────
 
-router.post('/users/me/2fa/disable', authenticate, validate({ body: DisableTotpBody }), async (req, res, next) => {
+router.post('/users/me/2fa/disable', authenticate, totpEnableLimiter, validate({ body: DisableTotpBody }), async (req, res, next) => {
   try {
     const { code, password } = req.body
 

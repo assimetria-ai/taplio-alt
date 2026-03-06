@@ -12,10 +12,11 @@ const express = require('express')
 const router = express.Router()
 const { authenticate, requireAdmin } = require('../../../lib/@system/Helpers/auth')
 const Email = require('../../../lib/@system/Email')
+const { emailTestLimiter, adminReadLimiter } = require('../../../lib/@system/RateLimit')
 
 // ── GET /api/email/provider ───────────────────────────────────────────────────
 
-router.get('/email/provider', authenticate, requireAdmin, (req, res) => {
+router.get('/email/provider', authenticate, requireAdmin, adminReadLimiter, (req, res) => {
   const { provider } = Email.getTransport()
   const from = process.env.EMAIL_FROM ?? process.env.SES_FROM_EMAIL ?? null
   const appUrl = process.env.APP_URL ?? null
@@ -31,7 +32,7 @@ router.get('/email/provider', authenticate, requireAdmin, (req, res) => {
 
 // ── GET /api/email/verify ─────────────────────────────────────────────────────
 
-router.get('/email/verify', authenticate, requireAdmin, async (req, res, next) => {
+router.get('/email/verify', authenticate, requireAdmin, adminReadLimiter, async (req, res, next) => {
   try {
     const { provider, smtpTransporter } = Email.getTransport()
     let result
@@ -63,7 +64,7 @@ router.get('/email/verify', authenticate, requireAdmin, async (req, res, next) =
 
 // ── GET /api/email/quota ──────────────────────────────────────────────────────
 
-router.get('/email/quota', authenticate, requireAdmin, async (req, res, next) => {
+router.get('/email/quota', authenticate, requireAdmin, adminReadLimiter, async (req, res, next) => {
   try {
     const { provider } = Email.getTransport()
     if (provider !== 'ses') {
@@ -80,7 +81,7 @@ router.get('/email/quota', authenticate, requireAdmin, async (req, res, next) =>
 
 // ── POST /api/email/test ──────────────────────────────────────────────────────
 
-router.post('/email/test', authenticate, requireAdmin, async (req, res, next) => {
+router.post('/email/test', authenticate, requireAdmin, emailTestLimiter, async (req, res, next) => {
   try {
     const { template = 'notification', to } = req.body
 

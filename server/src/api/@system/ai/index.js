@@ -23,6 +23,7 @@ const { authenticate } = require('../../../lib/@system/Helpers/auth')
 const { openai, anthropic } = require('../../../lib/@system/AI')
 const { ValidationError } = require('../../../lib/@system/Errors')
 const logger = require('../../../lib/@system/Logger')
+const { aiChatLimiter, aiImageLimiter } = require('../../../lib/@system/RateLimit')
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -45,7 +46,7 @@ function writeSSE(res, data) {
  * POST /api/ai/openai/chat
  * Body: { prompt, system?, model?, maxTokens?, temperature?, messages? }
  */
-router.post('/ai/openai/chat', authenticate, async (req, res, next) => {
+router.post('/ai/openai/chat', authenticate, aiChatLimiter, async (req, res, next) => {
   try {
     const { prompt, system, model, maxTokens, temperature, messages } = req.body
 
@@ -65,7 +66,7 @@ router.post('/ai/openai/chat', authenticate, async (req, res, next) => {
  * Body: { prompt, system?, model?, maxTokens?, temperature?, messages? }
  * Returns SSE stream: data: { type: 'delta'|'done', text?, ... }
  */
-router.post('/ai/openai/chat/stream', authenticate, async (req, res) => {
+router.post('/ai/openai/chat/stream', authenticate, aiChatLimiter, async (req, res) => {
   const { prompt, system, model, maxTokens, temperature, messages } = req.body
 
   if (!prompt && !messages?.length) {
@@ -98,7 +99,7 @@ router.post('/ai/openai/chat/stream', authenticate, async (req, res) => {
  * POST /api/ai/openai/image
  * Body: { prompt, model?, size?, quality?, style?, n? }
  */
-router.post('/ai/openai/image', authenticate, async (req, res, next) => {
+router.post('/ai/openai/image', authenticate, aiImageLimiter, async (req, res, next) => {
   try {
     const { prompt, model, size, quality, style, n } = req.body
     if (!prompt) throw new ValidationError('prompt is required')
@@ -115,7 +116,7 @@ router.post('/ai/openai/image', authenticate, async (req, res, next) => {
  * Body: { input, model? }
  * input can be a string or array of strings.
  */
-router.post('/ai/openai/embed', authenticate, async (req, res, next) => {
+router.post('/ai/openai/embed', authenticate, aiChatLimiter, async (req, res, next) => {
   try {
     const { input, model } = req.body
     if (!input) throw new ValidationError('input is required')
@@ -133,7 +134,7 @@ router.post('/ai/openai/embed', authenticate, async (req, res, next) => {
  * POST /api/ai/anthropic/message
  * Body: { prompt, system?, model?, maxTokens?, temperature?, messages? }
  */
-router.post('/ai/anthropic/message', authenticate, async (req, res, next) => {
+router.post('/ai/anthropic/message', authenticate, aiChatLimiter, async (req, res, next) => {
   try {
     const { prompt, system, model, maxTokens, temperature, messages } = req.body
 
@@ -153,7 +154,7 @@ router.post('/ai/anthropic/message', authenticate, async (req, res, next) => {
  * Body: { prompt, system?, model?, maxTokens?, temperature?, messages? }
  * Returns SSE stream: data: { type: 'delta'|'done', text?, ... }
  */
-router.post('/ai/anthropic/message/stream', authenticate, async (req, res) => {
+router.post('/ai/anthropic/message/stream', authenticate, aiChatLimiter, async (req, res) => {
   const { prompt, system, model, maxTokens, temperature, messages } = req.body
 
   if (!prompt && !messages?.length) {
@@ -187,7 +188,7 @@ router.post('/ai/anthropic/message/stream', authenticate, async (req, res) => {
  * Body: { prompt, system?, model?, messages? }
  * Pre-flight token count — does not consume output tokens.
  */
-router.post('/ai/anthropic/tokens', authenticate, async (req, res, next) => {
+router.post('/ai/anthropic/tokens', authenticate, aiChatLimiter, async (req, res, next) => {
   try {
     const { prompt, system, model, messages } = req.body
     if (!prompt && !messages?.length) throw new ValidationError('prompt or messages is required')
