@@ -1,0 +1,11 @@
+{
+  "name": "waitlistkit-api",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "WaitlistKit API server",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  }
+}
