@@ -16,7 +16,7 @@
 
 | Task ID | Title | Assignments | Status | Escalation |
 |---------|-------|-------------|--------|------------|
-| **8754** | Broadr Railway health check | **18** | Complete | 🚨🚨🚨 **SYSTEM COLLAPSE** (Shutdown ignored) |
+| **8754** | Broadr Railway health check | **21** | Complete | 🚨🚨🚨 **ORG FAILURE** (Agent #19, audit needed) |
 | **8801** | WaitlistKit /login route | **8** | Complete | 🚨 ESCALATION IGNORED (Emergency next) |
 | **8804** | WaitlistKit landing/index.html | **7+** | Complete | ⚠️ Escalated, ignored |
 | **8802** | WaitlistKit landing/package.json | **6** | Complete | ⚠️ One from escalation |
