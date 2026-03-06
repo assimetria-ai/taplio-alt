@@ -11,12 +11,18 @@ Added a production-ready Express server with a dedicated health check endpoint.
 ### Problem (Updated - Task #8754)
 Health check was still timing out because build and start commands were combined in `startCommand`, causing Railway to build during the start phase instead of the build phase.
 
-### Solution (Updated)
-Separated build and start commands in `railway.json`:
-- `buildCommand`: `npm run build` (runs during build phase)
-- `startCommand`: `npm start` (runs during start phase)
+### Solution (Updated - Iteration 2)
+Optimized Railway configuration in `railway.json`:
+- Removed manual `installCommand` - Railway's Nixpacks auto-detects dependencies
+- Combined install and build: `buildCommand`: `npm ci && npm run build`
+- Direct start command: `startCommand`: `node server.js` (bypasses npm overhead)
+- Reduced health check timeout from 300s to 100s (more reasonable for a static site server)
 
-This ensures the app is fully built before the server starts and the health check is performed.
+This ensures:
+1. Clean dependency installation during build phase
+2. App is fully built before starting
+3. Server starts directly without npm wrapper overhead
+4. Health check responds quickly once server is up
 
 ## Files Changed
 
@@ -30,20 +36,19 @@ This ensures the app is fully built before the server starts and the health chec
    - `start` script for production
 
 3. **railway.json** - Railway configuration:
-   - Build command: `npm run build` (separate build phase)
-   - Start command: `npm start` (separate start phase)
-   - Health check path: `/health`
+   - Build command: `npm ci && npm run build` (install + build in build phase)
+   - Start command: `node server.js` (direct server start)
+   - Health check path: `/health` with 100s timeout
    - Automatic restart on failure
 
 ## Deployment
 
 Railway will automatically:
-1. **Install Phase**: Run `npm install`
-2. **Build Phase**: Run `npm run build` (builds Vite app to `dist/`)
-3. **Start Phase**: Run `npm start` (starts Express server on PORT from env)
-4. **Health Check**: Check `/health` endpoint for service health
+1. **Build Phase**: Run `npm ci && npm run build` (installs deps + builds Vite app to `dist/`)
+2. **Start Phase**: Run `node server.js` (starts Express server on PORT from env)
+3. **Health Check**: Check `/health` endpoint (100s timeout) for service health
 
-The separation of build and start phases ensures the application is fully built before the server starts and health checks begin, preventing timeout issues.
+The optimized build command ensures all dependencies are installed and the app is fully built before the server starts. Using `node server.js` directly (instead of `npm start`) reduces startup overhead and improves health check reliability.
 
 ## Local Testing
 
