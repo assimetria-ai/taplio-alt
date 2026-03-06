@@ -18,6 +18,16 @@ Optimized Railway configuration in `railway.json`:
 - Direct start command: `startCommand`: `node server.js` (bypasses npm overhead)
 - Reduced health check timeout from 300s to 100s (more reasonable for a static site server)
 
+### Problem (Final Fix - Task #8754)
+Health check was failing with QA because the 100-second timeout was still too long. Railway health checks expect quick responses (typically 10-30 seconds).
+
+### Solution (Final - Iteration 3)
+Reduced `healthcheckTimeout` from 100s to 30s:
+- The Express server starts in under 1 second locally
+- 30 seconds provides sufficient buffer for Railway's cold start
+- Aligns with Railway best practices for static site deployments
+- Health endpoint responds immediately once server is running
+
 This ensures:
 1. Clean dependency installation during build phase
 2. App is fully built before starting
@@ -38,7 +48,7 @@ This ensures:
 3. **railway.json** - Railway configuration:
    - Build command: `npm ci && npm run build` (install + build in build phase)
    - Start command: `node server.js` (direct server start)
-   - Health check path: `/health` with 100s timeout
+   - Health check path: `/health` with 30s timeout
    - Automatic restart on failure
 
 ## Deployment
@@ -46,7 +56,7 @@ This ensures:
 Railway will automatically:
 1. **Build Phase**: Run `npm ci && npm run build` (installs deps + builds Vite app to `dist/`)
 2. **Start Phase**: Run `node server.js` (starts Express server on PORT from env)
-3. **Health Check**: Check `/health` endpoint (100s timeout) for service health
+3. **Health Check**: Check `/health` endpoint (30s timeout) for service health
 
 The optimized build command ensures all dependencies are installed and the app is fully built before the server starts. Using `node server.js` directly (instead of `npm start`) reduces startup overhead and improves health check reliability.
 
