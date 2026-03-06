@@ -23,8 +23,19 @@ app.get('/', (req, res) => {
     service: 'nestora',
     message: 'Nestora landing page server',
     endpoints: {
-      health: '/api/health'
+      health: '/api/health',
+      login: '/login'
     }
+  });
+});
+
+// Login endpoint
+app.get('/login', (req, res) => {
+  res.status(200).json({
+    service: 'nestora',
+    page: 'login',
+    message: 'Login page',
+    info: 'This is the login endpoint for Nestora'
   });
 });
 
