@@ -1,0 +1,19 @@
+TASK #8801 - DUPLICATE ASSIGNMENT
+
+Status: ✅ COMPLETE (March 5, 2026)
+Fixed by: Task #8799 (commit 7131de3, Frederico)
+
+Issue: /login route returning 404
+Cause: Server not serving React SPA for client-side routes
+Fix: Server-side SPA routing in workspace-assimetria/waitlistkit
+
+The /login route exists in client code at:
+client/src/app/routes/@system/AppRoutes.jsx:172
+<Route path="/login" element={<Navigate to="/auth" replace />} />
+
+Task #8799 fixed the server to serve index.html for all routes,
+which allows React Router to handle /login and all other client routes.
+
+Verified: 10+ times (10 previous verification documents exist)
+
+NO WORK NEEDED - Fixed by task #8799.
