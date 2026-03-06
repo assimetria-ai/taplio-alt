@@ -22,11 +22,22 @@ Optimized Railway configuration in `railway.json`:
 Health check was failing with QA because the 100-second timeout was still too long. Railway health checks expect quick responses (typically 10-30 seconds).
 
 ### Solution (Final - Iteration 3)
-Reduced `healthcheckTimeout` from 100s to 30s:
-- The Express server starts in under 1 second locally
-- 30 seconds provides sufficient buffer for Railway's cold start
-- Aligns with Railway best practices for static site deployments
-- Health endpoint responds immediately once server is running
+1. **Reduced timeout**: `healthcheckTimeout` from 100s to 30s
+   - The Express server starts in under 1 second locally
+   - 30 seconds provides sufficient buffer for Railway's cold start
+   - Aligns with Railway best practices for static site deployments
+
+2. **Enhanced health check endpoint** with readiness verification:
+   - Checks that `dist/` folder exists
+   - Verifies `dist/index.html` is present
+   - Returns `503 Service Unavailable` if app isn't built
+   - Returns `200 OK` only when fully ready to serve content
+   - This prevents Railway from marking the service as healthy before it can actually serve traffic
+
+3. **Improved error handling**:
+   - Added server error handling for port conflicts
+   - Better logging for debugging Railway deployments
+   - Explicit binding confirmation to 0.0.0.0
 
 This ensures:
 1. Clean dependency installation during build phase
@@ -36,10 +47,13 @@ This ensures:
 
 ## Files Changed
 
-1. **server.js** - New Express server that:
+1. **server.js** - Production Express server that:
    - Serves static files from `dist/` directory
-   - Provides `/health` endpoint for Railway health checks
+   - Provides `/health` endpoint with readiness verification (checks dist/ exists)
+   - Returns 503 if app not built, 200 if ready to serve
    - Handles SPA routing
+   - Binds to 0.0.0.0 for Railway compatibility
+   - Includes error handling for port conflicts
 
 2. **package.json** - Updated with:
    - `express` dependency

@@ -1,6 +1,7 @@
 import express from 'express';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import fs from 'fs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -10,7 +11,22 @@ const PORT = process.env.PORT || 3000;
 
 // Health check endpoint for Railway
 app.get('/health', (req, res) => {
-  res.status(200).json({ status: 'healthy', timestamp: new Date().toISOString() });
+  // Verify that the app is built and ready to serve
+  const distPath = path.join(__dirname, 'dist');
+  const indexPath = path.join(distPath, 'index.html');
+  
+  if (!fs.existsSync(distPath) || !fs.existsSync(indexPath)) {
+    return res.status(503).json({ 
+      status: 'unhealthy', 
+      error: 'Application not built',
+      timestamp: new Date().toISOString() 
+    });
+  }
+  
+  res.status(200).json({ 
+    status: 'healthy', 
+    timestamp: new Date().toISOString() 
+  });
 });
 
 // Serve static files from the dist directory
@@ -26,7 +42,17 @@ app.get('*', (req, res) => {
   });
 });
 
-app.listen(PORT, '0.0.0.0', () => {
+const server = app.listen(PORT, '0.0.0.0', () => {
   console.log(`Broadr landing page server running on port ${PORT}`);
   console.log(`Health check available at http://localhost:${PORT}/health`);
+  console.log(`Server bound to 0.0.0.0:${PORT}`);
+});
+
+server.on('error', (error) => {
+  if (error.code === 'EADDRINUSE') {
+    console.error(`Port ${PORT} is already in use`);
+  } else {
+    console.error('Server error:', error);
+  }
+  process.exit(1);
 });
