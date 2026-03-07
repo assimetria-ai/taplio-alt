@@ -9,8 +9,8 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Health check endpoint for Railway
-app.get('/api/health', (req, res) => {
+// Health check handler function
+const healthCheck = (req, res) => {
   // Verify that the app is built and ready to serve
   const distPath = path.join(__dirname, 'dist');
   const indexPath = path.join(distPath, 'index.html');
@@ -29,7 +29,11 @@ app.get('/api/health', (req, res) => {
     service: 'broadr',
     timestamp: new Date().toISOString() 
   });
-});
+};
+
+// Health check endpoints for Railway (both /health and /api/health for compatibility)
+app.get('/health', healthCheck);
+app.get('/api/health', healthCheck);
 
 // Serve static files from the dist directory
 app.use(express.static(path.join(__dirname, 'dist')));
@@ -46,7 +50,9 @@ app.get('*', (req, res) => {
 
 const server = app.listen(PORT, '0.0.0.0', () => {
   console.log(`Broadr landing page server running on port ${PORT}`);
-  console.log(`Health check available at http://localhost:${PORT}/api/health`);
+  console.log(`Health checks available at:`);
+  console.log(`  - http://localhost:${PORT}/health`);
+  console.log(`  - http://localhost:${PORT}/api/health`);
   console.log(`Server bound to 0.0.0.0:${PORT}`);
 });
 
