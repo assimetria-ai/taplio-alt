@@ -23,5 +23,16 @@ export {
   ErrorBoundaryDemoSection,
 } from './ErrorBoundaryDemo'
 
+// Test utilities (for testing)
+export {
+  withErrorBoundary,
+  withSectionErrorBoundary,
+  withAsyncErrorBoundary,
+  createThrowingComponent,
+  createAsyncThrowingComponent,
+  MockErrorLogger,
+  suppressConsoleError,
+} from './ErrorBoundary.test-utils'
+
 // Landing page
 export { LandingPage } from './LandingPage'
