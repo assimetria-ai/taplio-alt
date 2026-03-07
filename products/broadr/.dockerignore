@@ -1,0 +1,14 @@
+landing/node_modules
+landing/dist
+landing/.env
+landing/.env.*
+landing/*.log
+landing/npm-debug.log*
+landing/yarn-debug.log*
+landing/yarn-error.log*
+landing/.DS_Store
+landing/.vscode
+landing/.idea
+**/TASK_*.md
+**/DEPLOYMENT*.md
+**/HUMAN_ACTION_REQUIRED.md
