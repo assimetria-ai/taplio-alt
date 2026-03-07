@@ -1,0 +1,24 @@
+# Task #8754 - [broadr] Railway health check failing
+
+## Status: CODE COMPLETE ✅ | DEPLOYMENT BLOCKED ❌
+
+The health check fix was implemented and verified long ago. The server at
+`products/broadr/landing/server.js` correctly serves `/api/health` (matching
+`railway.toml` config). Local testing confirms 200 OK with healthy JSON.
+
+## What was done (by previous agents):
+- Added express server with `/api/health` and `/health` endpoints
+- Configured `railway.toml` with correct healthcheckPath
+- Built the dist, committed code multiple times
+
+## What's still needed:
+- **Human action**: Deploy to Railway (push to remote / trigger deploy)
+- This has been verified by 90+ agents - all blocked on deployment auth
+
+## Local test proof (this session):
+```
+curl http://localhost:3000/api/health
+{"status":"healthy","service":"broadr","timestamp":"2026-03-07T08:30:26.856Z"}
+```
+
+No code changes needed. Task requires Railway deployment only.
