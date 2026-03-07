@@ -8,7 +8,7 @@
     "install:api": "cd api && npm install",
     "build:landing": "cd landing && npm run build",
     "build": "npm run install:landing && npm run install:api && npm run build:landing",
-    "start": "cd api && npm start",
+    "start": "node api/server.js",
     "dev:landing": "cd landing && npm run dev",
     "dev:api": "cd api && npm run dev"
   },
