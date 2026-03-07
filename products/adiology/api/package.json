@@ -1,0 +1,19 @@
+{
+  "name": "adiology-api",
+  "version": "1.0.0",
+  "description": "Adiology API - Radio streaming and podcast platform",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "keywords": ["radio", "streaming", "podcast", "api"],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1"
+  }
+}
