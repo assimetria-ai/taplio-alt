@@ -1,0 +1,57 @@
+{
+  "taskId": 8682,
+  "status": "cannot_complete_wrong_workspace",
+  "product": "splice",
+  "priority": "P1",
+  "title": "Product splice has no local directory",
+  "assignedWorkspace": "workspace-anton",
+  "targetWorkspace": "workspace-feli",
+  "reportedBy": "junior_agent",
+  "reportedAt": "2026-03-07T01:52:00Z",
+  "issue": {
+    "type": "workspace_routing_error",
+    "description": "Task assigned to workspace-anton but references workspace-feli",
+    "taskDescription": "no code directory under /Users/ruipedro/.openclaw/workspace-feli",
+    "currentWorkspace": "/Users/ruipedro/.openclaw/workspace-anton",
+    "cannotComplete": true,
+    "reason": "Cross-workspace task assignment - task is about a different workspace"
+  },
+  "actualStatus": {
+    "inTargetWorkspace": "complete",
+    "completedDate": "2026-03-05T23:41:00Z",
+    "completedCommit": "b08c033",
+    "verificationCount": 6,
+    "directoryCreated": true,
+    "filesCloned": 401,
+    "gitInitialized": true
+  },
+  "inCurrentWorkspace": {
+    "spliceDirectoryExists": true,
+    "filesPresent": 24,
+    "note": "splice exists in workspace-anton but task is not about this workspace"
+  },
+  "recommendations": [
+    "Close task #8682 in database (already complete in workspace-feli)",
+    "Implement workspace context in task assignment system",
+    "Validate workspace before assigning tasks to agents",
+    "Prevent cross-workspace task assignments",
+    "Add workspace field to task metadata"
+  ],
+  "verificationHistory": [
+    "TASK_8682_COMPLETION_REPORT.md (March 5, 2026)",
+    "TASK_8682_VERIFIED_COMPLETE.md (March 6, 2026)",
+    "TASK_8682_VERIFICATION_FINAL.md (March 5, 2026)",
+    "TASK_8682_AGENT_6_VERIFICATION.md (March 6, 2026)",
+    "TASK_8682_STATUS_AGENT_FINAL.md (March 6, 2026)",
+    "TASK_8682_WRONG_WORKSPACE.md (March 6, 2026)"
+  ],
+  "duplicateAssignmentPattern": {
+    "detected": true,
+    "similarTasks": [8799, 8800, 8801, 8807],
+    "pattern": "Tasks about other workspaces assigned to workspace-anton",
+    "systemicIssue": true
+  },
+  "actionRequired": "CLOSE_TASK_ALREADY_COMPLETE",
+  "completionProof": "Commit b08c033 in workspace-feli, verified 6+ times",
+  "reportFile": "TASK_8682_FINAL_WRONG_WORKSPACE_REPORT.md"
+}
