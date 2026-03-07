@@ -1,0 +1,39 @@
+# Node modules (will be installed fresh in container)
+node_modules
+npm-debug.log
+
+# Build output (built fresh in container)
+dist
+
+# Git
+.git
+.gitignore
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Documentation and task tracking
+*.md
+TASK_*
+DEPLOYMENT*
+HUMAN_ACTION*
+
+# Testing
+coverage
+.nyc_output
+
+# Environment files
+.env.local
+.env.*.local
+
+# Logs
+logs
+*.log
