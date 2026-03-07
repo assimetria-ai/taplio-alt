@@ -1,6 +1,5 @@
 // @system — Landing page: hero + features + CTA + footer
-// @custom — override info.ts values (name, tagline) and add your own sections below
-import { lazy, Suspense } from 'react'
+// @custom — to add custom sections (FAQ, HeroSection), create @custom/LandingPage.jsx that wraps or extends this
 import { Link } from 'react-router-dom'
 import { ArrowRight, Check } from 'lucide-react'
 import { Button } from '../../../components/@system/ui/button'
@@ -10,19 +9,6 @@ import { Card, CardContent } from '../../../components/@system/Card/Card'
 import { FeaturesSection } from '../../../components/@system/FeaturesSection'
 import { OgMeta } from '../../../components/@system/OgMeta/OgMeta'
 import { info } from '../../../../config/@system/info'
-
-// ─── Optional @custom components ─────────────────────────────────────────────
-// @system should not have hard dependencies on @custom — lazy load with fallback
-const FAQ = lazy(() =>
-  import('../../../components/@custom/FAQ')
-    .then((m) => ({ default: m.FAQ }))
-    .catch(() => ({ default: () => null }))
-)
-const HeroSection = lazy(() =>
-  import('../../../components/@custom/HeroSection/HeroSection')
-    .then((m) => ({ default: m.HeroSection }))
-    .catch(() => ({ default: () => null }))
-)
 
 const PLANS = [
   {
@@ -65,11 +51,22 @@ export function LandingPage() {
       <Header />
 
       {/* ── Hero ─────────────────────────────────────────────────────────── */}
-      {/* @custom — override badge/headline/subtitle/CTA labels via props:    */}
-      {/*   <HeroSection headline="Ship faster" subtitle="..." ctaLabel="..." /> */}
-      <Suspense fallback={null}>
-        <HeroSection />
-      </Suspense>
+      {/* @custom — to add a custom hero, create @custom/LandingPage.jsx that includes your HeroSection */}
+      <section className="container mx-auto px-4 py-12 sm:py-20 text-center">
+        <h1 className="text-3xl sm:text-5xl font-bold tracking-tight">
+          {info.tagline}
+        </h1>
+        <p className="mt-4 sm:mt-6 text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto">
+          Get started with {info.name} today.
+        </p>
+        <div className="mt-6 sm:mt-8 flex justify-center gap-4">
+          <Link to="/auth?tab=register">
+            <Button size="lg" className="gap-2">
+              Get Started <ArrowRight className="h-4 w-4" />
+            </Button>
+          </Link>
+        </div>
+      </section>
 
       {/* ── Features ─────────────────────────────────────────────────────── */}
       <FeaturesSection />
@@ -125,11 +122,6 @@ export function LandingPage() {
           ))}
         </div>
       </section>
-
-      {/* ── FAQ ──────────────────────────────────────────────────────────── */}
-      <Suspense fallback={null}>
-        <FAQ />
-      </Suspense>
 
       {/* ── Footer CTA ───────────────────────────────────────────────────── */}
       <section className="border-t bg-muted/30">

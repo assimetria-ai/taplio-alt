@@ -1,8 +1,10 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
-import { lazy, Suspense, useState, useEffect } from 'react'
+import { lazy, Suspense } from 'react'
 import { useAuthContext } from '../../store/@system/auth'
 import { Spinner } from '../../components/@system/Loading/Spinner'
 import { ProtectedRoute } from '../../components/@system/ProtectedRoute/ProtectedRoute'
+
+// @custom — to add custom routes, create @custom/AppRoutes.jsx that wraps or extends this component
 
 // Static / marketing pages (no auth required)
 const LandingPage = lazy(() =>
@@ -67,9 +69,6 @@ const TwoFactorVerifyPage = lazy(() =>
 )
 
 // App pages (auth required)
-const BlogAdminPage = lazy(() =>
-  import('../../pages/app/@custom/BlogAdminPage').then((m) => ({ default: m.BlogAdminPage }))
-)
 const HomePage = lazy(() =>
   import('../../pages/app/@system/HomePage').then((m) => ({ default: m.HomePage }))
 )
@@ -92,10 +91,6 @@ const IntegrationsPage = lazy(() =>
   import('../../pages/app/@system/IntegrationsPage').then((m) => ({ default: m.IntegrationsPage }))
 )
 
-// ─── Optional @custom routes ─────────────────────────────────────────────────
-// @system should not have hard dependencies on @custom — lazy load with fallback
-// Custom routes are loaded asynchronously and default to an empty array if unavailable.
-
 function PageFallback() {
   return (
     <div className="flex h-screen items-center justify-center">
@@ -113,15 +108,6 @@ function GuestRoute({ children }) {
 }
 
 export function AppRoutes() {
-  const [customRoutes, setCustomRoutes] = useState([])
-
-  // Load @custom routes if they exist, gracefully fall back to empty array
-  useEffect(() => {
-    import('../@custom')
-      .then((mod) => setCustomRoutes(mod.customRoutes ?? []))
-      .catch(() => setCustomRoutes([]))
-  }, [])
-
   return (
     <Suspense fallback={<PageFallback />}>
       <Routes>
@@ -244,18 +230,6 @@ export function AppRoutes() {
             </ProtectedRoute>
           }
         />
-
-        <Route
-          path="/app/admin/blog"
-          element={
-            <ProtectedRoute role="admin">
-              <BlogAdminPage />
-            </ProtectedRoute>
-          }
-        />
-
-        {/* Custom product routes */}
-        {customRoutes}
 
         {/* 404 */}
         <Route path="*" element={<NotFoundPage />} />

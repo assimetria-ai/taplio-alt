@@ -1,4 +1,4 @@
-import { useState, lazy, Suspense } from 'react'
+import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -9,13 +9,7 @@ import { FormField, Input } from '../../../components/@system/Form/Form'
 import { api } from '../../../lib/@system/api'
 import { useAuthContext } from '../../../store/@system/auth'
 
-// ─── Optional @custom components ─────────────────────────────────────────────
-// @system should not have hard dependencies on @custom — lazy load with fallback
-const PasswordStrengthIndicator = lazy(() =>
-  import('../../../components/@custom/PasswordStrengthIndicator')
-    .then((m) => ({ default: m.PasswordStrengthIndicator }))
-    .catch(() => ({ default: () => null })) // Graceful fallback if @custom component doesn't exist
-)
+// @custom — to add password strength indicator, create @custom/RegisterPage.jsx that wraps or extends this
 
 // ─── Validation Schema ───────────────────────────────────────────────────────
 
@@ -145,9 +139,6 @@ export function RegisterPage() {
                 {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
               </button>
             </div>
-            <Suspense fallback={null}>
-              <PasswordStrengthIndicator password={passwordValue} />
-            </Suspense>
           </FormField>
 
           {/* Confirm Password */}
