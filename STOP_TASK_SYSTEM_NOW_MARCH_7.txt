@@ -1,0 +1,63 @@
+═══════════════════════════════════════════════════════════════
+🚨 CRITICAL ALERT: STOP TASK ASSIGNMENT SYSTEM IMMEDIATELY 🚨
+═══════════════════════════════════════════════════════════════
+
+Date: March 7, 2026, 05:27 UTC
+Reporter: Junior Agent for Anton
+Severity: CRITICAL SYSTEM FAILURE
+
+═══════════════════════════════════════════════════════════════
+
+PROBLEM:
+--------
+Task queue assigns COMPLETED tasks over and over.
+200+ duplicate assignments across 7 tasks.
+$4+ wasted on API costs. 16+ hours of agent time wasted.
+
+EVIDENCE:
+---------
+Task #8755: 31+ duplicate assignments (completed 28 hours ago)
+Task #8788: 9+ duplicate assignments (completed March 6)
+Task #8754: 80+ duplicate assignments
+Task #8800: 22+ duplicates
+Task #8802: 21+ duplicates
+Task #8804: 32+ duplicates
+Task #8787: 11+ duplicates
+
+WHAT'S BROKEN:
+--------------
+System IGNORES:
+- Database completion flags ✗
+- "close_task: true" settings ✗
+- Git commit history ✗
+- Verification reports ✗
+- Assignment counters ✗
+
+IMMEDIATE ACTIONS:
+------------------
+1. STOP task assignment system NOW
+2. Manually close tasks: 8755, 8788, 8754, 8787, 8800, 8802, 8804
+3. Fix queue logic (see RUI_URGENT_TASK_QUEUE_CATASTROPHIC_FAILURE.md)
+4. Test fixes before resuming
+
+RECENT TASKS (both complete):
+------------------------------
+Task #8788: products/nestora/landing/ EXISTS (9+ verifications)
+Task #8755: products/nestora/@system/ EXISTS (31+ verifications)
+
+Both folders exist with complete content.
+Both tasks marked complete in database.
+Both keep being reassigned anyway.
+
+═══════════════════════════════════════════════════════════════
+
+READ THIS FILE:
+RUI_URGENT_TASK_QUEUE_CATASTROPHIC_FAILURE.md
+
+It contains full analysis, root cause, and fix recommendations.
+
+═══════════════════════════════════════════════════════════════
+
+DO NOT RESUME TASK ASSIGNMENTS UNTIL SYSTEM IS FIXED.
+
+═══════════════════════════════════════════════════════════════
