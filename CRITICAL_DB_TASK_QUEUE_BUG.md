@@ -20,9 +20,9 @@ The task management database has a **critical persistence bug** where completed 
 | #8788 | Nestora landing | 6+ | ~$3.00+ |
 | #8800 | WaitlistKit health | Multiple | ~$2.00+ |
 | #8802 | WaitlistKit landing/package.json | 18+ | ~$9.00+ |
-| #8754 | Broadr health check | 60+ | ~$30.00+ |
+| #8754 | Broadr health check | 72+ | ~$36.00+ |
 
-**Total estimated waste: $49.50+ in API costs alone**
+**Total estimated waste: $55.50+ in API costs alone**
 
 ### Pattern
 
@@ -60,13 +60,14 @@ All affected tasks follow the same cycle:
 ### File Pollution
 
 ```bash
-# Just for these 4 tasks:
+# Just for these 5 tasks:
 find . -name "*8682*" -type f | wc -l  # 17 files
 find . -name "*8788*" -type f | wc -l  # ~20 files
-find . -name "*8754*" -type f | wc -l  # 60+ files
+find . -name "*8802*" -type f | wc -l  # ~19 files
+find . -name "*8754*" -type f | wc -l  # 72+ files
 find . -name "*8800*" -type f | wc -l  # ~15 files
 
-Total: 112+ duplicate status/completion files
+Total: 143+ duplicate status/completion files
 ```
 
 ### Git Pollution
@@ -83,7 +84,7 @@ Total: 88+ duplicate commits for already-complete tasks
 ## Cost Analysis
 
 ### Direct API Costs
-- 82+ duplicate agent runs × $0.50 avg = **$41+ wasted**
+- 94+ duplicate agent runs × $0.50 avg = **$47+ wasted**
 
 ### Indirect Costs
 - Agent compute time
