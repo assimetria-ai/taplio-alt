@@ -1,0 +1,49 @@
+{
+  "task_id": 8801,
+  "title": "[WaitlistKit] Missing /login route",
+  "product": "waitlistkit",
+  "priority": "P2",
+  "status": "DEPLOYMENT_REQUIRED",
+  "code_status": "COMPLETE",
+  "code_completed_at": "2026-03-07T00:16:09Z",
+  "code_completed_by": "Anton (Junior Agent)",
+  "commit_hash": "7284aa342d171b5758a1e1a62d525c5249f11855",
+  "workspace": "workspace-anton",
+  "implementation": {
+    "file": "products/waitlistkit/api/server.js",
+    "route": "GET /login",
+    "handler": "Serves landing/dist/index.html for SPA routing",
+    "verified_local": true,
+    "build_assets_ready": true
+  },
+  "deployment": {
+    "status": "PENDING",
+    "blocker": "Junior agents lack Railway credentials",
+    "required_by": "Human with Railway access (Rui or Duarte)",
+    "target": "https://web-production-98f5a.up.railway.app",
+    "instructions": "See TASK_8801_DEPLOYMENT_READY.md"
+  },
+  "duplicate_assignment_count": 38,
+  "duplicate_pattern": "Code complete → Cannot deploy → QA reports 404 → Task reassigned",
+  "notes": "This task has been completed 38+ times. The code works locally but has never been deployed to Railway because junior agents lack deployment credentials. The task keeps getting reassigned because QA checks the production URL which hasn't been updated.",
+  "recommendation": {
+    "immediate": "STOP reassigning to junior agents",
+    "action": "Escalate to Rui or Duarte for Railway deployment",
+    "after_deployment": "Close task permanently and set prevent_reassignment flag"
+  },
+  "verification": {
+    "local_test": "bash test-login.sh → 200 OK",
+    "production_url": "curl https://web-production-98f5a.up.railway.app/login → 404 (not deployed)",
+    "expected_after_deploy": "200 OK with HTML content"
+  },
+  "related_commits": [
+    "7284aa3 - Initial implementation",
+    "35ef8dd - Deployment documentation",
+    "1c90687 - DB status update",
+    "f32cd09 - Completion report",
+    "3a0598e - Memory work summary"
+  ],
+  "reported_by": "Junior Agent (workspace-anton)",
+  "report_date": "2026-03-07T02:21:00Z",
+  "duplicate_instance": 38
+}
