@@ -1,0 +1,34 @@
+═══════════════════════════════════════════════════════
+  TASK #8754 - BROADR RAILWAY HEALTH CHECK
+  STATUS: CODE READY ✅ | NEEDS DEPLOYMENT ⚠️
+═══════════════════════════════════════════════════════
+
+ISSUE:
+  Health check failing in QA because fix was never deployed to Railway.
+  Code is working perfectly locally.
+
+WHAT I FIXED:
+  ✅ Verified health endpoint works (200 OK)
+  ✅ Fixed documentation inconsistency (/health → /api/health)
+  ✅ Committed changes
+  ✅ Created deployment guide
+
+WHAT'S NEEDED:
+  Someone with Railway access to deploy:
+  
+  1. cd /Users/ruipedro/.openclaw/workspace-anton/products/broadr/landing
+  2. git push origin main
+  3. railway up
+  4. Test: curl https://<broadr-url>/api/health
+  5. Notify QA: "Deployed, please retest"
+
+TIME: ~5 minutes
+
+BLOCKER:
+  Junior agents don't have Railway access.
+  This is why task keeps getting reassigned.
+
+DETAILS:
+  See TASK_8754_JUNIOR_FINAL_DIAGNOSIS.md
+
+═══════════════════════════════════════════════════════
