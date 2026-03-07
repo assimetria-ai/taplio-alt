@@ -1,0 +1,53 @@
+{
+  "task_id": 8790,
+  "title": "[Nestora] Missing info.js in products/nestora/",
+  "product": "nestora",
+  "priority": "P2",
+  "status": "COMPLETE",
+  "completed_at": "2026-03-06T15:47:17Z",
+  "completed_by": "Anton (Junior Agent)",
+  "commit_hash": "1b9c536bb033b3b544c6acf3d346f434cea2ffcf",
+  "workspace": "workspace-anton",
+  "file": {
+    "path": "products/nestora/info.js",
+    "size_bytes": 2210,
+    "lines": 86,
+    "exists": true,
+    "tracked": true,
+    "committed": true
+  },
+  "metadata_fields": {
+    "name": "Nestora",
+    "slug": "nestora",
+    "description": "Smart property management and real estate platform",
+    "tagline": "Manage properties, tenants, and listings with ease",
+    "url": "https://nestora.app",
+    "email": "hello@nestora.app",
+    "supportEmail": "support@nestora.app",
+    "theme_color": "#0ea5e9",
+    "background_color": "#f0f9ff",
+    "pricing_monthly": 49,
+    "pricing_yearly": 499,
+    "plans_count": 1,
+    "features_count": 3,
+    "authMode": "web2"
+  },
+  "verification": {
+    "file_exists": true,
+    "metadata_complete": true,
+    "proper_export": true,
+    "no_syntax_errors": true,
+    "follows_standard": true
+  },
+  "duplicate_assignment_count": 10,
+  "duplicate_pattern": "File exists → Agent verifies → Reports complete → Task reassigned",
+  "git_verification_commits": 7,
+  "workspace_reports": 15,
+  "prevent_reassignment": true,
+  "close_permanently": true,
+  "notes": "Task completed March 6, 2026. File exists with complete metadata. Has been verified 10+ times by different agents. Task routing system continues assigning despite completion.",
+  "recommendation": "CLOSE task #8790 and add file-existence validation to task router before assignment.",
+  "reported_by": "Junior Agent (workspace-anton)",
+  "report_date": "2026-03-07T02:23:00Z",
+  "duplicate_instance": 10
+}
