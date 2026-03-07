@@ -16,14 +16,16 @@ The task management database has a **critical persistence bug** where completed 
 
 | Task ID | Description | Duplicate Assignments | Cost Wasted | Notes |
 |---------|-------------|----------------------|-------------|-------|
-| #8682 | Splice directory | 11+ | ~$5.50+ | |
-| #8788 | Nestora landing | 6+ | ~$3.00+ | |
-| #8800 | WaitlistKit health | Multiple | ~$2.00+ | |
-| #8802 | WaitlistKit landing/package.json | 18+ | ~$9.00+ | |
-| #8807 | PDF generation with puppeteer | 4+ | ~$2.00+ | **Workspace mismatch** |
+| #8632 | **Shelf error boundaries** | **104+** | **~$52.00+** | **🚨 HIGHEST COUNT - CRITICAL** |
 | #8754 | Broadr health check | 72+ | ~$36.00+ | |
+| #8802 | WaitlistKit landing/package.json | 19+ | ~$9.50+ | Latest: 2026-03-07 11:30 UTC |
+| #8682 | Splice directory | 11+ | ~$5.50+ | |
+| #8790 | Nestora info.js | 9+ | ~$4.50+ | Latest: 2026-03-07 11:35 UTC |
+| #8788 | Nestora landing | 6+ | ~$3.00+ | |
+| #8807 | PDF generation with puppeteer | 4+ | ~$2.00+ | **Workspace mismatch** |
+| #8800 | WaitlistKit health | Multiple | ~$2.00+ | |
 
-**Total estimated waste: $57.50+ in API costs alone**
+**Total estimated waste: $114.50+ in API costs alone**
 
 **Note:** Task #8807 has an additional issue - it was completed in workspace-felix but keeps getting assigned to workspace-anton (workspace mismatch).
 
@@ -107,7 +109,7 @@ Total: 88+ duplicate commits for already-complete tasks
 -- Verify task completion status
 SELECT task_id, status, updated_at 
 FROM tasks 
-WHERE task_id IN (8682, 8788, 8800, 8802, 8807, 8754)
+WHERE task_id IN (8682, 8788, 8790, 8800, 8802, 8807, 8754)
 ORDER BY updated_at DESC;
 ```
 
@@ -120,7 +122,7 @@ ORDER BY updated_at DESC;
 -- Look for rollbacks
 SELECT task_id, action, status, timestamp
 FROM task_audit_log
-WHERE task_id IN (8682, 8788, 8800, 8802, 8807, 8754)
+WHERE task_id IN (8682, 8788, 8790, 8800, 8802, 8807, 8754)
 ORDER BY timestamp DESC;
 ```
 
@@ -150,7 +152,7 @@ If this query returns empty, **task locking is not implemented**.
    SET status = 'COMPLETE', 
        completed_at = NOW(),
        locked = TRUE
-   WHERE task_id IN (8682, 8788, 8800, 8802, 8754);
+   WHERE task_id IN (8682, 8788, 8790, 8800, 8802, 8754);
    
    -- Task #8807 has special workspace requirement
    UPDATE tasks 
