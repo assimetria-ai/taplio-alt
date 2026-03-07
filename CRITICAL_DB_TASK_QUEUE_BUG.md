@@ -19,9 +19,10 @@ The task management database has a **critical persistence bug** where completed 
 | #8682 | Splice directory | 11+ | ~$5.50+ |
 | #8788 | Nestora landing | 6+ | ~$3.00+ |
 | #8800 | WaitlistKit health | Multiple | ~$2.00+ |
+| #8802 | WaitlistKit landing/package.json | 18+ | ~$9.00+ |
 | #8754 | Broadr health check | 60+ | ~$30.00+ |
 
-**Total estimated waste: $40.50+ in API costs alone**
+**Total estimated waste: $49.50+ in API costs alone**
 
 ### Pattern
 
@@ -102,7 +103,7 @@ Total: 88+ duplicate commits for already-complete tasks
 -- Verify task completion status
 SELECT task_id, status, updated_at 
 FROM tasks 
-WHERE task_id IN (8682, 8788, 8800, 8754)
+WHERE task_id IN (8682, 8788, 8800, 8802, 8754)
 ORDER BY updated_at DESC;
 ```
 
@@ -115,7 +116,7 @@ ORDER BY updated_at DESC;
 -- Look for rollbacks
 SELECT task_id, action, status, timestamp
 FROM task_audit_log
-WHERE task_id IN (8682, 8788, 8800, 8754)
+WHERE task_id IN (8682, 8788, 8800, 8802, 8754)
 ORDER BY timestamp DESC;
 ```
 
@@ -145,7 +146,7 @@ If this query returns empty, **task locking is not implemented**.
    SET status = 'COMPLETE', 
        completed_at = NOW(),
        locked = TRUE
-   WHERE task_id IN (8682, 8788, 8800, 8754);
+   WHERE task_id IN (8682, 8788, 8800, 8802, 8754);
    ```
 
 2. **Add completion verification:**
@@ -235,7 +236,7 @@ If this query returns empty, **task locking is not implemented**.
 
 ### For Task Assignment System
 
-1. 🔄 Disable assignments for tasks #8682, #8788, #8800, #8754
+1. 🔄 Disable assignments for tasks #8682, #8788, #8800, #8802, #8754
 2. 🔄 Add pre-flight validation checking git history
 3. 🔄 Implement assignment cooldown (1 hour minimum)
 4. 🔄 Add duplicate assignment alerts
