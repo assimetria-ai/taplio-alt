@@ -14,15 +14,18 @@ The task management database has a **critical persistence bug** where completed 
 
 ### Affected Tasks (Confirmed)
 
-| Task ID | Description | Duplicate Assignments | Cost Wasted |
-|---------|-------------|----------------------|-------------|
-| #8682 | Splice directory | 11+ | ~$5.50+ |
-| #8788 | Nestora landing | 6+ | ~$3.00+ |
-| #8800 | WaitlistKit health | Multiple | ~$2.00+ |
-| #8802 | WaitlistKit landing/package.json | 18+ | ~$9.00+ |
-| #8754 | Broadr health check | 72+ | ~$36.00+ |
+| Task ID | Description | Duplicate Assignments | Cost Wasted | Notes |
+|---------|-------------|----------------------|-------------|-------|
+| #8682 | Splice directory | 11+ | ~$5.50+ | |
+| #8788 | Nestora landing | 6+ | ~$3.00+ | |
+| #8800 | WaitlistKit health | Multiple | ~$2.00+ | |
+| #8802 | WaitlistKit landing/package.json | 18+ | ~$9.00+ | |
+| #8807 | PDF generation with puppeteer | 4+ | ~$2.00+ | **Workspace mismatch** |
+| #8754 | Broadr health check | 72+ | ~$36.00+ | |
 
-**Total estimated waste: $55.50+ in API costs alone**
+**Total estimated waste: $57.50+ in API costs alone**
+
+**Note:** Task #8807 has an additional issue - it was completed in workspace-felix but keeps getting assigned to workspace-anton (workspace mismatch).
 
 ### Pattern
 
@@ -104,7 +107,7 @@ Total: 88+ duplicate commits for already-complete tasks
 -- Verify task completion status
 SELECT task_id, status, updated_at 
 FROM tasks 
-WHERE task_id IN (8682, 8788, 8800, 8802, 8754)
+WHERE task_id IN (8682, 8788, 8800, 8802, 8807, 8754)
 ORDER BY updated_at DESC;
 ```
 
@@ -117,7 +120,7 @@ ORDER BY updated_at DESC;
 -- Look for rollbacks
 SELECT task_id, action, status, timestamp
 FROM task_audit_log
-WHERE task_id IN (8682, 8788, 8800, 8802, 8754)
+WHERE task_id IN (8682, 8788, 8800, 8802, 8807, 8754)
 ORDER BY timestamp DESC;
 ```
 
@@ -148,6 +151,15 @@ If this query returns empty, **task locking is not implemented**.
        completed_at = NOW(),
        locked = TRUE
    WHERE task_id IN (8682, 8788, 8800, 8802, 8754);
+   
+   -- Task #8807 has special workspace requirement
+   UPDATE tasks 
+   SET status = 'COMPLETE',
+       completed_at = '2026-03-05 21:33:06',
+       workspace = 'workspace-felix',
+       commit_hash = '9265008ea92a7df2988b96e0a949af4ec0ff0bcb',
+       locked = TRUE
+   WHERE task_id = 8807;
    ```
 
 2. **Add completion verification:**
@@ -186,7 +198,7 @@ If this query returns empty, **task locking is not implemented**.
 
 3. **Implement pre-flight validation:**
    ```python
-   def assign_task(task_id, agent_id):
+   def assign_task(task_id, agent_id, workspace):
        # Check if already complete
        if check_git_history(task_id):
            mark_complete(task_id)
@@ -196,8 +208,13 @@ If this query returns empty, **task locking is not implemented**.
        if is_locked(task_id):
            return None
        
+       # CRITICAL: Validate workspace match (prevents #8807 issue)
+       if not validate_file_exists_in_workspace(task_id, workspace):
+           log_error(f"Task {task_id} file doesn't exist in {workspace}")
+           return None
+       
        # Lock and assign
-       return lock_and_assign(task_id, agent_id)
+       return lock_and_assign(task_id, agent_id, workspace)
    ```
 
 ### Priority 3: Prevent Recurrence (Long-term)
@@ -237,7 +254,7 @@ If this query returns empty, **task locking is not implemented**.
 
 ### For Task Assignment System
 
-1. 🔄 Disable assignments for tasks #8682, #8788, #8800, #8802, #8754
+1. 🔄 Disable assignments for tasks #8682, #8788, #8800, #8802, #8807, #8754
 2. 🔄 Add pre-flight validation checking git history
 3. 🔄 Implement assignment cooldown (1 hour minimum)
 4. 🔄 Add duplicate assignment alerts
