@@ -15,8 +15,8 @@ The health check code is **working perfectly** (tested locally). QA failures con
 ```bash
 cd products/broadr/landing
 node server.js
-curl http://localhost:3000/health
-# Returns: {"status":"healthy","timestamp":"2026-03-07T00:39:06.596Z"}
+curl http://localhost:3000/api/health
+# Returns: {"status":"healthy","service":"broadr","timestamp":"2026-03-07T00:39:06.596Z"}
 ```
 
 ---
@@ -52,8 +52,8 @@ railway up    # Deploy
 
 ### 4. Verify Production
 ```bash
-curl https://<broadr-production-url>/health
-# Should return: {"status":"healthy","timestamp":"..."}
+curl https://<broadr-production-url>/api/health
+# Should return: {"status":"healthy","service":"broadr","timestamp":"..."}
 ```
 
 ### 5. Confirm with QA
@@ -67,7 +67,7 @@ curl https://<broadr-production-url>/health
 
 ### What Was Fixed
 - **Builder**: Changed from deprecated NIXPACKS to RAILPACK
-- **Health Endpoint**: `/health` verifies dist/index.html exists
+- **Health Endpoint**: `/api/health` verifies dist/index.html exists
 - **Configuration**: Proper 30s timeout, restart on failure
 
 ### Why It Works Now
@@ -86,7 +86,7 @@ RAILPACK is Railway's current recommended builder (2026). NIXPACKS is deprecated
   },
   "deploy": {
     "startCommand": "node server.js",
-    "healthcheckPath": "/health",
+    "healthcheckPath": "/api/health",
     "healthcheckTimeout": 30,
     "restartPolicyType": "ON_FAILURE",
     "restartPolicyMaxRetries": 10

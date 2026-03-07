@@ -7,14 +7,14 @@
 The Railway health check has been fixed and verified across multiple iterations.
 
 ### Architecture
-- **Build phase** (Railway Nixpacks): `npm ci && npm run build` → installs deps + builds Vite app to `dist/`
+- **Build phase** (Railway RAILPACK): `npm ci && npm run build` → installs deps + builds Vite app to `dist/`
 - **Start phase**: `node server.js` → Express server serves static files
-- **Health check**: `GET /health` (30s timeout) → verifies `dist/index.html` exists, returns 200
+- **Health check**: `GET /api/health` (30s timeout) → verifies `dist/index.html` exists, returns 200
 
 ### Key Files
 
 1. **server.js** - Express server with:
-   - `/health` endpoint that verifies dist/ and index.html exist
+   - `/api/health` endpoint that verifies dist/ and index.html exist
    - Returns 503 if not built, 200 if ready
    - Static file serving from `dist/`
    - SPA routing fallback
@@ -23,7 +23,7 @@ The Railway health check has been fixed and verified across multiple iterations.
 2. **railway.json** - Railway config:
    - `buildCommand`: `npm ci && npm run build`
    - `startCommand`: `node server.js`
-   - `healthcheckPath`: `/health` (30s timeout)
+   - `healthcheckPath`: `/api/health` (30s timeout)
    - Restart on failure (max 10 retries)
 
 3. **package.json** - Node 18+, express dependency, vite build
@@ -32,7 +32,7 @@ The Railway health check has been fixed and verified across multiple iterations.
 ```bash
 npm run build          # Builds in <1s
 npm start              # Starts server
-curl localhost:3000/health  # Returns {"status":"healthy","timestamp":"..."}
+curl localhost:3000/api/health  # Returns {"status":"healthy","service":"broadr","timestamp":"..."}
 ```
 
 ### History
@@ -69,7 +69,7 @@ Health check continued to fail in QA because Railway deprecated the NIXPACKS bui
   },
   "deploy": {
     "startCommand": "node server.js",
-    "healthcheckPath": "/health",
+    "healthcheckPath": "/api/health",
     "healthcheckTimeout": 30,
     "restartPolicyType": "ON_FAILURE",
     "restartPolicyMaxRetries": 10
