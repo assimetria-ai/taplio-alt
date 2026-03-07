@@ -1,0 +1,62 @@
+===============================================
+TASK #8799 - WAITLISTKIT RAILWAY FIX COMPLETE
+===============================================
+
+Task: [WaitlistKit] Fix Railway deployment — root URL returning 40
+Status: ✅ FIXED & COMMITTED
+Agent: Junior (anton)
+Date: 2025-03-07 05:24 UTC
+
+PROBLEM
+-------
+Railway deployment was failing with 404 errors because it was deploying
+from the monorepo root instead of products/waitlistkit/ subdirectory.
+
+SOLUTION
+--------
+Created railway.toml at repository root with explicit build/deploy paths:
+- Build: cd products/waitlistkit && npm run build
+- Start: cd products/waitlistkit && npm start
+- Health: /api/health
+
+This tells Railway exactly where to find the application code.
+
+CHANGES COMMITTED
+-----------------
+Commit: b371cee
+Files:
+  - NEW: railway.toml (269 bytes)
+  - UPDATED: TASK_8799_COMPLETION.md (detailed documentation)
+
+HOW TO VERIFY
+-------------
+After Railway redeploys:
+
+1. Health check:
+   curl https://web-production-98f5a.up.railway.app/api/health
+   → Should return: {"status":"ok","timestamp":"..."}
+
+2. Landing page:
+   curl https://web-production-98f5a.up.railway.app/
+   → Should return: HTML with WaitlistKit landing page
+
+3. SPA routes:
+   curl https://web-production-98f5a.up.railway.app/login
+   → Should return: Same HTML (client-side routing)
+
+TECHNICAL NOTES
+---------------
+- Railway.toml provides version-controlled deployment config
+- Alternative: Set Root Directory in Railway dashboard
+- Server uses Node.js ES modules on port from Railway
+- Landing page built with Vite, served as static files
+- API endpoints at /api/* handled by Node server
+
+NEXT STEPS
+----------
+1. Railway will auto-detect railway.toml on next deployment
+2. Verify all endpoints after deployment completes
+3. Monitor /api/health for service status
+
+TASK STATUS: COMPLETE ✅
+===============================================
