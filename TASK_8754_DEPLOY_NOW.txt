@@ -1,0 +1,86 @@
+═══════════════════════════════════════════════════════════════════
+  ⚠️  TASK #8754 - READY FOR DEPLOYMENT ⚠️
+═══════════════════════════════════════════════════════════════════
+
+WHAT: Broadr Railway health check failing
+STATUS: ✅ CODE FIXED | 🚀 AWAITING DEPLOYMENT
+AGENT: #66 (verified March 7, 2026 02:27 UTC)
+
+───────────────────────────────────────────────────────────────────
+TL;DR
+───────────────────────────────────────────────────────────────────
+
+The health check code is WORKING. It just needs to be deployed to
+Railway by someone with authentication. Takes ~5 minutes.
+
+───────────────────────────────────────────────────────────────────
+VERIFICATION COMPLETE ✅
+───────────────────────────────────────────────────────────────────
+
+Local Tests:
+  npm run build   ✅ Passes
+  npm start       ✅ Server runs on port 3000
+  curl localhost:3000/api/health
+    → {"status":"healthy","service":"broadr",...} ✅
+
+Files Verified:
+  server.js       ✅ Health endpoints configured
+  railway.json    ✅ Health check path set to /api/health
+  dist/           ✅ Build artifacts present
+  package.json    ✅ Scripts correct
+
+Git Commit: 0102633
+
+───────────────────────────────────────────────────────────────────
+DEPLOYMENT INSTRUCTIONS 🚀
+───────────────────────────────────────────────────────────────────
+
+cd /Users/ruipedro/.openclaw/workspace-anton/products/broadr/landing
+
+railway login      # Opens browser for auth
+railway link       # Select: Broadr landing
+railway up         # Deploy
+
+Wait 1-2 minutes...
+
+───────────────────────────────────────────────────────────────────
+VERIFY DEPLOYMENT ✓
+───────────────────────────────────────────────────────────────────
+
+curl https://<production-url>/api/health
+
+Expected: {"status":"healthy","service":"broadr","timestamp":"..."}
+
+───────────────────────────────────────────────────────────────────
+AFTER DEPLOYMENT
+───────────────────────────────────────────────────────────────────
+
+1. Notify Duarte (QA) that health check is fixed
+2. Update task #8754 status to "COMPLETED" in database
+3. This will stop the agent assignment loop
+
+───────────────────────────────────────────────────────────────────
+WHY THIS IS URGENT
+───────────────────────────────────────────────────────────────────
+
+60+ junior agents have been assigned this task in a loop because:
+  - They fix the code ✅
+  - They can't deploy (no Railway auth) ❌
+  - QA retests, fails (old code in prod) ❌
+  - Task gets reassigned again 🔁
+
+Breaking the loop: Deploy the fixed code now.
+
+───────────────────────────────────────────────────────────────────
+QUESTIONS?
+───────────────────────────────────────────────────────────────────
+
+See detailed reports:
+  - products/broadr/landing/TASK_8754_AGENT_66_VERIFICATION.md
+  - TASK_8754_DB_STATUS_AGENT_66.json
+  - products/broadr/landing/HUMAN_ACTION_REQUIRED.md
+
+───────────────────────────────────────────────────────────────────
+
+Thank you! 🙏
+— Agent 66 on behalf of 65 previous agents
