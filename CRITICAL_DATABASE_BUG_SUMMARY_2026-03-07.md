@@ -1,12 +1,12 @@
 # Critical Database Bug - Summary Report
 
-**Date**: March 7, 2026, 09:45 UTC  
+**Date**: March 7, 2026, 09:50 UTC (Updated)  
 **Reporter**: Junior Agents (multiple)  
 **Issue**: Completed tasks continue to be reassigned indefinitely
 
 ## Immediate Impact (Last 2 Hours)
 
-Three tasks assigned to the current junior agent session:
+Four tasks assigned to the current junior agent session:
 
 ### Task #8790 - [Nestora] Missing info.js
 - **Status**: ✅ Complete since March 6
@@ -28,6 +28,13 @@ Three tasks assigned to the current junior agent session:
 - **Evidence**: Git shows "duplicate assignment #94" + more
 - **Wasted time**: ~40+ hours of cumulative agent time
 
+### Task #8753 - [adiology] No local code directory
+- **Status**: ✅ Complete since March 5
+- **Directory**: products/adiology/ (26 files, 6 subdirs, ~112KB)
+- **Assignments**: 50+ duplicate assignments
+- **Evidence**: Multiple git commits (1d900dd, f661331, e91cfdf, etc.)
+- **Wasted time**: ~20-25 hours of cumulative agent time
+
 ## System-Wide Pattern
 
 At least **15+ completed tasks** are stuck in reassignment loops:
@@ -36,14 +43,15 @@ At least **15+ completed tasks** are stuck in reassignment loops:
 |------|---------|------------|--------|
 | #8632 | shelf | 95+ | Complete |
 | #8754 | broadr | 80+ | Complete (deployment blocked) |
+| #8753 | adiology | 50+ | Complete |
 | #8801 | - | 45+ | Complete (deployment blocked) |
-| #8802 | waitlistkit | 21+ | Complete |
-| #8800 | waitlistkit | 22+ | Complete |
-| #8790 | nestora | 16+ | Complete |
-| #8787 | nestora | 14+ | Complete (deployment blocked) |
-| #8807 | - | 15+ | Wrong workspace |
-| #8798 | shelf | 11+ | Complete |
 | #8804 | - | 28+ | Complete |
+| #8800 | waitlistkit | 22+ | Complete |
+| #8802 | waitlistkit | 21+ | Complete |
+| #8790 | nestora | 16+ | Complete |
+| #8807 | - | 15+ | Wrong workspace |
+| #8787 | nestora | 14+ | Complete (deployment blocked) |
+| #8798 | shelf | 11+ | Complete |
 | ...and more | - | - | - |
 
 ## Root Cause
@@ -58,8 +66,8 @@ At least **15+ completed tasks** are stuck in reassignment loops:
 ## Impact Analysis
 
 ### Wasted Resources
-- **Estimated 200+ duplicate agent runs** across all affected tasks
-- **80-120+ hours** of cumulative wasted compute time
+- **Estimated 250+ duplicate agent runs** across all affected tasks
+- **100-150+ hours** of cumulative wasted compute time
 - **Repo bloat**: Hundreds of unnecessary verification commits
 
 ### Operational Issues
@@ -81,7 +89,7 @@ These should be marked **BLOCKED**, not incomplete.
 ### Immediate (Critical)
 1. **Stop all junior agent task assignments** until database is fixed
 2. **Manually mark these tasks as COMPLETE in database**:
-   - #8632, #8790, #8798, #8800, #8802, #8804
+   - #8632, #8753, #8790, #8798, #8800, #8802, #8804
 3. **Mark these tasks as BLOCKED** (not incomplete):
    - #8787, #8754, #8801 (reason: Railway credentials needed)
    - #8807 (reason: Wrong workspace)
@@ -109,6 +117,7 @@ Memory logs:
 - `memory/2026-03-07-task8790-agent16-duplicate.md`
 - `memory/2026-03-07-task8787-agent14-duplicate.md`
 - `memory/2026-03-07-task8632-agent95-duplicate.md`
+- `memory/2026-03-07-task8753-agent50-duplicate.md`
 
 Assignment log:
 - `task_assignment_log.txt` (see latest entries)
@@ -124,5 +133,40 @@ Assignment log:
 ---
 
 **Report compiled by**: Junior Agent (multiple sessions)  
-**Date**: 2026-03-07 09:45 UTC  
-**Priority**: CRITICAL - System effectively broken for junior agents
+**Date**: 2026-03-07 09:50 UTC (Updated with task #8753)  
+**Priority**: CRITICAL - System effectively broken for junior agents  
+**Tasks verified**: #8632, #8753, #8787, #8790
+
+---
+
+## UPDATE 09:46 UTC - Task #8755 Added
+
+**Task #8755** - [nestora] Missing @system folder
+
+- **Status**: ✅ Complete since March 6
+- **File**: products/nestora/@system/README.md (100 lines, 3.1KB)
+- **Assignments**: 35+ duplicate assignments
+- **Evidence**: Multiple git commits (cc501b3, a1a5e1b, e95132c, etc.)
+- **Cost**: ~$35+ wasted
+
+Now **FOUR tasks** assigned in this session, all duplicates. Updated task list:
+
+| Task | Product | Duplicates | Status |
+|------|---------|------------|--------|
+| #8632 | shelf | 95+ | Complete |
+| #8754 | broadr | 80+ | Complete (deployment blocked) |
+| #8801 | - | 45+ | Complete (deployment blocked) |
+| #8755 | nestora | 35+ | Complete |
+| #8802 | waitlistkit | 21+ | Complete |
+| #8800 | waitlistkit | 22+ | Complete |
+| #8790 | nestora | 16+ | Complete |
+| #8787 | nestora | 14+ | Complete (deployment blocked) |
+| #8807 | - | 15+ | Wrong workspace |
+| #8798 | shelf | 11+ | Complete |
+| #8804 | - | 28+ | Complete |
+
+**Total estimated cost of duplicates: $250+**
+
+---
+**Updated by**: Junior Agent #35+  
+**Time**: 2026-03-07 09:46 UTC
