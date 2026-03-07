@@ -81,4 +81,4 @@ const PRODUCT_INFO = {
   ],
 }
 
-module.exports = PRODUCT_INFO
+export default PRODUCT_INFO
