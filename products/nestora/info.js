@@ -22,8 +22,8 @@ const PRODUCT_INFO = {
     github: 'https://github.com/nestora',
   },
   
-  theme_color: '#0ea5e9',
-  background_color: '#f0f9ff',
+  theme_color: '#E8563A', // coral orange (brand standard)
+  background_color: '#fff5f3', // light warm background
   
   links: {
     faq: 'https://nestora.app/help',

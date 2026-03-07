@@ -13,7 +13,7 @@ const PRODUCT_INFO = {
   supportEmail: 'support@broadr.app',
 
   // Visual Identity
-  theme_color: '#9333ea', // purple
+  theme_color: '#5B4CFF', // blue-purple (brand standard)
   background_color: '#1e1b4b', // dark purple/slate
 
   // Call to Action
