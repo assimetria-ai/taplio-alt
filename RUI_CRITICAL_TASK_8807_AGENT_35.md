@@ -1,65 +1,70 @@
-# ⚠️ CRITICAL: Task #8807 - Agent 35 Workspace Mismatch
+# 🚨 CRITICAL: Task #8807 Workspace Routing Error - Agent 35
 
-**Date:** March 7, 2026, 10:06 WET  
-**Junior Agent:** #35  
-**Task:** #8807 - Implement PDF generation with puppeteer  
+**Date**: March 7, 2026 10:17 WET  
+**Severity**: HIGH - Recurring system issue  
+**Task**: #8807 - PDF generation with puppeteer
 
----
+## Summary
 
-## Status: ❌ CANNOT COMPLETE
+Task #8807 has been assigned to **Agent 35** but cannot be completed due to **workspace mismatch**. The required file `backend/lib/intelligence-agent.js` does not exist in the current workspace.
 
-Task #8807 was assigned to workspace-anton **again** (35th+ time).
+## This is a RECURRING Issue
 
-**Problem:** The target file `backend/lib/intelligence-agent.js` **does not exist** in workspace-anton.
+Based on workspace file analysis, task #8807 has experienced **35+ failed attempts** due to workspace errors:
 
-**Solution:** The task was **already completed** in workspace-felix on March 5, 2026.
+- `TASK_8807_AGENT_24_DUPLICATE_FINAL.md`
+- `TASK_8807_AGENT_25_WORKSPACE_ERROR.md`
+- `TASK_8807_AGENT_26_WORKSPACE_ERROR.md`
+- `TASK_8807_AGENT_27_WORKSPACE_ERROR_FINAL.md`
+- `TASK_8807_AGENT_28_CANNOT_COMPLETE.md`
+- `TASK_8807_AGENT_29_WORKSPACE_ERROR_FINAL.md`
+- `TASK_8807_AGENT_30_FINAL_STATUS.md`
+- `TASK_8807_AGENT_31_FINAL.md`
+- `TASK_8807_AGENT_32_WORKSPACE_ERROR.md`
+- `TASK_8807_AGENT_33_WORKSPACE_ERROR.md`
+- `TASK_8807_AGENT_34_FINAL_WORKSPACE_ERROR.md`
+- **`TASK_8807_AGENT_35_[CURRENT]`**
 
----
+## The Problem
 
-## What Happened
+The task database is routing task #8807 to the **anton management workspace** instead of the **project codebase workspace**.
 
-1. Task #8807 assigned to junior agent in workspace-anton
-2. Agent searched for `backend/lib/intelligence-agent.js`
-3. File does not exist (workspace-anton doesn't have this project)
-4. Confirmed task completed in workspace-felix (commit 9265008)
-5. This is approximately the **35th duplicate assignment**
+**Current workspace**: `/Users/ruipedro/.openclaw/workspace-anton`  
+**Required workspace**: Unknown - needs to contain `backend/lib/intelligence-agent.js`
 
----
+## Action Required
 
-## Required Action
+**STOP assigning task #8807** until workspace routing is fixed.
 
-**PLEASE CLOSE TASK #8807 PERMANENTLY:**
+### Options:
 
-1. Set status to `COMPLETE` in database
-2. Set `prevent_reassignment: true`
-3. Remove from assignment queue
-4. Stop routing to workspace-anton
+1. **Fix the task database** to route #8807 to the correct workspace
+2. **Close task #8807** if it's already complete (likely - see 35+ duplicate reports)
+3. **Update the task** with the correct workspace path
+4. **Deploy the fix manually** if the code is already written
 
-**Task Details:**
-- ✅ Completed in workspace-felix
-- ✅ Commit: 9265008ea92a7df2988b94e0a949af4ec0ff0bcb
-- ✅ Date: March 5, 2026, 21:33:06 UTC
-- ✅ By: Lena (Agent)
+## Database Action Needed
 
----
+```sql
+-- Check task status
+SELECT * FROM tasks WHERE id = 8807;
+
+-- Either close it (if already complete):
+UPDATE tasks SET status = 'closed' WHERE id = 8807;
+
+-- Or fix the workspace routing:
+UPDATE tasks SET workspace = '<correct-workspace-path>' WHERE id = 8807;
+```
 
 ## Impact
 
-This task has been reported **30+ times** by multiple agents. Each assignment wastes:
-- Agent time investigating
-- System resources
-- Delays other pending tasks
+- **35+ agents** have attempted this task
+- **35+ failed reports** generated
+- **Token/compute waste** from repeated failed attempts
+- **System credibility** damaged by recurring errors
 
 ---
 
-## Files Created
-
-- `TASK_8807_WORKSPACE_ERROR_AGENT_35.md` (detailed report)
-- This file (critical alert)
-
-Both committed to git.
-
----
-
-**Junior Agent #35 - workspace-anton**  
-**Recommendation:** CLOSE TASK #8807 IN DATABASE NOW
+**Action**: Please intervene manually to resolve this task routing issue.  
+**Reporter**: Junior Agent 35  
+**Timestamp**: 2026-03-07 10:17:45 WET
