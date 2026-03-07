@@ -1,0 +1,85 @@
+{
+  "task_id": 8801,
+  "title": "[WaitlistKit] Missing /login route",
+  "product": "waitlistkit",
+  "priority": "P2",
+  "status": "CODE_COMPLETE_DEPLOYMENT_REQUIRED",
+  "updated_at": "2026-03-07T01:32:00Z",
+  "updated_by": "Anton (Junior Agent)",
+  
+  "completion_summary": {
+    "code_status": "COMPLETE",
+    "testing_status": "PASSED",
+    "deployment_status": "BLOCKED",
+    "commit": "7284aa3",
+    "commit_message": "feat(waitlistkit): task #8801 - [WaitlistKit] Missing /login route",
+    "commit_date": "2026-03-07T00:16:09Z",
+    "verified_locally": true,
+    "works_on_localhost": true,
+    "works_on_production": false
+  },
+  
+  "implementation": {
+    "file_modified": "products/waitlistkit/api/server.js",
+    "lines_added": 4,
+    "route_added": "GET /login",
+    "handler": "Serve index.html for SPA routing",
+    "test_command": "bash test-login.sh",
+    "test_result": "PASSED - 200 OK with HTML content"
+  },
+  
+  "deployment": {
+    "platform": "Railway",
+    "production_url": "https://web-production-98f5a.up.railway.app",
+    "deployment_status": "NOT_DEPLOYED",
+    "blocker": "Junior agents lack Railway access credentials",
+    "requires_human": true,
+    "deployment_owner": "Rui or Duarte (Railway access required)",
+    "deployment_instructions": "See TASK_8801_DEPLOYMENT_READY.md"
+  },
+  
+  "verification": {
+    "local_test": {
+      "endpoint": "http://localhost:3001/login",
+      "result": "200 OK",
+      "response": "HTML content (index.html)",
+      "status": "PASSED"
+    },
+    "production_test": {
+      "endpoint": "https://web-production-98f5a.up.railway.app/login",
+      "result": "404 Not Found",
+      "response": "{\"status\":\"error\",\"code\":404,\"message\":\"Application not found\"}",
+      "status": "FAILED - App not deployed"
+    }
+  },
+  
+  "next_actions": [
+    "Human with Railway access must deploy the code",
+    "Run: railway login && railway link && railway up",
+    "Verify production URL returns 200 OK for /login",
+    "Notify QA (Duarte) that deployment is complete",
+    "Update task status to COMPLETED in database"
+  ],
+  
+  "duplicate_assignment_prevention": {
+    "recommendation": "Set task status to BLOCKED_DEPLOYMENT to prevent reassignment to junior agents",
+    "reason": "Code is complete. Reassigning to junior agents wastes resources.",
+    "requires_human": true,
+    "sql_update": "UPDATE tasks SET status = 'BLOCKED_DEPLOYMENT', requires_human = TRUE WHERE task_id = 8801"
+  },
+  
+  "documentation": {
+    "deployment_guide": "TASK_8801_DEPLOYMENT_READY.md",
+    "commit_hash": "7284aa3",
+    "test_script": "products/waitlistkit/test-login.sh",
+    "railway_config": "products/waitlistkit/railway.json"
+  },
+  
+  "timeline": {
+    "task_created": "Unknown",
+    "code_completed": "2026-03-07T00:16:09Z",
+    "locally_verified": "2026-03-07T01:32:00Z",
+    "deployment_pending": true,
+    "estimated_deployment_time": "5-10 minutes (when human deploys)"
+  }
+}
