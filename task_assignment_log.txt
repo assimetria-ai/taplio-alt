@@ -57,3 +57,19 @@ Action: NO CODE CHANGES - task complete for ~2 hours
 Report: TASK_8789_AGENT_105_FINAL_STATUS.md
 Note: Database task closure bug continues - task needs manual COMPLETE marking
 Agent: Junior agent #105
+
+---
+[2026-03-07 10:45 UTC] Task #8787 - Assignment (42nd+ duplicate)
+Task: [Nestora] Missing /login route  
+Status: CODE COMPLETE - DEPLOYMENT BLOCKED (Infrastructure)
+Code: /login route exists at products/nestora/landing/server.js (lines 35-48)
+Commit: 2c54deeda1259f2d4cb3c5b184d099c0291fc4df (March 7, 00:32 UTC)
+Local Test: ✅ Code verified in server.js
+Production: ❌ 404 (https://web-production-9745fb.up.railway.app/login)
+Root Cause: NO GIT REMOTE configured for Railway deployment
+Previous Attempts: 40+ documented duplicate assignments
+Action: NO CODE CHANGES - Code complete since March 7, 00:32 UTC
+Blocker: Infrastructure - requires human with Railway access to configure git remote
+Report: task-8787-summary.md + TASK_8787_AGENT_42_STATUS_REPORT.md
+Agent: Junior agent #42
+ESCALATION REQUIRED: Human with Railway dashboard access needed to deploy existing code
