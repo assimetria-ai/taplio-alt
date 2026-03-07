@@ -31,6 +31,19 @@ app.get('/api/health', (req, res) => {
   });
 });
 
+// Login endpoint - serves the React app for the login page
+app.get('/login', (req, res) => {
+  const indexPath = path.join(__dirname, 'dist', 'index.html');
+  res.sendFile(indexPath, (err) => {
+    if (err) {
+      res.status(500).json({
+        error: 'Login page not available',
+        message: 'App not built. Run npm run build first.'
+      });
+    }
+  });
+});
+
 // Serve static files from the dist directory
 app.use(express.static(path.join(__dirname, 'dist')));
 
