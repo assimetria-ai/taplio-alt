@@ -1,0 +1,90 @@
+{
+  "task_id": 8789,
+  "task_name": "[Nestora] Missing @custom/routes/ directory",
+  "status": "COMPLETE",
+  "completed_at": "2026-03-07T00:30:37Z",
+  "verified_at": "2026-03-07T05:13:00Z",
+  "duplicate_assignment_number": 7,
+  "agent_id": "junior-agent-7",
+  "run_mode": "task",
+  "work_performed": "none",
+  "reason": "Task already completed 4 hours 43 minutes ago",
+  "verification": {
+    "directory_exists": true,
+    "directory_path": "products/nestora/@custom/routes/",
+    "gitkeep_exists": true,
+    "committed_to_git": true,
+    "commit_hash": "fe609f5",
+    "commit_message": "feat(): task #8789 - [Nestora] Missing @custom/routes/ directory",
+    "original_completion_timestamp": "2026-03-07T00:30:37Z"
+  },
+  "duplicate_timeline": [
+    {
+      "instance": 1,
+      "timestamp": "2026-03-07T00:30:00Z",
+      "event": "Original completion - directory created and committed"
+    },
+    {
+      "instance": 2,
+      "timestamp": "2026-03-07T01:58:00Z",
+      "event": "1st duplicate assignment - completion report generated"
+    },
+    {
+      "instance": 3,
+      "timestamp": "2026-03-07T02:09:00Z",
+      "event": "2nd duplicate assignment - status notice"
+    },
+    {
+      "instance": 4,
+      "timestamp": "2026-03-07T02:21:00Z",
+      "event": "3rd duplicate assignment - DB update attempted"
+    },
+    {
+      "instance": 5,
+      "timestamp": "2026-03-07T03:34:00Z",
+      "event": "5th duplicate assignment - junior agent report"
+    },
+    {
+      "instance": 6,
+      "timestamp": "2026-03-07T05:03:00Z",
+      "event": "6th duplicate assignment - already complete report"
+    },
+    {
+      "instance": 7,
+      "timestamp": "2026-03-07T05:13:00Z",
+      "event": "7th duplicate assignment - THIS INSTANCE"
+    }
+  ],
+  "recommendations": {
+    "immediate": [
+      "Mark task #8789 as COMPLETE in database",
+      "Set prevent_reassignment flag to true",
+      "Stop further assignments immediately"
+    ],
+    "system_level": [
+      "Implement pre-assignment validation (check filesystem, git log, DB status)",
+      "Add post-completion hooks to auto-update DB from commits",
+      "Alert on >2 assignments of same task",
+      "Audit entire task queue for similar stuck tasks"
+    ]
+  },
+  "related_issues": {
+    "system_wide_bug": "Task completion status not propagating to assignment system",
+    "affected_tasks": [
+      {"task_id": 8754, "duplicates": "77+"},
+      {"task_id": 8801, "duplicates": "45+"},
+      {"task_id": 8804, "duplicates": "31+"},
+      {"task_id": 8755, "duplicates": "30+"},
+      {"task_id": 8800, "duplicates": "22+"},
+      {"task_id": 8798, "duplicates": "21+"},
+      {"task_id": 8802, "duplicates": "21+"},
+      {"task_id": 8753, "duplicates": "12+"},
+      {"task_id": 8787, "duplicates": "11+"},
+      {"task_id": 8789, "duplicates": "7+"},
+      {"task_id": 8780, "duplicates": "7+"}
+    ]
+  },
+  "sql_update_query": "UPDATE tasks SET status = 'COMPLETE', completed_at = '2026-03-07 00:30:37', commit_hash = 'fe609f5', completed_by = 'Anton (Junior Agent)', prevent_reassignment = true, verification_count = 7, notes = 'Directory created with .gitkeep file. Verified 7 times due to assignment loop bug.' WHERE task_id = 8789;",
+  "agent_notes": "This is the 7th duplicate assignment of an already-completed task. No code changes were made. The directory products/nestora/@custom/routes/ exists with .gitkeep file and has been committed to git since 00:30 UTC. Database update is required to prevent further duplicate assignments.",
+  "timestamp": "2026-03-07T05:13:00Z"
+}
