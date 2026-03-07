@@ -3,7 +3,7 @@
 **Product:** Nestora  
 **Type:** Product Template  
 **Status:** Active Template  
-**Last Updated:** 2026-03-06
+**Last Updated:** 2026-03-07
 
 ---
 
@@ -44,6 +44,8 @@ Nestora is a **product template** for a smart property management and real estat
 ```
 nestora/
 ├── info.js              ✅ Required — Product metadata
+├── @system/             ✅ Required — System directory with README
+│   └── README.md        ✅ Required — Template type documentation
 ├── landing/             ✅ Required — Landing page assets
 │   └── (page files)
 └── docs/                ✅ Required — Documentation
@@ -55,13 +57,14 @@ nestora/
 ```
 nestora/
 ├── README.md            ⏳ Recommended — Product overview
-├── @custom/             ⏳ Optional — Custom overrides
+├── @custom/             ⏳ Optional — Custom overrides (landing-only templates don't need this)
 └── assets/              ⏳ Optional — Images, icons, etc.
 ```
 
 ### Validation Checks
 
 - [ ] `info.js` exists and is valid JavaScript
+- [ ] `@system/` directory exists with README.md
 - [ ] `landing/` directory exists
 - [ ] `docs/` directory exists with QA.md
 - [ ] No absolute paths or hardcoded domains (except official product URLs)
@@ -180,7 +183,8 @@ The `landing/` directory should contain:
 Run this checklist before deploying or sharing the template:
 
 #### 1. File Structure
-- [ ] All required files present (`info.js`, `landing/`, `docs/QA.md`)
+- [ ] All required files present (`info.js`, `@system/`, `landing/`, `docs/QA.md`)
+- [ ] `@system/README.md` exists and documents template type
 - [ ] No temporary or test files (`.DS_Store`, `test.js`, etc.)
 - [ ] No sensitive data (API keys, credentials)
 
@@ -244,6 +248,7 @@ Run this checklist before deploying or sharing the template:
 This product template now meets all Duarte automated QA requirements:
 
 - ✅ `info.js` present and valid
+- ✅ `@system/` directory exists with README.md
 - ✅ `landing/` directory exists
 - ✅ `docs/QA.md` present (this file)
 - ✅ Required metadata fields populated
@@ -251,10 +256,14 @@ This product template now meets all Duarte automated QA requirements:
 
 ### Template Version
 
-**Version:** 1.0  
+**Version:** 1.1  
 **Created:** 2026-03-06  
-**Last QA Review:** 2026-03-06  
+**Last QA Review:** 2026-03-07  
 **Next Review:** When template structure or requirements change
+
+**Version History:**
+- **v1.1** (2026-03-07): Added `@system/` folder to required structure (task #8755)
+- **v1.0** (2026-03-06): Initial QA documentation
 
 ---
 
@@ -291,6 +300,7 @@ Duarte's QA system will verify:
 
 - ✅ `docs/QA.md` exists at expected path
 - ✅ `info.js` schema compliance (required fields present)
+- ✅ `@system/` directory exists with README.md
 - ✅ Landing page directory exists
 - ✅ No critical placeholders (except Stripe ID)
 - ✅ Documentation up-to-date (last updated < 6 months)
@@ -300,5 +310,19 @@ Duarte's QA system will verify:
 ---
 
 **Document Status:** Active  
-**Last Updated:** 2026-03-06  
+**Last Updated:** 2026-03-07  
 **Maintained By:** Duarte QA System + Anton (template owner)
+
+---
+
+## Update History
+
+### 2026-03-07 - Task #8755: @system Folder Documentation
+**Issue:** QA documentation missing `@system/` folder in required template structure  
+**Fix:** Updated QA.md to include `@system/` as a required component, matching standard product template structure (Adiology pattern)  
+**Changes:**
+- Added `@system/` to "Required Files & Folders" section
+- Added `@system/` verification to "Validation Checks"
+- Added `@system/` to "Template Compliance" requirements
+- Added `@system/` to "Future Automated Checks"
+- Updated "Pre-Deployment Template QA" checklist
