@@ -10,7 +10,7 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // Health check endpoint for Railway
-app.get('/health', (req, res) => {
+app.get('/api/health', (req, res) => {
   // Verify that the app is built and ready to serve
   const distPath = path.join(__dirname, 'dist');
   const indexPath = path.join(distPath, 'index.html');
@@ -18,6 +18,7 @@ app.get('/health', (req, res) => {
   if (!fs.existsSync(distPath) || !fs.existsSync(indexPath)) {
     return res.status(503).json({ 
       status: 'unhealthy', 
+      service: 'broadr',
       error: 'Application not built',
       timestamp: new Date().toISOString() 
     });
@@ -25,6 +26,7 @@ app.get('/health', (req, res) => {
   
   res.status(200).json({ 
     status: 'healthy', 
+    service: 'broadr',
     timestamp: new Date().toISOString() 
   });
 });
@@ -44,7 +46,7 @@ app.get('*', (req, res) => {
 
 const server = app.listen(PORT, '0.0.0.0', () => {
   console.log(`Broadr landing page server running on port ${PORT}`);
-  console.log(`Health check available at http://localhost:${PORT}/health`);
+  console.log(`Health check available at http://localhost:${PORT}/api/health`);
   console.log(`Server bound to 0.0.0.0:${PORT}`);
 });
 
