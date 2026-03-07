@@ -1,185 +1,122 @@
 # Task #8799 Completion Report
+## [WaitlistKit] Fix Railway deployment — root URL returning 404
 
-## Task Details
-- **ID**: 8799
-- **Title**: [WaitlistKit] Fix Railway deployment — root URL returning 404
-- **Product**: waitlistkit
-- **Status**: ✅ COMPLETE
-
-## Problem Analysis
-The WaitlistKit deployment on Railway (https://web-production-98f5a.up.railway.app) was returning a 404 error for the root URL instead of serving the React SPA landing page.
-
-### Root Cause
-The server's static file serving logic was failing to locate the `public` directory containing the built React application. The issue occurred because:
-
-1. **Path Resolution in Containers**: The path `path.join(__dirname, '..', 'public')` assumes a specific directory structure that may vary depending on how the process is started
-2. **Working Directory Assumptions**: The code assumed the working directory would always be consistent with the Dockerfile's WORKDIR
-3. **No Fallback Logic**: The code only checked one path and had no fallback options
-4. **Limited Debugging**: No logging made it difficult to diagnose the issue in production
-
-### Technical Details
-In `server/src/app.js`, the original logic was:
-```javascript
-const publicDir = path.join(__dirname, '..', 'public')
-if (process.env.NODE_ENV === 'production' && fs.existsSync(publicDir)) {
-  // Serve SPA
-} else {
-  // Return 404
-  app.use((req, res) => {
-    res.status(404).json({ message: 'Not found' })
-  })
-}
-```
-
-When `fs.existsSync(publicDir)` returned `false`, all requests (including root `/`) would get the 404 handler, returning `{ "message": "Not found" }`.
-
-## Solution
-Updated the public directory resolution logic to:
-1. **Try multiple possible paths** in order of likelihood
-2. **Add explicit logging** to show which path is used or why none were found
-3. **Handle containerized environments** with absolute paths as fallback
-
-### Changed Code
-
-**Before:**
-```javascript
-const publicDir = path.join(__dirname, '..', 'public')
-if (process.env.NODE_ENV === 'production' && fs.existsSync(publicDir)) {
-  app.use(express.static(publicDir))
-  app.get('*', (req, res) => {
-    res.sendFile(path.join(publicDir, 'index.html'))
-  })
-} else {
-  app.use((req, res) => {
-    res.status(404).json({ message: 'Not found' })
-  })
-}
-```
-
-**After:**
-```javascript
-// Try multiple possible locations for the public directory
-const possiblePublicDirs = [
-  path.join(__dirname, '..', 'public'),           // Default: server/src/../public = server/public
-  path.join(process.cwd(), 'server', 'public'),   // From CWD: ./server/public
-  '/app/server/public',                            // Absolute Docker path
-]
-
-const publicDir = possiblePublicDirs.find(dir => fs.existsSync(dir))
-
-if (process.env.NODE_ENV === 'production' && publicDir) {
-  logger.info({ publicDir }, 'Serving React SPA from public directory')
-  app.use(express.static(publicDir))
-  app.get('*', (req, res) => {
-    res.sendFile(path.join(publicDir, 'index.html'))
-  })
-} else {
-  if (process.env.NODE_ENV === 'production') {
-    logger.warn({ tried: possiblePublicDirs, cwd: process.cwd(), dirname: __dirname }, 
-      'Production mode but no public directory found')
-  }
-  app.use((req, res) => {
-    res.status(404).json({ message: 'Not found' })
-  })
-}
-```
-
-### Path Resolution Strategy
-The code now tries three locations in order:
-
-1. **`path.join(__dirname, '..', 'public')`**
-   - Relative to the app.js file location
-   - Expected: `/app/server/src/../public` = `/app/server/public`
-   - This should work when started normally from the Docker CMD
-
-2. **`path.join(process.cwd(), 'server', 'public')`**
-   - Relative to the current working directory
-   - Expected: `/app` + `server/public` = `/app/server/public`
-   - Handles cases where CWD is `/app`
-
-3. **`/app/server/public`**
-   - Absolute path matching the Dockerfile structure
-   - Guaranteed to work in Railway's container environment
-   - Final fallback to ensure reliability
-
-## Files Modified
-- `server/src/app.js` (16 lines changed: +14, -2)
-
-## Commit
-```
-commit 7131de3
-feat(waitlistkit): task #8799 - [WaitlistKit] Fix Railway deployment — root URL returning 404
-
-Improve public directory resolution for Railway deployment:
-- Try multiple possible paths for the public directory
-- Add explicit logging when public directory is found or missing
-- Handle edge cases where path resolution might differ in containerized environments
-- This fixes 404 errors on root URL by ensuring SPA files are found correctly
-```
-
-## Verification Steps
-Once deployed to Railway:
-1. Visit the root URL: https://web-production-98f5a.up.railway.app/
-2. Verify the React SPA loads correctly (not a 404 JSON response)
-3. Check Railway logs for the line: `Serving React SPA from public directory`
-4. Confirm the `publicDir` value in logs shows the correct path
-5. Test navigation within the SPA (client-side routing)
-
-## Benefits of This Fix
-
-### Robustness
-- ✅ Handles multiple possible directory structures
-- ✅ Works across different process start methods
-- ✅ Resilient to Docker layer changes or CWD variations
-
-### Debugging
-- ✅ Clear logging when public directory is found
-- ✅ Warning with diagnostic info when directory is missing
-- ✅ Logs show: attempted paths, CWD, __dirname
-- ✅ Makes future path issues easy to diagnose
-
-### Maintenance
-- ✅ Self-documenting with comments explaining each path
-- ✅ Easy to add more fallback paths if needed
-- ✅ No breaking changes to existing working deployments
-
-## Related Configuration
-
-### Dockerfile Structure
-```dockerfile
-WORKDIR /app
-COPY server/src/ ./server/src/
-COPY --from=client-build /app/client/dist ./server/public
-CMD ["node", "server/src/db/migrations/@system/start.js"]
-```
-
-### Expected Directory Structure in Container
-```
-/app/
-  server/
-    src/
-      app.js          (this file)
-      index.js
-      ...
-    public/           (built React app)
-      index.html
-      assets/
-      ...
-    node_modules/
-```
-
-## Additional Notes
-- This fix is defensive and adds multiple fallback paths
-- The absolute path `/app/server/public` ensures the fix works even if path resolution behaves unexpectedly
-- Logging helps diagnose any future path-related issues without needing to redeploy
-- No changes needed to Dockerfile or other configuration files
-
-## Repository
-- **Location**: `/Users/ruipedro/.openclaw/workspace-assimetria/waitlistkit`
-- **Branch**: main
-- **Commit**: 7131de3
+**Status:** ✅ **FIXED - Awaiting Deployment**  
+**Agent:** Junior Agent (task #8799)  
+**Date:** 2026-03-07 02:56 UTC
 
 ---
-**Completed by**: Junior Agent  
-**Date**: 2026-03-05  
-**Run Mode**: task
+
+## Problem Identified
+
+Railway deployment at `https://web-production-98f5a.up.railway.app` was returning:
+```json
+{"status":"error","code":404,"message":"Application not found"}
+```
+
+### Root Cause
+
+The `package.json` start script was running the server from the `api/` directory:
+```json
+"start": "cd api && npm start"
+```
+
+This caused the path resolution in `api/server.js` to fail:
+```javascript
+const LANDING_DIST = join(__dirname, "../landing/dist");
+```
+
+When the server runs from `api/`, the path `../landing/dist` resolves incorrectly, causing 404 errors for all static file requests (root URL, assets, etc.).
+
+---
+
+## Solution Implemented
+
+**Changed:** `package.json` start script to run from project root:
+```json
+"start": "node api/server.js"
+```
+
+This ensures the server's path resolution works correctly:
+- ✅ Root URL (`/`) → serves `landing/dist/index.html`
+- ✅ Health check (`/api/health`) → returns `{"status":"ok"}`
+- ✅ Static assets → served from `landing/dist/assets/`
+
+---
+
+## Testing
+
+Verified locally:
+```bash
+$ npm start
+$ curl http://localhost:3333/
+<!doctype html>...  # ✅ Serves HTML
+
+$ curl http://localhost:3333/api/health
+{"status":"ok","timestamp":"2026-03-07T02:56:36.268Z"}  # ✅ Health check works
+```
+
+---
+
+## Commit
+
+**Commit:** `945d856`  
+**Message:** `feat(): task #8799 - [WaitlistKit] Fix Railway deployment — root URL returning 40`
+
+Changes:
+```diff
+- "start": "cd api && npm start",
++ "start": "node api/server.js",
+```
+
+---
+
+## Next Steps Required 🚨
+
+The fix is **committed locally** but **NOT pushed** to the remote repository.
+
+### To Deploy:
+
+1. **Configure git remote** (if not already set):
+   ```bash
+   cd products/waitlistkit
+   git remote add origin <your-repo-url>
+   ```
+
+2. **Push the commit**:
+   ```bash
+   git push origin main
+   ```
+
+3. Railway will automatically:
+   - Detect the push
+   - Run `npm run build` (installs deps + builds landing page)
+   - Run `npm start` (starts server from project root)
+   - Health check `/api/health` should pass
+   - Deploy successfully
+
+### Alternative: Manual Railway Deployment
+
+If you prefer to deploy via Railway CLI:
+```bash
+railway up
+```
+
+---
+
+## Expected Result
+
+After deployment, `https://web-production-98f5a.up.railway.app` should:
+- ✅ Root URL shows WaitlistKit landing page
+- ✅ `/api/health` returns `{"status":"ok"}`
+- ✅ No more "Application not found" errors
+
+---
+
+## Files Changed
+
+- `products/waitlistkit/package.json` (1 line)
+
+---
+
+**Ready for deployment.** 🚀
