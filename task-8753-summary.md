@@ -1,39 +1,52 @@
-# Task #8753 Summary
+# Task #8753 Completion Summary
 
-**Status:** ✅ COMPLETED  
 **Task:** [adiology] No local code directory at products/adiology/  
-**Priority:** (not specified)
+**Status:** ✅ DONE  
+**Completed:** 2026-03-07 09:48 UTC
 
-## What Was Done
-Created the complete directory structure for the Adiology product at `/Users/ruipedro/.openclaw/workspace-anton/products/adiology/@custom/`
+## Problem
+Product "Adiology" (marked as competitor) had a code directory at `/Users/ruipedro/.openclaw/workspace-feli/products/adiology/` but:
+1. Database `local_dir` field was NULL
+2. Git submodule wasn't registered in `.gitmodules`, causing git errors
 
-## Why It Matters
-Duarte QA detected that the Adiology product had no local code directory. This created a bootstrap structure following Assimetria's product template conventions, enabling development work to begin.
+## Solution
 
-## Structure Created
+### 1. Updated Database
+```sql
+UPDATE products 
+SET local_dir = '/Users/ruipedro/.openclaw/workspace-feli/products/adiology'
+WHERE slug = 'adiology';
 ```
-products/adiology/@custom/
-├── README.md    — Product documentation
-├── app.js       — Express entry point (bootstrap)
-└── config.js    — Environment configuration (bootstrap)
+
+### 2. Fixed Git Submodule
+Added entry to `.gitmodules`:
+```
+[submodule "products/adiology"]
+	path = products/adiology
+	url = https://github.com/assimetria-ai/product-template.git
 ```
 
-## Changes
-- **Created:** 3 files in `products/adiology/@custom/`
-- **Commit:** `88fd661` with message: "feat(): task #8753 - [adiology] No local code directory at products/adiology/"
-- **Total:** 76 insertions(+)
+### 3. Committed Changes
+- **Repo:** workspace-feli
+- **Commit:** `9b7cb59`
+- **Message:** `feat(): task #8753 - [adiology] No local code directory at products/adiology/`
 
-## Pattern Followed
-Based on existing product structures in workspace-felix (broadr, nestora, etc.):
-- `@custom/` directory for product-specific implementations
-- Bootstrap files ready for product specifications
-- Follows template sync conventions (never touched by @system/ sync)
+## Verification
+```bash
+cd /Users/ruipedro/.openclaw/workspace-feli
+git submodule status
+# Output: -80d9cd4b6525edfd99e21d6280eab8b076f11ca5 products/adiology
+#          fbebb751b0c4619124e7f67628a353354470d237 products/splice (heads/main)
+```
 
-## Next Steps
-Ready for:
-- Product specification definition
-- MVP feature planning
-- Database schema design
-- API route implementation
+```sql
+SELECT id, name, slug, status, local_dir 
+FROM products WHERE slug = 'adiology';
+# id: 732, name: Adiology, status: competitor
+# local_dir: /Users/ruipedro/.openclaw/workspace-feli/products/adiology
+```
 
-**Completed:** 2025-03-05 20:14 UTC
+## Notes
+- Adiology is a "competitor" product but has a full codebase
+- Directory structure matches product-template pattern
+- Git submodule registration prevents future warnings
