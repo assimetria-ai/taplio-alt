@@ -1,6 +1,6 @@
 [[services]]
 name = "waitlistkit"
-source = "products/waitlistkit"
+source = "products/WaitlistKit"
 
 [services.waitlistkit.build]
 builder = "NIXPACKS"
