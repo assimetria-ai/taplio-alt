@@ -1,9 +1,13 @@
-[build]
-builder = "NIXPACKS"
-buildCommand = "cd products/waitlistkit && npm run build"
+[[services]]
+name = "waitlistkit"
+source = "products/waitlistkit"
 
-[deploy]
-startCommand = "cd products/waitlistkit && npm start"
+[services.waitlistkit.build]
+builder = "NIXPACKS"
+buildCommand = "npm run build"
+
+[services.waitlistkit.deploy]
+startCommand = "npm start"
 healthcheckPath = "/api/health"
 healthcheckTimeout = 30
 restartPolicyType = "ON_FAILURE"
