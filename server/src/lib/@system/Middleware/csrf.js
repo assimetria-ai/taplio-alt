@@ -13,12 +13,12 @@ const { doubleCsrf } = require('csrf-csrf')
  *
  * Usage:
  *   - Add csrfProtection middleware to routes that need CSRF protection
- *   - Expose generateToken() via a GET endpoint so clients can fetch the token
+ *   - Expose generateCsrfToken() via a GET endpoint so clients can fetch the token
  *   - Clients must include the token in the X-CSRF-Token header for protected requests
  */
 const {
-  generateToken,       // Generate a new CSRF token
-  doubleCsrfProtection // Middleware to validate CSRF tokens
+  generateCsrfToken: _generateCsrfToken, // Generate a new CSRF token
+  doubleCsrfProtection                    // Middleware to validate CSRF tokens
 } = doubleCsrf({
   getSecret: () => process.env.CSRF_SECRET || 'default-csrf-secret-change-in-production',
   cookieName: '__Host-psifi.x-csrf-token',
@@ -31,6 +31,12 @@ const {
   size: 64, // Token size in bytes
   ignoredMethods: ['GET', 'HEAD', 'OPTIONS'], // Safe methods that don't need CSRF protection
   getTokenFromRequest: (req) => req.headers['x-csrf-token'], // Custom header for the token
+  getSessionIdentifier: (req) => {
+    // Use session ID if available, otherwise fall back to a default empty string
+    // This is safe because CSRF protection relies on the double-submit cookie pattern,
+    // not on session identification
+    return req.sessionID || req.session?.id || ''
+  },
 })
 
 /**
@@ -58,9 +64,14 @@ const csrfProtection = (req, res, next) => {
  * Mount this on a GET endpoint (e.g., GET /api/csrf-token)
  */
 const generateCsrfToken = (req, res) => {
-  const token = generateToken(req, res)
+  const token = _generateCsrfToken(req, res)
   res.json({ csrfToken: token })
 }
+
+/**
+ * Export generateToken as an alias for compatibility
+ */
+const generateToken = _generateCsrfToken
 
 module.exports = {
   csrfProtection,
