@@ -53,7 +53,7 @@ export function QuickActions({
   }
 
   return (
-    <div className={cn('grid gap-4 sm:grid-cols-2 lg:grid-cols-4', className)}>
+    <div className={cn('grid gap-3 sm:gap-4 grid-cols-2 sm:grid-cols-2 lg:grid-cols-4', className)}>
       {actions.map((action) => (
         <QuickActionCard key={action.id} action={action} />
       ))}
@@ -97,18 +97,20 @@ function QuickActionCard({ action, variant = 'grid' }) {
     <Card
       className={cn(
         'cursor-pointer transition-all',
-        'hover:border-primary/60 hover:shadow-md',
+        'hover:border-primary/60 hover:shadow-md active:scale-[0.98]',
+        // Mobile-friendly touch target
+        'min-h-[120px] sm:min-h-[140px]',
         disabled && 'opacity-50 cursor-not-allowed'
       )}
       onClick={!disabled ? onClick : undefined}
     >
-      <CardContent className="flex flex-col items-center text-center p-6">
-        <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10 mb-3">
-          <Icon className="h-6 w-6 text-primary" />
+      <CardContent className="flex flex-col items-center text-center justify-center h-full p-4 sm:p-6">
+        <div className="flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center rounded-lg bg-primary/10 mb-2 sm:mb-3">
+          <Icon className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
         </div>
-        <p className="text-sm font-medium mb-1">{label}</p>
+        <p className="text-xs sm:text-sm font-medium mb-1">{label}</p>
         {description && (
-          <p className="text-xs text-muted-foreground">{description}</p>
+          <p className="text-[10px] sm:text-xs text-muted-foreground line-clamp-2">{description}</p>
         )}
       </CardContent>
     </Card>
