@@ -1,0 +1,23 @@
+{
+  "name": "nestora-backend",
+  "version": "1.0.0",
+  "description": "Nestora property management backend API",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js",
+    "dev": "nodemon app.js",
+    "init-db": "node -e \"require('./db').initDatabase(); console.log('Database initialized successfully');\""
+  },
+  "dependencies": {
+    "better-sqlite3": "^11.0.0",
+    "cors": "^2.8.5",
+    "express": "^4.22.1",
+    "multer": "^1.4.5-lts.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

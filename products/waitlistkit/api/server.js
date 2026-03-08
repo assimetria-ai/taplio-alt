@@ -146,6 +146,16 @@ const routes = {
     // Serve the main index.html for SPA routing
     await serveStatic(join(LANDING_DIST, "index.html"), res);
   },
+
+  "GET /admin": async (_req, res) => {
+    // Serve the main index.html for SPA routing
+    await serveStatic(join(LANDING_DIST, "index.html"), res);
+  },
+
+  "GET /dashboard": async (_req, res) => {
+    // Serve the main index.html for SPA routing
+    await serveStatic(join(LANDING_DIST, "index.html"), res);
+  },
 };
 
 const serveStatic = async (filepath, res) => {
