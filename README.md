@@ -104,6 +104,101 @@ The Product Template is the starting point for all Assimetria products. It solve
 
 ---
 
+## 📱 Mobile-First Responsive Design
+
+This template is built with a **mobile-first approach**, ensuring excellent experiences across all devices.
+
+### Key Features
+
+- **✅ Touch-friendly targets** — All interactive elements meet WCAG 2.5.5 (44x44px minimum)
+- **✅ Responsive breakpoints** — xs (480px), sm (640px), md (768px), lg (1024px), xl (1280px), 2xl (1536px)
+- **✅ Fluid typography** — Scales smoothly using clamp() for optimal readability
+- **✅ Safe area support** — Respects notches on iPhone X+ and other modern devices
+- **✅ Mobile-optimized components** — MobileTable (card view), BottomSheet, responsive modals
+- **✅ Horizontal overflow protection** — No accidental horizontal scrolling
+- **✅ Accessibility** — Respects prefers-reduced-motion and other user preferences
+
+### Mobile Utilities
+
+The template includes comprehensive mobile utilities in `client/src/index.css`:
+
+```jsx
+// Touch-friendly targets
+<button className="touch-target">...</button>
+
+// Safe area padding
+<div className="safe-padding-all">...</div>
+
+// Responsive spacing
+<div className="px-4 sm:px-6 lg:px-8">...</div>
+
+// Stack on mobile, row on desktop
+<div className="mobile-stack">...</div>
+
+// Hide/show based on screen size
+<div className="mobile-only">Mobile only</div>
+<div className="mobile-hide">Desktop only</div>
+
+// Responsive grids
+<div className="mobile-card-grid-3">...</div>
+
+// Horizontal scroll with snap
+<div className="mobile-scroll-x">...</div>
+```
+
+### Mobile Components
+
+**MobileTable** — Card view on mobile, table on desktop:
+```jsx
+import { MobileTable } from '@/app/components/@system/Dashboard/MobileTable'
+
+<MobileTable
+  columns={[
+    { key: 'name', label: 'Name', primary: true },
+    { key: 'email', label: 'Email' },
+    { key: 'role', label: 'Role', hideOnMobile: true }
+  ]}
+  data={users}
+  onRowClick={handleRowClick}
+/>
+```
+
+**BottomSheet** — Native mobile action sheet:
+```jsx
+import { BottomSheet, BottomSheetAction } from '@/app/components/@system/BottomSheet/BottomSheet'
+
+<BottomSheet open={isOpen} onClose={handleClose} title="Actions">
+  <BottomSheetAction icon={<Edit />} onClick={handleEdit}>
+    Edit
+  </BottomSheetAction>
+  <BottomSheetAction icon={<Trash />} onClick={handleDelete} destructive>
+    Delete
+  </BottomSheetAction>
+</BottomSheet>
+```
+
+**DashboardLayout** — Built-in mobile drawer navigation:
+```jsx
+<DashboardLayout>
+  {/* Hamburger menu automatically appears on mobile */}
+  <DashboardLayout.Content>...</DashboardLayout.Content>
+</DashboardLayout>
+```
+
+### Testing Checklist
+
+- [ ] Test on iPhone SE (320px) — smallest modern device
+- [ ] Test on iPhone 12/13 (390px)
+- [ ] Test on iPad (768px portrait, 1024px landscape)
+- [ ] Verify all buttons are at least 44x44px
+- [ ] Check horizontal scroll is prevented
+- [ ] Test in both portrait and landscape orientations
+- [ ] Verify touch feedback on interactive elements
+
+📖 **Full documentation:** [docs/MOBILE_RESPONSIVE.md](./docs/MOBILE_RESPONSIVE.md)
+
+---
+
 ## Project Structure
 
 ```
