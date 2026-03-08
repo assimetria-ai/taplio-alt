@@ -1,427 +1,286 @@
 # Mobile Responsiveness Guide
 
-## Overview
+This template has been enhanced with comprehensive mobile-first responsive design. All components and pages adapt seamlessly across devices.
 
-This template is built with a mobile-first responsive design approach. All components are optimized for mobile devices while maintaining full desktop functionality.
+## 🎯 Key Features
 
-## Breakpoint System
+### 1. **Mobile-First Breakpoints**
 
-### Tailwind Breakpoints
-- `xs`: 480px (extra small phones)
-- `sm`: 640px (small tablets)
-- `md`: 768px (tablets)
-- `lg`: 1024px (small desktops)
-- `xl`: 1280px (desktops)
-- `2xl`: 1536px (large desktops)
+Tailwind CSS breakpoints (defined in `client/tailwind.config.js`):
+- `xs`: 480px - Extra small devices
+- `sm`: 640px - Small tablets
+- `md`: 768px - Tablets
+- `lg`: 1024px - Desktop (sidebar switches from drawer to fixed)
+- `xl`: 1280px - Large desktop
+- `2xl`: 1536px - Extra large desktop
 
-### Usage Example
-```jsx
-<div className="text-sm sm:text-base lg:text-lg">
-  Responsive text
-</div>
+### 2. **Responsive Navigation**
 
-<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-  Responsive grid
-</div>
-```
-
-## Mobile-Optimized Components
-
-### 1. MobileTable
-Automatically switches between table (desktop) and card (mobile) views.
-
-```jsx
-import { MobileTable } from '@/app/components/@system/Dashboard/MobileTable'
-
-<MobileTable
-  columns={[
-    { key: 'name', label: 'Name', primary: true },
-    { key: 'email', label: 'Email' },
-    { key: 'status', label: 'Status', hideOnMobile: true }
-  ]}
-  data={users}
-  onRowClick={(user) => navigate(`/users/${user.id}`)}
-/>
-```
-
-**Features:**
-- Card view on mobile (< 1024px)
-- Table view on desktop (>= 1024px)
-- Touch-friendly tap targets
-- Optimized spacing for small screens
-
-### 2. MobileForm
-Form wrapper with mobile-specific enhancements.
-
-```jsx
-import { MobileForm } from '@/app/components/@system/Form/MobileForm'
-
-<MobileForm onSubmit={handleSubmit}>
-  <MobileForm.Section
-    title="Personal Information"
-    description="Update your profile details"
-  >
-    <MobileForm.Group>
-      <MobileForm.Field label="First Name" required>
-        <Input {...register('firstName')} />
-      </MobileForm.Field>
-      <MobileForm.Field label="Last Name" required>
-        <Input {...register('lastName')} />
-      </MobileForm.Field>
-    </MobileForm.Group>
-
-    <MobileForm.Field
-      label="Email"
-      description="Your primary email address"
-      error={errors.email?.message}
-    >
-      <Input type="email" {...register('email')} />
-    </MobileForm.Field>
-  </MobileForm.Section>
-
-  <MobileForm.Actions>
-    <Button type="button" variant="outline">Cancel</Button>
-    <Button type="submit">Save Changes</Button>
-  </MobileForm.Actions>
-</MobileForm>
-```
-
-**Features:**
-- Automatic keyboard dismissal on submit
-- Full-width inputs on mobile
-- Stacked buttons on mobile, horizontal on desktop
-- Optimized spacing and touch targets
-
-### 3. MobileModal
-Full-screen modals on mobile, centered dialogs on desktop.
-
-```jsx
-import { MobileModal } from '@/app/components/@system/Modal/MobileModal'
-
-<MobileModal
-  open={isOpen}
-  onClose={() => setIsOpen(false)}
-  title="Confirm Action"
-  description="Are you sure you want to continue?"
-  size="md"
->
-  <MobileModal.Content>
-    <p>This action cannot be undone.</p>
-  </MobileModal.Content>
-
-  <MobileModal.Actions>
-    <Button variant="outline" onClick={onClose}>Cancel</Button>
-    <Button variant="destructive" onClick={onConfirm}>Confirm</Button>
-  </MobileModal.Actions>
-</MobileModal>
-```
-
-**Features:**
-- Full-screen on mobile (< 640px)
-- Centered dialog on desktop
+#### Sidebar
+- **Desktop** (`lg+`): Fixed sidebar always visible
+- **Mobile** (`< lg`): Drawer that slides in from left
+- Floating hamburger button (bottom-right) on mobile
+- Auto-closes on navigation
 - Prevents body scroll when open
-- ESC key to close
-- Overlay click to close (configurable)
 
-## Mobile-First CSS Utilities
+#### Header
+- Collapsible mobile menu with hamburger icon
+- User menu adapts to drawer on mobile
+- Full-width authentication buttons on mobile
+
+### 3. **Touch-Optimized Components**
+
+All interactive elements meet **WCAG 2.1 minimum touch target size (44x44px)**:
+
+```jsx
+// Button sizes with mobile-first approach
+<Button size="default" /> // h-11 (44px)
+<Button size="sm" />      // h-10 (40px) 
+<Button size="lg" />      // h-12 mobile, h-14 desktop
+<Button size="icon" />    // 44x44px touch target
+```
+
+#### Card Component
+- Responsive padding: `p-4` mobile → `p-6` desktop
+- Responsive typography
+- Mobile-stacked card footers
+
+#### Table Component
+New `ResponsiveTableWrapper` for horizontal scrolling:
+
+```jsx
+import { ResponsiveTableWrapper } from '@/components/@system/Table/ResponsiveTable'
+
+<ResponsiveTableWrapper>
+  <Table>
+    {/* Your table content */}
+  </Table>
+</ResponsiveTableWrapper>
+```
+
+Features:
+- Horizontal scroll on mobile
+- Full-width on desktop
+- Proper borders and rounded corners
+- Negative margin for edge-to-edge on mobile
+
+### 4. **Responsive Typography**
+
+```css
+/* Mobile-optimized text utilities in index.css */
+.text-mobile-sm   // text-sm with relaxed leading
+.text-mobile-base // text-base with relaxed leading
+.text-mobile-lg   // text-lg → text-xl (sm+)
+```
+
+Component-level responsive text:
+```jsx
+<h1 className="text-xl sm:text-2xl lg:text-3xl">Heading</h1>
+<p className="text-sm sm:text-base">Body text</p>
+```
+
+### 5. **Modal/Dialog Responsiveness**
+
+Modal improvements:
+- Mobile: `width: calc(100% - 2rem)` (1rem margin on each side)
+- Desktop: `max-w-lg`
+- Max-height: `85vh` with overflow scroll
+- Responsive padding: `p-4` mobile → `p-6` desktop
+
+### 6. **Forms**
+
+Mobile-optimized form inputs:
+- Larger touch targets (min-height: 44px)
+- Full-width on mobile
+- Proper keyboard navigation
+- Auto-focus management
+
+### 7. **Tabs**
+
+Horizontal scroll on mobile:
+```jsx
+<TabsList>
+  <TabsTrigger value="members">Members</TabsTrigger>
+  <TabsTrigger value="settings">Settings</TabsTrigger>
+</TabsList>
+```
+
+Features:
+- Scrollable on mobile (no wrap)
+- Centered on desktop
+- Hide scrollbar for clean look
+
+## 📱 Mobile-Specific Utilities
+
+### Safe Area Padding
+For notched devices (iPhone X+):
+
+```css
+.safe-padding-top     // max(1rem, env(safe-area-inset-top))
+.safe-padding-bottom  // max(1rem, env(safe-area-inset-bottom))
+.safe-padding-x       // horizontal safe areas
+```
+
+### Stack Layout
+```css
+.mobile-stack // flex-col mobile → flex-row desktop
+```
 
 ### Touch Targets
-All interactive elements should meet the WCAG 2.1 AAA minimum of 44x44px:
-
-```jsx
-<button className="touch-target">
-  Click me
-</button>
-
-// Renders as: min-h-[44px] min-w-[44px] inline-flex items-center justify-center
-```
-
-### Safe Area Support
-For devices with notches and rounded corners:
-
-```jsx
-<div className="safe-padding-top">
-  Content respects notch
-</div>
-
-<div className="safe-padding-bottom">
-  Content respects home indicator
-</div>
-
-<div className="safe-padding-x">
-  Content respects curved edges
-</div>
-```
-
-### Mobile-Optimized Text
-```jsx
-<p className="text-mobile-sm">Small text with relaxed line height</p>
-<p className="text-mobile-base">Base text with relaxed line height</p>
-<h2 className="text-mobile-lg">Large responsive heading</h2>
-```
-
-### Responsive Stacking
-```jsx
-<div className="mobile-stack">
-  {/* Stacks vertically on mobile, horizontal on desktop */}
-  <Button>Action 1</Button>
-  <Button>Action 2</Button>
-</div>
-```
-
-## Container System
-
-The template uses responsive container padding:
-
-```jsx
-<div className="container">
-  {/* 
-    Padding:
-    - Mobile: 1rem (16px)
-    - sm: 1.5rem (24px)
-    - md: 2rem (32px)
-    - lg: 2.5rem (40px)
-    - xl+: 3rem (48px)
-  */}
-</div>
-```
-
-## Layout Patterns
-
-### 1. Responsive Grid
-```jsx
-// Single column on mobile, 2 on tablet, 3 on desktop
-<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-  <Card>...</Card>
-  <Card>...</Card>
-  <Card>...</Card>
-</div>
-```
-
-### 2. Sidebar Layout
-```jsx
-// Stacked on mobile, side-by-side on desktop
-<div className="flex flex-col lg:flex-row gap-6">
-  <aside className="lg:w-64">Sidebar</aside>
-  <main className="flex-1">Content</main>
-</div>
-```
-
-### 3. Dashboard Stats
-```jsx
-// 1 column mobile, 2 tablet, 4 desktop
-<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-  <StatCard label="Users" value="1,234" />
-  <StatCard label="Revenue" value="$45,678" />
-  <StatCard label="Orders" value="892" />
-  <StatCard label="Growth" value="+12%" />
-</div>
-```
-
-## Best Practices
-
-### 1. Always Test on Real Devices
-- iPhone SE (smallest common viewport: 375x667)
-- iPhone 14 Pro (notch + dynamic island)
-- iPad (tablet breakpoint)
-- Android phones (various sizes)
-
-### 2. Touch-Friendly Design
-✅ **DO:**
-- Minimum 44x44px tap targets
-- Spacing between interactive elements
-- Large buttons for primary actions
-- Easy-to-reach bottom navigation on mobile
-
-❌ **DON'T:**
-- Tiny close buttons (< 44px)
-- Links/buttons too close together
-- Important actions in hard-to-reach corners
-- Hover-only interactions (no touch equivalent)
-
-### 3. Typography
-✅ **DO:**
-- Use responsive text sizes (`text-sm sm:text-base lg:text-lg`)
-- Adequate line spacing (leading-relaxed)
-- Maximum line length (~60-70 characters)
-- Readable contrast ratios (WCAG AA minimum)
-
-❌ **DON'T:**
-- Fixed font sizes that don't scale
-- Tight line spacing on mobile
-- Long paragraphs without breaks
-- Low contrast text on mobile
-
-### 4. Images & Media
-```jsx
-// Responsive images
-<img
-  src="/hero.jpg"
-  srcSet="/hero-mobile.jpg 640w, /hero-tablet.jpg 1024w, /hero-desktop.jpg 1920w"
-  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-  alt="Hero image"
-  className="w-full h-auto object-cover"
-/>
-
-// Video with mobile-friendly controls
-<video
-  className="w-full h-auto"
-  controls
-  playsInline // Important for iOS
-  poster="/thumbnail.jpg"
->
-  <source src="/video.mp4" type="video/mp4" />
-</video>
-```
-
-### 5. Forms
-✅ **DO:**
-- Full-width inputs on mobile
-- Appropriate input types (`type="email"`, `type="tel"`, etc.)
-- Large submit buttons
-- Clear error messages
-- Auto-focus first input on desktop only
-
-❌ **DON'T:**
-- Tiny input fields
-- Generic `type="text"` for emails/phones
-- Multi-column forms on mobile
-- Auto-focus on mobile (triggers keyboard)
-
-### 6. Navigation
-```jsx
-// Mobile hamburger menu
-<Header />
-
-// Dashboard sidebar
-<DashboardLayout>
-  {/* Hamburger on mobile, persistent sidebar on desktop */}
-</DashboardLayout>
-
-// Bottom tab navigation for mobile apps
-<div className="lg:hidden fixed bottom-0 inset-x-0 border-t bg-background">
-  <nav className="flex justify-around p-2">
-    <NavButton icon={Home} label="Home" />
-    <NavButton icon={Search} label="Search" />
-    <NavButton icon={Settings} label="Settings" />
-  </nav>
-</div>
-```
-
-### 7. Modals & Overlays
-```jsx
-// Use MobileModal for full-screen on mobile
-<MobileModal open={isOpen} onClose={onClose}>
-  <MobileModal.Content>
-    {/* Content */}
-  </MobileModal.Content>
-</MobileModal>
-
-// Or use sheet/drawer pattern for mobile
-<Sheet open={isOpen} onOpenChange={setIsOpen}>
-  <SheetContent side="bottom" className="h-[80vh]">
-    {/* Slides up from bottom on mobile */}
-  </SheetContent>
-</Sheet>
-```
-
-## Performance Optimization
-
-### 1. Lazy Loading
-```jsx
-import { lazy, Suspense } from 'react'
-
-const HeavyComponent = lazy(() => import('./HeavyComponent'))
-
-<Suspense fallback={<Spinner />}>
-  <HeavyComponent />
-</Suspense>
-```
-
-### 2. Conditional Rendering
-```jsx
-// Load mobile vs desktop components conditionally
-const isMobile = window.innerWidth < 768
-
-{isMobile ? <MobileTable /> : <DesktopTable />}
-```
-
-### 3. Image Optimization
-- Use WebP format with JPEG/PNG fallback
-- Implement lazy loading for below-fold images
-- Compress images appropriately
-- Use appropriate sizes for different viewports
-
-## Testing Checklist
-
-- [ ] Test on iPhone SE (375px width)
-- [ ] Test on iPad (768px width)
-- [ ] Test on desktop (1920px width)
-- [ ] Test in both portrait and landscape
-- [ ] Verify touch targets are 44x44px minimum
-- [ ] Check for horizontal scroll issues
-- [ ] Test with slow 3G connection
-- [ ] Verify safe area handling on notched devices
-- [ ] Test keyboard interactions on mobile
-- [ ] Verify form input types trigger correct keyboards
-- [ ] Test swipe gestures don't conflict
-- [ ] Check that modals don't trap users
-- [ ] Verify animations are smooth (60fps)
-- [ ] Test with VoiceOver/TalkBack (accessibility)
-
-## Common Issues & Solutions
-
-### Issue: Horizontal Scroll on Mobile
-**Solution:**
 ```css
-/* Add to affected container */
-.container {
-  overflow-x: hidden;
-  width: 100%;
-  max-width: 100vw;
+.touch-target // min-h-touch min-w-touch (44px)
+```
+
+## 🔧 Usage Examples
+
+### Page Layout with Mobile Sidebar
+
+```jsx
+import { useMobileSidebar } from '@/hooks/@system/useMobileSidebar'
+
+export function MyPage() {
+  const { mobileOpen, toggleMobile, closeMobile } = useMobileSidebar()
+  
+  return (
+    <div className="flex h-screen flex-col">
+      <Header />
+      <div className="flex flex-1 overflow-hidden">
+        {/* Floating menu button */}
+        <button
+          onClick={toggleMobile}
+          className="lg:hidden fixed bottom-6 right-6 z-30 flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg"
+        >
+          <Menu className="h-6 w-6" />
+        </button>
+        
+        {/* Sidebar with drawer support */}
+        <Sidebar mobileOpen={mobileOpen} onMobileClose={closeMobile}>
+          {/* Sidebar content */}
+        </Sidebar>
+        
+        {/* Main content */}
+        <main className="flex-1 overflow-auto p-4 sm:p-6 lg:p-8">
+          {/* Page content */}
+        </main>
+      </div>
+    </div>
+  )
 }
 ```
 
-### Issue: Fixed Positioning on iOS
-**Solution:**
+### Responsive Grid
+
 ```jsx
-// Use dvh (dynamic viewport height) instead of vh
-<div className="h-screen"> {/* ❌ Can be buggy on iOS */}
-<div style={{ height: '100dvh' }}> {/* ✅ Better */}
+<div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+  {items.map(item => (
+    <Card key={item.id}>
+      {/* Card content */}
+    </Card>
+  ))}
+</div>
 ```
 
-### Issue: Buttons Too Small on Mobile
-**Solution:**
-```jsx
-// Use the touch-target utility
-<button className="touch-target">
-  Click me
-</button>
+### Responsive Flex Layout
 
-// Or add explicit sizing
-<Button size="lg" className="min-h-[44px] min-w-[44px]">
-  Click me
-</Button>
+```jsx
+<div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
+  <div className="flex-1">Content 1</div>
+  <div className="flex-1">Content 2</div>
+</div>
 ```
 
-### Issue: Text Too Small on Mobile
-**Solution:**
-```jsx
-// Use responsive text utilities
-<p className="text-sm sm:text-base">
-  Responsive text
-</p>
+## 📊 Testing
 
-// Or mobile-optimized classes
-<p className="text-mobile-base">
-  Optimized for mobile
-</p>
-```
+### Breakpoint Testing Checklist
 
-## Resources
+Test on these viewports:
+- [ ] Mobile: 375px (iPhone SE)
+- [ ] Mobile: 390px (iPhone 12/13/14)
+- [ ] Mobile: 414px (iPhone Plus)
+- [ ] Tablet: 768px (iPad)
+- [ ] Tablet: 820px (iPad Air)
+- [ ] Desktop: 1024px
+- [ ] Desktop: 1280px
+- [ ] Wide: 1920px
 
-- [WebAIM Touch Target Size](https://webaim.org/articles/touch/)
-- [WCAG 2.1 Success Criterion 2.5.5](https://www.w3.org/WAI/WCAG21/Understanding/target-size.html)
-- [iOS Human Interface Guidelines](https://developer.apple.com/design/human-interface-guidelines/ios)
-- [Material Design - Touch Targets](https://m3.material.io/foundations/accessible-design/overview)
+### Touch Target Testing
+
+Use Chrome DevTools mobile emulation:
+1. Open DevTools (F12)
+2. Toggle device toolbar (Cmd+Shift+M / Ctrl+Shift+M)
+3. Enable "Show rulers" and "Show device frame"
+4. Verify all buttons/links are ≥44px
+
+### iOS Safari Specific
+
+Check these iOS Safari quirks:
+- [ ] Safe area insets (notch/home indicator)
+- [ ] Fixed positioning behavior
+- [ ] Viewport height with address bar
+- [ ] Touch scrolling momentum
+
+## 🚀 Performance
+
+Mobile optimizations:
+- **Lazy loading**: Offscreen images lazy-load
+- **Code splitting**: React.lazy for routes
+- **Responsive images**: Use `srcset` for different densities
+- **Touch scrolling**: `-webkit-overflow-scrolling: touch`
+
+## 📝 Best Practices
+
+1. **Always use mobile-first approach**:
+   ```jsx
+   // ✅ Good
+   className="text-sm sm:text-base"
+   
+   // ❌ Bad
+   className="text-base sm:text-sm"
+   ```
+
+2. **Stack on mobile, row on desktop**:
+   ```jsx
+   className="flex flex-col sm:flex-row"
+   ```
+
+3. **Test with real devices**:
+   - Emulators are not enough
+   - Test on actual phones and tablets
+   - Check touch interactions
+
+4. **Consider thumb zones**:
+   - Place primary actions in bottom-right (right-handed users)
+   - Or center-bottom (both hands)
+   - Avoid top corners on large screens
+
+5. **Use responsive padding consistently**:
+   ```jsx
+   className="p-4 sm:p-6 lg:p-8"
+   ```
+
+## 🐛 Troubleshooting
+
+### Sidebar not showing on mobile
+- Verify `useMobileSidebar()` hook is imported
+- Check `mobileOpen` and `onMobileClose` props are passed to `<Sidebar>`
+- Ensure floating menu button is present
+
+### Table overflowing on mobile
+- Wrap table in `<ResponsiveTableWrapper>`
+- Check parent containers don't have `overflow: hidden`
+
+### Touch targets too small
+- Verify minimum `h-11` (44px) on all interactive elements
+- Use Button component (already optimized)
+- Add `min-h-touch` class if needed
+
+### Modal too wide on mobile
+- Modal component updated to `w-[calc(100%-2rem)]`
+- Check you're using the system Modal component
+
+## 📚 Resources
+
 - [Tailwind CSS Responsive Design](https://tailwindcss.com/docs/responsive-design)
+- [WCAG 2.1 Touch Target Size](https://www.w3.org/WAI/WCAG21/Understanding/target-size.html)
+- [iOS Safe Area](https://webkit.org/blog/7929/designing-websites-for-iphone-x/)
+- [Chrome DevTools Device Mode](https://developer.chrome.com/docs/devtools/device-mode/)
