@@ -12,6 +12,7 @@ const response = require('./response')
 const queryBuilder = require('./query-builder')
 const passwordValidator = require('./password-validator')
 const apiUtils = require('./api-utils')
+const middleware = require('../Middleware')
 
 module.exports = {
   // Auth helpers
@@ -37,4 +38,13 @@ module.exports = {
   
   // Password validation
   validatePassword: passwordValidator.validatePassword,
+  
+  // Middleware (re-exported for convenience)
+  pagination: middleware.pagination,
+  sorting: middleware.sorting,
+  multiSort: middleware.multiSort,
+  filtering: middleware.filtering,
+  advancedFiltering: middleware.advancedFiltering,
+  formatPaginatedResponse: middleware.formatPaginatedResponse,
+  formatSortClause: middleware.formatSortClause,
 }
