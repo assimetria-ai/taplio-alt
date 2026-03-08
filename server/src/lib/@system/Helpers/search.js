@@ -2,6 +2,7 @@
  * Search Helpers
  * 
  * Reusable utilities for building search queries and handling search patterns
+ * Fixed for PostgreSQL parameter syntax ($1, $2, etc.)
  */
 
 /**
@@ -12,12 +13,14 @@
  * @param {Object} options - Search options
  * @param {boolean} options.caseSensitive - Use case-sensitive search (default: false)
  * @param {string} options.mode - Search mode: 'contains', 'starts_with', 'exact' (default: 'contains')
+ * @param {number} options.paramOffset - Starting parameter index (default: 1)
  * @returns {Object} SQL condition and parameters
  */
 function buildSearchCondition(query, columns, options = {}) {
   const {
     caseSensitive = false,
     mode = 'contains',
+    paramOffset = 1,
   } = options
 
   if (!query || !columns || columns.length === 0) {
@@ -41,8 +44,9 @@ function buildSearchCondition(query, columns, options = {}) {
   }
 
   const operator = mode === 'exact' ? '=' : (caseSensitive ? 'LIKE' : 'ILIKE')
-  const conditions = columns.map((col) => {
-    return caseSensitive ? `${col} ${operator} ?` : `LOWER(${col}) ${operator} ?`
+  const conditions = columns.map((col, index) => {
+    const paramNum = paramOffset + index
+    return caseSensitive ? `${col} ${operator} $${paramNum}` : `LOWER(${col}) ${operator} $${paramNum}`
   })
 
   return {
@@ -108,7 +112,10 @@ function buildWhereClause(options = {}) {
 
   // Add search condition
   if (searchQuery && searchFields.length > 0) {
-    const searchCondition = buildSearchCondition(searchQuery, searchFields, { mode: searchMode })
+    const searchCondition = buildSearchCondition(searchQuery, searchFields, { 
+      mode: searchMode,
+      paramOffset: params.length + 1,
+    })
     if (searchCondition.condition) {
       conditions.push(searchCondition.condition)
       params.push(...searchCondition.params)
@@ -120,12 +127,13 @@ function buildWhereClause(options = {}) {
     if (value !== undefined && value !== null && value !== '') {
       if (Array.isArray(value)) {
         // Handle IN clause for arrays
-        const placeholders = value.map(() => '?').join(', ')
+        const placeholders = value.map((_, idx) => `$${params.length + idx + 1}`).join(', ')
         conditions.push(`${key} IN (${placeholders})`)
         params.push(...value)
       } else {
-        conditions.push(`${key} = ?`)
+        // Handle single value
         params.push(value)
+        conditions.push(`${key} = $${params.length}`)
       }
     }
   })
