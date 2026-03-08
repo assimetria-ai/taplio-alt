@@ -251,6 +251,24 @@ export function AppRoutes() {
           }
         />
 
+        {/* Teams */}
+        <Route
+          path="/app/teams"
+          element={
+            <ProtectedRoute>
+              <TeamsPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/app/teams/:id"
+          element={
+            <ProtectedRoute>
+              <TeamDetailPage />
+            </ProtectedRoute>
+          }
+        />
+
         {/* 404 */}
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
