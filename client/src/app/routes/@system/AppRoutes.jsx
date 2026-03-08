@@ -90,6 +90,9 @@ const ApiKeysPage = lazy(() =>
 const IntegrationsPage = lazy(() =>
   import('../../pages/app/@system/IntegrationsPage').then((m) => ({ default: m.IntegrationsPage }))
 )
+const MobileResponsiveDemo = lazy(() =>
+  import('../../pages/app/@system/MobileResponsiveDemo').then((m) => ({ default: m.MobileResponsiveDemo }))
+)
 
 function PageFallback() {
   return (
@@ -227,6 +230,15 @@ export function AppRoutes() {
           element={
             <ProtectedRoute role="admin">
               <IntegrationsPage />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/app/mobile-demo"
+          element={
+            <ProtectedRoute>
+              <MobileResponsiveDemo />
             </ProtectedRoute>
           }
         />

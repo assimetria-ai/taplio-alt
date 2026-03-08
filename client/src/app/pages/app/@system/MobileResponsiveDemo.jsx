@@ -1,366 +1,442 @@
-// @system — Mobile Responsive Components Demo
-// Showcase of mobile-optimized components and patterns
-// This page demonstrates best practices for mobile-first design
+// @system — Mobile responsiveness showcase and testing page
+// Demonstrates all mobile-first patterns, utilities, and components
+// Access at: /app/mobile-demo
 
 import { useState } from 'react'
-import { Users, Mail, Phone, MapPin, Edit, Trash2, Plus } from 'lucide-react'
-import { DashboardLayout } from '@/app/components/@system/Dashboard/DashboardLayout'
-import { MobileTable } from '@/app/components/@system/Dashboard/MobileTable'
-import { MobileForm } from '@/app/components/@system/Form/MobileForm'
-import { MobileModal } from '@/app/components/@system/Modal/MobileModal'
-import { StatCard, StatCardGrid } from '@/app/components/@system/Dashboard/StatCard'
-import { Card, CardContent, CardHeader, CardTitle } from '@/app/components/@system/Card/Card'
-import { Button } from '@/app/components/@system/ui/button'
-import { Input } from '@/app/components/@system/Form/Form'
-import { Badge } from '@/app/components/@system/ui/badge'
-
-// Sample data
-const SAMPLE_USERS = [
-  {
-    id: 1,
-    name: 'John Doe',
-    email: 'john@example.com',
-    phone: '+1 234 567 8900',
-    status: 'active',
-    role: 'Admin',
-  },
-  {
-    id: 2,
-    name: 'Jane Smith',
-    email: 'jane@example.com',
-    phone: '+1 234 567 8901',
-    status: 'active',
-    role: 'User',
-  },
-  {
-    id: 3,
-    name: 'Bob Johnson',
-    email: 'bob@example.com',
-    phone: '+1 234 567 8902',
-    status: 'inactive',
-    role: 'User',
-  },
-]
+import { Smartphone, Tablet, Monitor, CheckCircle2, Info, Code } from 'lucide-react'
+import { DashboardLayout } from '../../../components/@system/Dashboard/DashboardLayout'
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '../../../components/@system/Card/Card'
+import { Button } from '../../../components/@system/ui/button'
+import { Badge } from '../../../components/@system/Badge/Badge'
+import { FormField, Input } from '../../../components/@system/Form/Form'
+import { Modal } from '../../../components/@system/Modal/Modal'
+import { Alert } from '../../../components/@system/Alert/Alert'
 
 export function MobileResponsiveDemo() {
-  const [formModalOpen, setFormModalOpen] = useState(false)
-  const [deleteModalOpen, setDeleteModalOpen] = useState(false)
-  const [formData, setFormData] = useState({
-    firstName: '',
-    lastName: '',
-    email: '',
-    phone: '',
-  })
+  const [modalOpen, setModalOpen] = useState(false)
+  const [currentBreakpoint, setCurrentBreakpoint] = useState('unknown')
 
-  const handleFormSubmit = (e) => {
-    e.preventDefault()
-    console.log('Form submitted:', formData)
-    setFormModalOpen(false)
-  }
+  // Detect current breakpoint for demo purposes
+  useState(() => {
+    const updateBreakpoint = () => {
+      const width = window.innerWidth
+      if (width < 480) setCurrentBreakpoint('xs (< 480px)')
+      else if (width < 640) setCurrentBreakpoint('xs-sm (480-640px)')
+      else if (width < 768) setCurrentBreakpoint('sm (640-768px)')
+      else if (width < 1024) setCurrentBreakpoint('md (768-1024px)')
+      else if (width < 1280) setCurrentBreakpoint('lg (1024-1280px)')
+      else if (width < 1536) setCurrentBreakpoint('xl (1280-1536px)')
+      else setCurrentBreakpoint('2xl (≥ 1536px)')
+    }
 
-  const handleUserClick = (user) => {
-    console.log('User clicked:', user)
-  }
+    updateBreakpoint()
+    window.addEventListener('resize', updateBreakpoint)
+    return () => window.removeEventListener('resize', updateBreakpoint)
+  }, [])
 
   return (
     <DashboardLayout>
       <DashboardLayout.Content>
         <DashboardLayout.Header
-          title="Mobile Responsive Demo"
-          description="Examples of mobile-optimized components and patterns"
+          title="Mobile Responsiveness"
+          description="Interactive showcase of mobile-first design patterns"
+          actions={
+            <Badge variant="outline" className="gap-1.5">
+              <Monitor className="h-3.5 w-3.5" />
+              {currentBreakpoint}
+            </Badge>
+          }
         />
 
-        {/* Stats Grid - Responsive */}
-        <DashboardLayout.Section
-          title="Responsive Stat Cards"
-          description="1 column on mobile, 2 on tablet, 4 on desktop"
-        >
-          <StatCardGrid>
-            <StatCard
-              label="Total Users"
-              value="2,543"
-              trend={{ value: 12, direction: 'up' }}
-              description="vs last month"
-              icon={Users}
-            />
-            <StatCard
-              label="Active Sessions"
-              value="1,234"
-              trend={{ value: 5, direction: 'down' }}
-              description="in last 24h"
-              icon={Activity}
-            />
-            <StatCard
-              label="Revenue"
-              value="$45,678"
-              trend={{ value: 23, direction: 'up' }}
-              description="this month"
-              icon={CreditCard}
-            />
-            <StatCard
-              label="Conversion"
-              value="3.2%"
-              trend={{ value: 0.5, direction: 'up' }}
-              description="from last week"
-              icon={BarChart}
-            />
-          </StatCardGrid>
-        </DashboardLayout.Section>
-
-        {/* Mobile Table - Card view on mobile */}
-        <DashboardLayout.Section
-          title="Mobile-Optimized Table"
-          description="Cards on mobile, table on desktop"
-          actions={
-            <Button onClick={() => setFormModalOpen(true)} className="gap-2">
-              <Plus className="h-4 w-4" />
-              Add User
-            </Button>
-          }
-        >
-          <MobileTable
-            columns={[
-              {
-                key: 'name',
-                label: 'Name',
-                primary: true,
-              },
-              {
-                key: 'email',
-                label: 'Email',
-              },
-              {
-                key: 'phone',
-                label: 'Phone',
-              },
-              {
-                key: 'status',
-                label: 'Status',
-                render: (value) => (
-                  <Badge variant={value === 'active' ? 'default' : 'secondary'}>
-                    {value}
-                  </Badge>
-                ),
-              },
-              {
-                key: 'role',
-                label: 'Role',
-                hideOnMobile: true,
-              },
-            ]}
-            data={SAMPLE_USERS}
-            onRowClick={handleUserClick}
-          />
-        </DashboardLayout.Section>
-
-        {/* Responsive Grid */}
-        <DashboardLayout.Section
-          title="Responsive Grid Layout"
-          description="Stacks on mobile, 2 columns on tablet, 3 on desktop"
-        >
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-            <Card>
-              <CardHeader>
-                <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-                    <Mail className="h-5 w-5 text-primary" />
-                  </div>
-                  <CardTitle>Email</CardTitle>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-muted-foreground">
-                  Send and receive emails
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-                    <Phone className="h-5 w-5 text-primary" />
-                  </div>
-                  <CardTitle>Phone</CardTitle>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-muted-foreground">
-                  Make and receive calls
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-                    <MapPin className="h-5 w-5 text-primary" />
-                  </div>
-                  <CardTitle>Location</CardTitle>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-muted-foreground">
-                  View location services
-                </p>
-              </CardContent>
-            </Card>
+        {/* Alert */}
+        <Alert className="mb-6" variant="info">
+          <Info className="h-4 w-4" />
+          <div>
+            <p className="font-medium">Resize your browser to test responsiveness</p>
+            <p className="text-sm mt-1 text-muted-foreground">
+              Or open DevTools (F12) and use device emulation to test on different screen sizes.
+            </p>
           </div>
+        </Alert>
+
+        {/* Breakpoint Indicators */}
+        <DashboardLayout.Section title="Breakpoint System">
+          <Card>
+            <CardContent className="pt-6">
+              <div className="mobile-grid-stack">
+                <BreakpointCard
+                  icon={Smartphone}
+                  name="Mobile"
+                  range="< 640px"
+                  classes="xs:, sm:"
+                  active={currentBreakpoint.includes('xs') || currentBreakpoint.includes('sm')}
+                />
+                <BreakpointCard
+                  icon={Tablet}
+                  name="Tablet"
+                  range="640-1024px"
+                  classes="md:, lg:"
+                  active={currentBreakpoint.includes('md') || currentBreakpoint.includes('lg')}
+                />
+                <BreakpointCard
+                  icon={Monitor}
+                  name="Desktop"
+                  range="≥ 1024px"
+                  classes="xl:, 2xl:"
+                  active={currentBreakpoint.includes('xl')}
+                />
+              </div>
+            </CardContent>
+          </Card>
         </DashboardLayout.Section>
 
-        {/* Buttons for Modals */}
-        <DashboardLayout.Section title="Modal Examples">
-          <div className="flex flex-wrap gap-3">
-            <Button onClick={() => setFormModalOpen(true)}>
-              Open Form Modal
-            </Button>
-            <Button variant="destructive" onClick={() => setDeleteModalOpen(true)}>
-              Open Delete Confirmation
-            </Button>
-          </div>
-        </DashboardLayout.Section>
-
-        {/* Mobile Utilities Showcase */}
+        {/* Touch Targets */}
         <DashboardLayout.Section
-          title="Mobile Utilities"
-          description="Touch targets, safe areas, and responsive text"
+          title="Touch Targets"
+          description="All interactive elements meet WCAG 2.1 minimum 44×44px"
         >
           <Card>
-            <CardContent className="space-y-6 p-4 sm:p-6">
-              {/* Touch Targets */}
-              <div>
-                <h4 className="text-sm font-semibold mb-3">Touch Targets (44x44px minimum)</h4>
-                <div className="flex flex-wrap gap-2">
-                  <button className="touch-target rounded-md bg-primary text-primary-foreground">
-                    Touch
-                  </button>
-                  <button className="touch-target rounded-md border">
-                    Target
-                  </button>
-                  <button className="touch-target rounded-md bg-secondary">
-                    Example
-                  </button>
+            <CardContent className="pt-6 mobile-spacing">
+              <div className="space-y-4">
+                <div>
+                  <p className="text-sm text-muted-foreground mb-3">Button sizes (all touch-optimized):</p>
+                  <div className="flex flex-wrap gap-3">
+                    <Button size="sm">Small (40px)</Button>
+                    <Button size="default">Default (44px)</Button>
+                    <Button size="lg">Large (48-56px)</Button>
+                    <Button size="icon" variant="outline">
+                      <CheckCircle2 className="h-5 w-5" />
+                    </Button>
+                  </div>
                 </div>
-              </div>
 
-              {/* Responsive Text */}
-              <div>
-                <h4 className="text-sm font-semibold mb-3">Responsive Typography</h4>
-                <p className="text-mobile-sm mb-2">Small mobile-optimized text</p>
-                <p className="text-mobile-base mb-2">Base mobile-optimized text</p>
-                <h3 className="text-mobile-lg">Large responsive heading</h3>
-              </div>
-
-              {/* Mobile Stack */}
-              <div>
-                <h4 className="text-sm font-semibold mb-3">Mobile Stack (vertical → horizontal)</h4>
-                <div className="mobile-stack">
-                  <Button variant="outline">Cancel</Button>
-                  <Button>Confirm</Button>
+                <div>
+                  <p className="text-sm text-muted-foreground mb-3">Custom touch targets:</p>
+                  <div className="flex flex-wrap gap-2">
+                    <button className="touch-target rounded-full border-2 border-primary px-4">
+                      .touch-target
+                    </button>
+                    <button className="touch-target rounded-md bg-secondary px-6">
+                      44×44px minimum
+                    </button>
+                  </div>
                 </div>
               </div>
             </CardContent>
           </Card>
         </DashboardLayout.Section>
+
+        {/* Layout Patterns */}
+        <DashboardLayout.Section
+          title="Layout Patterns"
+          description="Common responsive layout utilities"
+        >
+          <div className="space-y-4">
+            {/* Mobile Stack */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">Mobile Stack</CardTitle>
+                <CardDescription>Columns on mobile, row on desktop</CardDescription>
+                <CodeSnippet code='<div className="mobile-stack">...</div>' />
+              </CardHeader>
+              <CardContent>
+                <div className="mobile-stack">
+                  <div className="flex-1 p-4 bg-primary/10 rounded-md text-center">Column 1</div>
+                  <div className="flex-1 p-4 bg-primary/10 rounded-md text-center">Column 2</div>
+                  <div className="flex-1 p-4 bg-primary/10 rounded-md text-center">Column 3</div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Mobile Grid Stack */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">Mobile Grid Stack</CardTitle>
+                <CardDescription>1 col → 2 cols → 3 cols responsive grid</CardDescription>
+                <CodeSnippet code='<div className="mobile-grid-stack">...</div>' />
+              </CardHeader>
+              <CardContent>
+                <div className="mobile-grid-stack">
+                  {[1, 2, 3, 4, 5, 6].map((i) => (
+                    <div key={i} className="p-4 bg-secondary rounded-md text-center">
+                      Item {i}
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Mobile Scroll X */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">Horizontal Scroll</CardTitle>
+                <CardDescription>Scrolls on mobile, wraps on desktop</CardDescription>
+                <CodeSnippet code='<div className="mobile-scroll-x">...</div>' />
+              </CardHeader>
+              <CardContent>
+                <div className="mobile-scroll-x">
+                  <div className="flex gap-3 min-w-max sm:min-w-0 sm:flex-wrap">
+                    {['Feature 1', 'Feature 2', 'Feature 3', 'Feature 4', 'Feature 5'].map((f) => (
+                      <Badge key={f} className="px-4 py-2 whitespace-nowrap">
+                        {f}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </DashboardLayout.Section>
+
+        {/* Typography */}
+        <DashboardLayout.Section
+          title="Mobile Typography"
+          description="Responsive text with relaxed line-height"
+        >
+          <Card>
+            <CardContent className="pt-6 space-y-4">
+              <div>
+                <CodeSnippet code='<p className="text-mobile-sm">...' />
+                <p className="text-mobile-sm mt-2">
+                  Small text with relaxed line-height for better mobile readability.
+                </p>
+              </div>
+              <div>
+                <CodeSnippet code='<p className="text-mobile-base">...' />
+                <p className="text-mobile-base mt-2">
+                  Base text with relaxed line-height for comfortable reading on mobile.
+                </p>
+              </div>
+              <div>
+                <CodeSnippet code='<p className="text-mobile-lg">...' />
+                <p className="text-mobile-lg mt-2">
+                  Large text that scales from lg to xl across breakpoints.
+                </p>
+              </div>
+              <div>
+                <CodeSnippet code='<p className="text-mobile-xl">...' />
+                <p className="text-mobile-xl mt-2">
+                  Extra-large text that scales from xl to 2xl.
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        </DashboardLayout.Section>
+
+        {/* Visibility */}
+        <DashboardLayout.Section
+          title="Visibility Utilities"
+          description="Show/hide elements based on breakpoint"
+        >
+          <Card>
+            <CardContent className="pt-6 space-y-4">
+              <Alert variant="default" className="mobile-only">
+                <Smartphone className="h-4 w-4" />
+                <div>
+                  <p className="font-medium">Mobile Only (.mobile-only)</p>
+                  <p className="text-sm">This alert is only visible on mobile devices</p>
+                </div>
+              </Alert>
+
+              <Alert variant="default" className="mobile-hide">
+                <Monitor className="h-4 w-4" />
+                <div>
+                  <p className="font-medium">Desktop Only (.mobile-hide)</p>
+                  <p className="text-sm">This alert is only visible on desktop devices</p>
+                </div>
+              </Alert>
+
+              <div className="space-y-2">
+                <CodeSnippet code='<div className="mobile-only">Mobile only</div>' />
+                <CodeSnippet code='<div className="mobile-hide">Desktop only</div>' />
+              </div>
+            </CardContent>
+          </Card>
+        </DashboardLayout.Section>
+
+        {/* Forms */}
+        <DashboardLayout.Section
+          title="Mobile Forms"
+          description="Touch-friendly form inputs and layouts"
+        >
+          <Card>
+            <CardContent className="pt-6">
+              <form className="mobile-form-layout" onSubmit={(e) => e.preventDefault()}>
+                <div className="mobile-form-row">
+                  <FormField label="First Name" required className="flex-1">
+                    <Input placeholder="John" />
+                  </FormField>
+                  <FormField label="Last Name" required className="flex-1">
+                    <Input placeholder="Doe" />
+                  </FormField>
+                </div>
+
+                <FormField label="Email" required>
+                  <Input type="email" placeholder="john@example.com" />
+                </FormField>
+
+                <FormField label="Phone">
+                  <Input type="tel" placeholder="+1 (555) 123-4567" />
+                </FormField>
+
+                <div className="mobile-stack pt-2">
+                  <Button type="button" variant="outline" className="w-full sm:w-auto">
+                    Cancel
+                  </Button>
+                  <Button type="submit" className="w-full sm:w-auto">
+                    Submit Form
+                  </Button>
+                </div>
+              </form>
+
+              <div className="mt-6 space-y-2">
+                <CodeSnippet code='<form className="mobile-form-layout">...' />
+                <CodeSnippet code='<div className="mobile-form-row">...' />
+              </div>
+            </CardContent>
+          </Card>
+        </DashboardLayout.Section>
+
+        {/* Modal */}
+        <DashboardLayout.Section
+          title="Mobile Modal"
+          description="Full-screen on mobile, centered modal on desktop"
+        >
+          <Card>
+            <CardContent className="pt-6">
+              <Button onClick={() => setModalOpen(true)}>Open Modal</Button>
+              <p className="text-sm text-muted-foreground mt-3">
+                Modal adapts automatically: full-screen on mobile with slide-up animation,
+                centered overlay on desktop.
+              </p>
+            </CardContent>
+          </Card>
+        </DashboardLayout.Section>
+
+        {/* Safe Areas */}
+        <DashboardLayout.Section
+          title="Safe Area Support"
+          description="Respect iPhone notch and rounded corners"
+        >
+          <Card>
+            <CardContent className="pt-6 space-y-4">
+              <div className="space-y-2">
+                <p className="text-sm">Safe area utilities automatically adjust for device notches:</p>
+                <CodeSnippet code='<header className="safe-padding-top">...' />
+                <CodeSnippet code='<footer className="safe-padding-bottom">...' />
+                <CodeSnippet code='<div className="safe-padding-x">...' />
+                <CodeSnippet code='<div className="safe-padding-all">...' />
+              </div>
+
+              <Alert variant="default">
+                <Info className="h-4 w-4" />
+                <div>
+                  <p className="font-medium">Testing Safe Areas</p>
+                  <p className="text-sm">
+                    View this page on an iPhone X+ or use Chrome DevTools device emulation
+                    with "Show device frame" enabled to see safe area padding in action.
+                  </p>
+                </div>
+              </Alert>
+            </CardContent>
+          </Card>
+        </DashboardLayout.Section>
+
+        {/* Testing Checklist */}
+        <DashboardLayout.Section
+          title="Mobile Testing Checklist"
+          description="Ensure your mobile experience is production-ready"
+        >
+          <Card>
+            <CardContent className="pt-6">
+              <ul className="space-y-2.5">
+                <ChecklistItem text="Touch targets are at least 44×44px" />
+                <ChecklistItem text="Safe areas respected on notched devices" />
+                <ChecklistItem text="No horizontal scroll on mobile viewports" />
+                <ChecklistItem text="Text is readable without zooming (16px+ base)" />
+                <ChecklistItem text="Forms work with mobile keyboards" />
+                <ChecklistItem text="Navigation accessible with one thumb" />
+                <ChecklistItem text="Loading states are visible and clear" />
+                <ChecklistItem text="Error messages are visible and actionable" />
+                <ChecklistItem text="Images load efficiently (lazy loading)" />
+                <ChecklistItem text="Animations are performant (60fps)" />
+              </ul>
+            </CardContent>
+          </Card>
+        </DashboardLayout.Section>
+
       </DashboardLayout.Content>
 
-      {/* Form Modal - Full screen on mobile */}
-      <MobileModal
-        open={formModalOpen}
-        onClose={() => setFormModalOpen(false)}
-        title="Add New User"
-        description="Create a new user account"
-        size="lg"
+      {/* Demo Modal */}
+      <Modal
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        title="Responsive Modal"
+        description="This modal is full-screen on mobile, centered on desktop"
       >
-        <MobileModal.Content>
-          <MobileForm onSubmit={handleFormSubmit}>
-            <MobileForm.Section
-              title="Personal Information"
-              description="Basic user details"
-            >
-              <MobileForm.Group>
-                <MobileForm.Field label="First Name" required>
-                  <Input
-                    value={formData.firstName}
-                    onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
-                    placeholder="John"
-                  />
-                </MobileForm.Field>
-
-                <MobileForm.Field label="Last Name" required>
-                  <Input
-                    value={formData.lastName}
-                    onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
-                    placeholder="Doe"
-                  />
-                </MobileForm.Field>
-              </MobileForm.Group>
-
-              <MobileForm.Field
-                label="Email"
-                description="Primary email address"
-                required
-              >
-                <Input
-                  type="email"
-                  value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  placeholder="john@example.com"
-                />
-              </MobileForm.Field>
-
-              <MobileForm.Field label="Phone Number">
-                <Input
-                  type="tel"
-                  value={formData.phone}
-                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                  placeholder="+1 234 567 8900"
-                />
-              </MobileForm.Field>
-            </MobileForm.Section>
-          </MobileForm>
-        </MobileModal.Content>
-
-        <MobileModal.Actions>
-          <Button type="button" variant="outline" onClick={() => setFormModalOpen(false)}>
-            Cancel
-          </Button>
-          <Button type="submit" onClick={handleFormSubmit}>
-            Create User
-          </Button>
-        </MobileModal.Actions>
-      </MobileModal>
-
-      {/* Delete Confirmation Modal */}
-      <MobileModal
-        open={deleteModalOpen}
-        onClose={() => setDeleteModalOpen(false)}
-        title="Confirm Deletion"
-        description="This action cannot be undone"
-        size="sm"
-      >
-        <MobileModal.Content>
-          <p className="text-sm text-muted-foreground">
-            Are you sure you want to delete this user? All associated data will be permanently removed.
+        <div className="space-y-4">
+          <p className="text-sm">
+            On mobile devices, this modal takes up the full screen with a slide-up animation.
+            On desktop, it appears as a centered overlay with a backdrop.
           </p>
-        </MobileModal.Content>
 
-        <MobileModal.Actions>
-          <Button variant="outline" onClick={() => setDeleteModalOpen(false)}>
-            Cancel
-          </Button>
-          <Button
-            variant="destructive"
-            onClick={() => {
-              console.log('User deleted')
-              setDeleteModalOpen(false)
-            }}
-          >
-            Delete
-          </Button>
-        </MobileModal.Actions>
-      </MobileModal>
+          <div className="mobile-form-layout">
+            <FormField label="Example Input">
+              <Input placeholder="Type something..." />
+            </FormField>
+
+            <div className="mobile-stack">
+              <Button variant="outline" onClick={() => setModalOpen(false)} className="w-full sm:w-auto">
+                Cancel
+              </Button>
+              <Button onClick={() => setModalOpen(false)} className="w-full sm:w-auto">
+                Confirm
+              </Button>
+            </div>
+          </div>
+        </div>
+      </Modal>
     </DashboardLayout>
+  )
+}
+
+// Helper Components
+
+function BreakpointCard({ icon: Icon, name, range, classes, active }) {
+  return (
+    <div
+      className={`p-4 rounded-lg border-2 transition-all ${
+        active ? 'border-primary bg-primary/5' : 'border-border'
+      }`}
+    >
+      <Icon className={`h-6 w-6 mb-2 ${active ? 'text-primary' : 'text-muted-foreground'}`} />
+      <h3 className="font-semibold">{name}</h3>
+      <p className="text-sm text-muted-foreground mt-1">{range}</p>
+      <code className="text-xs bg-muted px-2 py-0.5 rounded mt-2 inline-block">{classes}</code>
+      {active && (
+        <Badge className="mt-2" variant="default">
+          <CheckCircle2 className="h-3 w-3 mr-1" />
+          Active
+        </Badge>
+      )}
+    </div>
+  )
+}
+
+function CodeSnippet({ code }) {
+  return (
+    <div className="flex items-center gap-2 text-xs bg-muted px-3 py-1.5 rounded-md font-mono">
+      <Code className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+      <code className="text-foreground">{code}</code>
+    </div>
+  )
+}
+
+function ChecklistItem({ text }) {
+  return (
+    <li className="flex items-start gap-2.5 text-sm">
+      <CheckCircle2 className="h-4 w-4 text-primary mt-0.5 shrink-0" />
+      <span>{text}</span>
+    </li>
   )
 }
