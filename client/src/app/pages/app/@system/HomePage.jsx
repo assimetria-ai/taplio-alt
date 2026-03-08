@@ -1,121 +1,260 @@
-// @system — main app dashboard page with sidebar layout
+// @system — main app dashboard page with modern UX components
 // @custom — add your dashboard widgets/sections in the main content area
-import { Link, useLocation } from 'react-router-dom'
-import { Home, Settings, Shield, CreditCard, Activity, Key, Menu } from 'lucide-react'
-import { Header } from '../../../components/@system/Header/Header'
-import { Sidebar, SidebarLogo, SidebarSection, SidebarItem } from '../../../components/@system/Sidebar/Sidebar'
-import { info } from '@/config/@system/info'
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../../../components/@system/Card/Card'
-import { EmptyState } from '../../../components/@system/EmptyState/EmptyState'
-import { Button } from '../../../components/@system/ui/button'
+import { Plus, Users, DollarSign, Activity as ActivityIcon, TrendingUp, FileText } from 'lucide-react'
 import { useAuthContext } from '../../../store/@system/auth'
 import { HomePageSkeleton } from '../../../components/@system/Skeleton/Skeleton'
-import { useMobileSidebar } from '../../../hooks/@system/useMobileSidebar'
+import { Button } from '../../../components/@system/ui/button'
+import {
+  DashboardLayout,
+  StatCard,
+  StatCardGrid,
+  RecentActivityList,
+  QuickActions,
+  DataTable,
+} from '../../../components/@system/Dashboard'
 
-const NAV_ITEMS = [
-  { icon: Home, label: 'Dashboard', to: '/app' },
-  { icon: Activity, label: 'Activity', to: '/app/activity' },
-  { icon: CreditCard, label: 'Billing', to: '/app/billing' },
-  { icon: Key, label: 'API Keys', to: '/app/api-keys' },
-  { icon: Settings, label: 'Settings', to: '/app/settings' },
+// @custom — Replace with real data from your API
+const MOCK_STATS = [
+  {
+    label: 'Total Users',
+    value: '2,543',
+    trend: { value: 12.5, direction: 'up' },
+    description: 'vs last month',
+    icon: Users,
+  },
+  {
+    label: 'Revenue',
+    value: '$45,234',
+    trend: { value: 8.2, direction: 'up' },
+    description: 'this month',
+    icon: DollarSign,
+  },
+  {
+    label: 'Active Sessions',
+    value: '156',
+    trend: { value: 3.1, direction: 'down' },
+    description: 'right now',
+    icon: ActivityIcon,
+  },
+  {
+    label: 'Conversion Rate',
+    value: '3.2%',
+    trend: { value: 0.4, direction: 'up' },
+    description: 'last 7 days',
+    icon: TrendingUp,
+  },
+]
+
+// @custom — Replace with real activity from your API
+const MOCK_ACTIVITY = [
+  {
+    id: 1,
+    icon: Users,
+    title: 'New user signed up',
+    description: 'john@example.com',
+    timestamp: new Date(Date.now() - 5 * 60 * 1000).toISOString(),
+    variant: 'success',
+  },
+  {
+    id: 2,
+    icon: DollarSign,
+    title: 'Payment received',
+    description: '$49.99 from Premium plan',
+    timestamp: new Date(Date.now() - 30 * 60 * 1000).toISOString(),
+    variant: 'success',
+  },
+  {
+    id: 3,
+    icon: FileText,
+    title: 'New document created',
+    description: 'Project proposal draft',
+    timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
+    variant: 'default',
+  },
+  {
+    id: 4,
+    icon: Users,
+    title: 'User upgraded plan',
+    description: 'Free → Premium',
+    timestamp: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString(),
+    variant: 'success',
+  },
+  {
+    id: 5,
+    icon: ActivityIcon,
+    title: 'API usage spike',
+    description: '1,234 requests in last hour',
+    timestamp: new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString(),
+    variant: 'warning',
+  },
+]
+
+// @custom — Replace with real actions relevant to your app
+const MOCK_QUICK_ACTIONS = [
+  {
+    id: 'create-user',
+    icon: Users,
+    label: 'Add User',
+    onClick: () => console.log('Add user'),
+  },
+  {
+    id: 'create-invoice',
+    icon: FileText,
+    label: 'New Invoice',
+    onClick: () => console.log('New invoice'),
+  },
+  {
+    id: 'view-reports',
+    icon: TrendingUp,
+    label: 'View Reports',
+    onClick: () => console.log('View reports'),
+  },
+  {
+    id: 'api-docs',
+    icon: FileText,
+    label: 'API Docs',
+    onClick: () => console.log('API docs'),
+  },
+]
+
+// @custom — Replace with real table data from your API
+const MOCK_TABLE_DATA = [
+  {
+    id: 1,
+    name: 'John Doe',
+    email: 'john@example.com',
+    status: 'active',
+    plan: 'Premium',
+    joined: '2024-01-15',
+  },
+  {
+    id: 2,
+    name: 'Jane Smith',
+    email: 'jane@example.com',
+    status: 'active',
+    plan: 'Free',
+    joined: '2024-02-20',
+  },
+  {
+    id: 3,
+    name: 'Bob Johnson',
+    email: 'bob@example.com',
+    status: 'inactive',
+    plan: 'Premium',
+    joined: '2024-01-08',
+  },
+  {
+    id: 4,
+    name: 'Alice Williams',
+    email: 'alice@example.com',
+    status: 'active',
+    plan: 'Business',
+    joined: '2024-03-01',
+  },
+  {
+    id: 5,
+    name: 'Charlie Brown',
+    email: 'charlie@example.com',
+    status: 'active',
+    plan: 'Free',
+    joined: '2024-02-14',
+  },
+]
+
+const TABLE_COLUMNS = [
+  { key: 'name', label: 'Name', sortable: true },
+  { key: 'email', label: 'Email', sortable: true },
+  {
+    key: 'status',
+    label: 'Status',
+    sortable: true,
+    render: (value) => (
+      <span
+        className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${
+          value === 'active'
+            ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+            : 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-400'
+        }`}
+      >
+        {value}
+      </span>
+    ),
+  },
+  { key: 'plan', label: 'Plan', sortable: true },
+  { key: 'joined', label: 'Joined', sortable: true },
 ]
 
 export function HomePage() {
   const { user, loading } = useAuthContext()
-  const location = useLocation()
-  const { mobileOpen, toggleMobile, closeMobile } = useMobileSidebar()
+
+  if (loading) {
+    return <HomePageSkeleton />
+  }
 
   return (
-    <div className="flex h-screen flex-col bg-background">
-      <Header />
+    <DashboardLayout>
+      <DashboardLayout.Content>
+        {/* Page header */}
+        <DashboardLayout.Header
+          title={`Welcome back${user?.name ? `, ${user.name.split(' ')[0]}` : ''}`}
+          description="Here's what's happening with your account today."
+          actions={
+            <>
+              <Button variant="outline" size="sm">
+                <FileText className="h-4 w-4 mr-2" />
+                Export
+              </Button>
+              <Button size="sm">
+                <Plus className="h-4 w-4 mr-2" />
+                New Item
+              </Button>
+            </>
+          }
+        />
 
-      <div className="flex flex-1 overflow-hidden">
-        {/* Mobile menu button */}
-        <button
-          onClick={toggleMobile}
-          className="lg:hidden fixed bottom-6 right-6 z-30 flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg hover:shadow-xl transition-all focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
-          aria-label="Toggle menu"
+        {/* Stats grid */}
+        <StatCardGrid>
+          {MOCK_STATS.map((stat) => (
+            <StatCard key={stat.label} {...stat} />
+          ))}
+        </StatCardGrid>
+
+        {/* Two-column layout for Quick Actions and Recent Activity */}
+        <div className="grid gap-6 lg:grid-cols-2 mb-8">
+          <DashboardLayout.Section
+            title="Quick Actions"
+            description="Frequently used features"
+          >
+            <QuickActions actions={MOCK_QUICK_ACTIONS} />
+          </DashboardLayout.Section>
+
+          <DashboardLayout.Section
+            title="Recent Activity"
+            description="Latest updates and events"
+          >
+            <RecentActivityList items={MOCK_ACTIVITY} limit={5} />
+          </DashboardLayout.Section>
+        </div>
+
+        {/* Recent users table */}
+        <DashboardLayout.Section
+          title="Recent Users"
+          description="Newest account registrations"
+          actions={
+            <Button variant="outline" size="sm">
+              View All
+            </Button>
+          }
         >
-          <Menu className="h-6 w-6" />
-        </button>
-
-        {/* ── Sidebar ── */}
-        <Sidebar mobileOpen={mobileOpen} onMobileClose={closeMobile}>
-          <SidebarLogo name={info.name} />
-          <SidebarSection>
-            {NAV_ITEMS.map(({ icon: Icon, label, to }) => (
-              <Link to={to} key={to} onClick={closeMobile}>
-                <SidebarItem
-                  icon={<Icon className="h-4 w-4" />}
-                  label={label}
-                  active={location.pathname === to}
-                />
-              </Link>
-            ))}
-            {user?.role === 'admin' && (
-              <Link to="/app/admin" onClick={closeMobile}>
-                <SidebarItem
-                  icon={<Shield className="h-4 w-4" />}
-                  label="Admin"
-                  active={location.pathname === '/app/admin'}
-                />
-              </Link>
-            )}
-          </SidebarSection>
-        </Sidebar>
-
-        {/* ── Main content ── */}
-        {loading ? (
-          <HomePageSkeleton />
-        ) : (
-          <main className="flex-1 overflow-auto p-4 sm:p-6 lg:p-8">
-            {/* Page header */}
-            <div className="mb-6 sm:mb-8">
-              <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold">
-                Welcome back{user?.name ? `, ${user.name.split(' ')[0]}` : ''}
-              </h1>
-              <p className="mt-1 text-sm sm:text-base text-muted-foreground">
-                Here's what's happening with your account.
-              </p>
-            </div>
-
-            {/* ── Stats row — @custom: replace with real metrics ── */}
-            <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 mb-6 sm:mb-8">
-              {[
-                { label: 'Total Users', value: '—', hint: 'all time' },
-                { label: 'Active Subscriptions', value: '—', hint: 'this month' },
-                { label: 'Revenue', value: '—', hint: 'this month' },
-                { label: 'Requests', value: '—', hint: 'today' },
-              ].map(({ label, value, hint }) => (
-                <Card key={label}>
-                  <CardHeader className="pb-2">
-                    <CardDescription className="text-xs sm:text-sm">{label}</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-xl sm:text-2xl font-bold">{value}</p>
-                    <p className="text-xs text-muted-foreground mt-1">{hint}</p>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-
-            {/* ── Recent activity — @custom: replace EmptyState with real data ── */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg sm:text-xl">Recent Activity</CardTitle>
-                <CardDescription>Your latest actions and events</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <EmptyState
-                  icon={Activity}
-                  title="No activity yet"
-                  description="Events will appear here once you start using the app."
-                />
-              </CardContent>
-            </Card>
-          </main>
-        )}
-      </div>
-    </div>
+          <DataTable
+            columns={TABLE_COLUMNS}
+            data={MOCK_TABLE_DATA}
+            searchable
+            paginated
+            onRowClick={(row) => console.log('Clicked row:', row)}
+          />
+        </DashboardLayout.Section>
+      </DashboardLayout.Content>
+    </DashboardLayout>
   )
 }

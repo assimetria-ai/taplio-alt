@@ -29,18 +29,27 @@ const SETTINGS_TABS = [
  * @param {string} [props.className] - Additional CSS classes
  * @param {Object} [props.user] - User data object
  * @param {Function} [props.onUpdate] - Callback when settings update
+ * @param {Function} [props.onTabChange] - Callback when tab changes
  */
 export function UserSettings({
   defaultTab = 'profile',
   className,
   user,
   onUpdate,
+  onTabChange,
 }) {
   const [activeTab, setActiveTab] = useState(defaultTab)
 
+  function handleTabChange(tab) {
+    setActiveTab(tab)
+    if (onTabChange) {
+      onTabChange(tab)
+    }
+  }
+
   return (
     <div className={cn('w-full', className)}>
-      <Tabs value={activeTab} onValueChange={setActiveTab}>
+      <Tabs value={activeTab} onValueChange={handleTabChange}>
         {/* Tabs navigation */}
         <TabsList className="mb-6 border-b pb-0">
           {SETTINGS_TABS.map(({ id, label, icon: Icon }) => (
