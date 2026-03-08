@@ -94,6 +94,14 @@ const MobileResponsiveDemo = lazy(() =>
   import('../../pages/app/@system/MobileResponsiveDemo').then((m) => ({ default: m.MobileResponsiveDemo }))
 )
 
+// Teams pages
+const TeamsPage = lazy(() =>
+  import('../../pages/app/TeamsPage').then((m) => ({ default: m.TeamsPage }))
+)
+const TeamDetailPage = lazy(() =>
+  import('../../pages/app/TeamDetailPage').then((m) => ({ default: m.TeamDetailPage }))
+)
+
 function PageFallback() {
   return (
     <div className="flex h-screen items-center justify-center">
