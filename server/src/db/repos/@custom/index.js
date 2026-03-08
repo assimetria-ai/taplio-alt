@@ -14,6 +14,8 @@ const BlogPostRepo = require('./BlogPostRepo')
 const UserRepo = require('./UserRepo')
 const TeamRepo = require('./TeamRepo')
 const PermissionRepo = require('./PermissionRepo')
+const EmailLogRepo = require('./EmailLogRepo')
+const FileUploadRepo = require('./FileUploadRepo')
 
 module.exports = { 
   ApiKeyRepo, 
@@ -23,5 +25,7 @@ module.exports = {
   CollaboratorRepo, 
   UserRepo,
   TeamRepo,
-  PermissionRepo
+  PermissionRepo,
+  EmailLogRepo,
+  FileUploadRepo
 }
