@@ -1,8 +1,8 @@
-// @system — main app dashboard page with modern UX components
+// @system — main app dashboard page with modern UX components + REAL COST TRACKING
 // @custom — add your dashboard widgets/sections in the main content area
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Plus, Users, DollarSign, Activity as ActivityIcon, TrendingUp, FileText } from 'lucide-react'
+import { Plus, Users, DollarSign, Activity as ActivityIcon, TrendingUp, FileText, AlertCircle } from 'lucide-react'
 import { useAuthContext } from '../../../store/@system/auth'
 import { HomePageSkeleton } from '../../../components/@system/Skeleton/Skeleton'
 import { Button } from '../../../components/@system/ui/button'
@@ -18,38 +18,7 @@ import {
 import { CommandPalette } from '../../../components/@system/CommandPalette/CommandPalette'
 import { GuidedTour } from '../../../components/@system/Onboarding/GuidedTour'
 import { AnnouncementBanner } from '../../../components/@system/AnnouncementBanner/AnnouncementBanner'
-
-// @custom — Replace with real data from your API
-const MOCK_STATS = [
-  {
-    label: 'Total Users',
-    value: '2,543',
-    trend: { value: 12.5, direction: 'up' },
-    description: 'vs last month',
-    icon: Users,
-  },
-  {
-    label: 'Revenue',
-    value: '$45,234',
-    trend: { value: 8.2, direction: 'up' },
-    description: 'this month',
-    icon: DollarSign,
-  },
-  {
-    label: 'Active Sessions',
-    value: '156',
-    trend: { value: 3.1, direction: 'down' },
-    description: 'right now',
-    icon: ActivityIcon,
-  },
-  {
-    label: 'Conversion Rate',
-    value: '3.2%',
-    trend: { value: 0.4, direction: 'up' },
-    description: 'last 7 days',
-    icon: TrendingUp,
-  },
-]
+import { getUsageDashboard } from '../../../api/@system/usage'
 
 // @custom — Replace with real activity from your API
 const MOCK_ACTIVITY = [
@@ -246,6 +215,75 @@ export function HomePage() {
   const { user, loading } = useAuthContext()
   const navigate = useNavigate()
   const [tourActive, setTourActive] = useState(false)
+  const [usageData, setUsageData] = useState(null)
+  const [usageLoading, setUsageLoading] = useState(true)
+  const [usageError, setUsageError] = useState(null)
+
+  // Fetch real cost data
+  useEffect(() => {
+    async function loadUsageData() {
+      try {
+        setUsageLoading(true)
+        const data = await getUsageDashboard()
+        setUsageData(data)
+        setUsageError(null)
+      } catch (err) {
+        console.error('Failed to load usage data:', err)
+        setUsageError(err.message)
+      } finally {
+        setUsageLoading(false)
+      }
+    }
+
+    if (user && !loading) {
+      loadUsageData()
+    }
+  }, [user, loading])
+
+  // Build stats from real cost data
+  const stats = usageData
+    ? [
+        {
+          label: 'Today\'s Cost',
+          value: `$${usageData.today.cost.toFixed(2)}`,
+          trend: usageData.yesterday.change,
+          description: 'vs yesterday',
+          icon: DollarSign,
+        },
+        {
+          label: 'This Month',
+          value: `$${usageData.thisMonth.cost.toFixed(2)}`,
+          trend: usageData.lastMonth.change,
+          description: usageData.limits?.monthly
+            ? `${usageData.thisMonth.percentUsed}% of $${usageData.limits.monthly} limit`
+            : 'this month',
+          icon: TrendingUp,
+        },
+        ...(usageData.topServices.slice(0, 2).map(service => ({
+          label: service.service.charAt(0).toUpperCase() + service.service.slice(1),
+          value: `$${service.cost.toFixed(2)}`,
+          trend: null,
+          description: `${service.requests} requests`,
+          icon: ActivityIcon,
+        }))),
+      ]
+    : [
+        // Fallback mock stats while loading
+        {
+          label: 'Total Users',
+          value: '—',
+          trend: null,
+          description: 'Loading...',
+          icon: Users,
+        },
+        {
+          label: 'Revenue',
+          value: '—',
+          trend: null,
+          description: 'Loading...',
+          icon: DollarSign,
+        },
+      ]
 
   // @custom — Replace with real completion logic from your API
   const tasks = ONBOARDING_TASKS.map((task) => ({
@@ -269,9 +307,9 @@ export function HomePage() {
       {/* Announcement banner — @custom: change message/variant as needed */}
       <AnnouncementBanner
         id="welcome-v1"
-        message="🎉 Welcome to the new dashboard! Check out our latest features."
+        message="🎉 Real-time cost tracking is now live! Monitor your usage across all services."
         variant="gradient"
-        action={{ label: 'Learn more', href: '/help' }}
+        action={{ label: 'Learn more', href: '/app/billing' }}
       />
 
       {/* Command palette — available globally via ⌘K */}
@@ -299,6 +337,25 @@ export function HomePage() {
           </div>
         )}
 
+        {/* Cost limit warning */}
+        {usageData?.limits?.monthly && usageData.thisMonth.percentUsed > 80 && (
+          <div className="mb-6 rounded-lg border border-orange-200 bg-orange-50 p-4 dark:border-orange-900/50 dark:bg-orange-900/20">
+            <div className="flex items-start">
+              <AlertCircle className="h-5 w-5 text-orange-600 dark:text-orange-500 mr-3 mt-0.5" />
+              <div>
+                <h3 className="text-sm font-medium text-orange-800 dark:text-orange-200">
+                  Approaching monthly cost limit
+                </h3>
+                <p className="mt-1 text-sm text-orange-700 dark:text-orange-300">
+                  You've used {usageData.thisMonth.percentUsed}% of your ${usageData.limits.monthly} monthly limit.
+                  {' '}
+                  <a href="/app/billing" className="font-medium underline">Adjust limits</a>
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Page header */}
         <DashboardLayout.Header
           title={`Welcome back${user?.name ? `, ${user.name.split(' ')[0]}` : ''}`}
@@ -313,9 +370,9 @@ export function HomePage() {
               >
                 Take a tour
               </Button>
-              <Button variant="outline" size="sm">
-                <FileText className="h-4 w-4 mr-2" />
-                Export
+              <Button variant="outline" size="sm" onClick={() => navigate('/app/billing')}>
+                <DollarSign className="h-4 w-4 mr-2" />
+                View Usage
               </Button>
               <Button size="sm">
                 <Plus className="h-4 w-4 mr-2" />
@@ -325,53 +382,71 @@ export function HomePage() {
           }
         />
 
-        {/* Stats grid */}
+        {/* Stats grid with REAL cost data */}
         <StatCardGrid data-tour="stats">
-          {MOCK_STATS.map((stat) => (
-            <StatCard key={stat.label} {...stat} />
-          ))}
+          {usageLoading ? (
+            <div className="col-span-4 text-center text-muted-foreground py-8">
+              Loading cost data...
+            </div>
+          ) : usageError ? (
+            <div className="col-span-4 text-center text-muted-foreground py-8">
+              {usageError}
+            </div>
+          ) : (
+            stats.map((stat) => <StatCard key={stat.label} {...stat} />)
+          )}
         </StatCardGrid>
 
-        {/* Two-column layout for Quick Actions and Recent Activity */}
-        <div className="grid gap-6 lg:grid-cols-2 mb-8">
-          <DashboardLayout.Section
-            title="Quick Actions"
-            description="Frequently used features"
-            className="[&]:mb-0"
-            data-tour="quick-actions"
-          >
-            <QuickActions actions={MOCK_QUICK_ACTIONS} />
-          </DashboardLayout.Section>
+        {/* Cost trends chart */}
+        {usageData?.trends && (
+          <div className="mt-6">
+            <div className="rounded-lg border bg-card p-6">
+              <h3 className="text-lg font-semibold mb-4">7-Day Cost Trend</h3>
+              <div className="h-64 flex items-end justify-between gap-2">
+                {usageData.trends.map((day, i) => {
+                  const maxCost = Math.max(...usageData.trends.map(d => d.cost), 1)
+                  const height = (day.cost / maxCost) * 100
+                  return (
+                    <div key={i} className="flex-1 flex flex-col items-center">
+                      <div className="w-full bg-primary/10 rounded-t relative" style={{ height: `${height}%` }}>
+                        <div className="absolute inset-0 bg-primary rounded-t hover:bg-primary/80 transition-colors" />
+                      </div>
+                      <span className="text-xs text-muted-foreground mt-2">
+                        {new Date(day.date).toLocaleDateString('en-US', { weekday: 'short' })}
+                      </span>
+                      <span className="text-xs font-medium">${day.cost.toFixed(2)}</span>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+          </div>
+        )}
 
-          <DashboardLayout.Section
-            title="Recent Activity"
-            description="Latest updates and events"
-            className="[&]:mb-0"
-            data-tour="activity"
-          >
-            <RecentActivityList items={MOCK_ACTIVITY} limit={5} />
-          </DashboardLayout.Section>
+        <div className="mt-6 grid gap-6 lg:grid-cols-2">
+          {/* Recent activity */}
+          <div data-tour="activity">
+            <RecentActivityList items={MOCK_ACTIVITY} />
+          </div>
+
+          {/* Quick actions */}
+          <div data-tour="quick-actions">
+            <QuickActions actions={MOCK_QUICK_ACTIONS} />
+          </div>
         </div>
 
-        {/* Recent users table */}
-        <DashboardLayout.Section
-          data-tour="data-table"
-          title="Recent Users"
-          description="Newest account registrations"
-          actions={
-            <Button variant="outline" size="sm">
-              View All
-            </Button>
-          }
-        >
+        {/* Data table */}
+        <div className="mt-6" data-tour="data-table">
           <DataTable
-            columns={TABLE_COLUMNS}
+            title="Recent Users"
+            description="Overview of user activity"
             data={MOCK_TABLE_DATA}
-            searchable
-            paginated
-            onRowClick={(row) => console.log('Clicked row:', row)}
+            columns={TABLE_COLUMNS}
+            onRowClick={(row) => console.log('Row clicked:', row)}
+            searchPlaceholder="Search users..."
+            emptyMessage="No users found."
           />
-        </DashboardLayout.Section>
+        </div>
       </DashboardLayout.Content>
     </DashboardLayout>
   )
