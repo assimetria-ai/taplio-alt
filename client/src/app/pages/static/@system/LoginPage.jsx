@@ -8,6 +8,7 @@ import { Button } from '@/app/components/@system/ui/button'
 import { FormField, Input } from '@/app/components/@system/Form/Form'
 import { api } from '@/app/lib/@system/api'
 import { useAuthContext } from '@/app/store/@system/auth'
+import { OAuthButtons } from '@/app/components/@system/OAuthButtons/OAuthButtons'
 
 const loginSchema = z.object({
   email: z.string().email('Enter a valid email address'),
@@ -75,6 +76,15 @@ export function LoginPage() {
             />
           </FormField>
 
+          <div className="flex justify-end">
+            <Link
+              to="/forgot-password"
+              className="text-xs text-muted-foreground underline underline-offset-4 hover:text-foreground"
+            >
+              Forgot password?
+            </Link>
+          </div>
+
           {serverError && (
             <p className="text-sm text-destructive">{serverError}</p>
           )}
@@ -84,6 +94,9 @@ export function LoginPage() {
             {isSubmitting ? 'Signing in…' : 'Sign in'}
           </Button>
         </form>
+
+        {/* OAuth Buttons */}
+        <OAuthButtons className="mt-4" />
 
         <p className="mt-6 text-center text-sm text-muted-foreground">
           No account{' '}
