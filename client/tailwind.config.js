@@ -35,6 +35,10 @@ export default {
         // lg: 1024px (Tailwind default)
         // xl: 1280px (Tailwind default)
         // 2xl: 1536px (Tailwind default)
+        // Landscape mobile detection
+        'landscape': { 'raw': '(orientation: landscape)' },
+        // High-res mobile (retina)
+        'retina': { 'raw': '(-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi)' },
       },
       // Mobile-optimized spacing scale
       spacing: {
@@ -43,12 +47,32 @@ export default {
         'safe-left': 'env(safe-area-inset-left)',
         'safe-right': 'env(safe-area-inset-right)',
       },
-      // Touch-friendly minimum sizes
+      // Touch-friendly minimum sizes (WCAG 2.5.5 - 44x44px)
       minHeight: {
         'touch': '44px',
+        'touch-sm': '36px',
+        'touch-lg': '48px',
       },
       minWidth: {
         'touch': '44px',
+        'touch-sm': '36px',
+        'touch-lg': '48px',
+      },
+      // Responsive font sizes (fluid typography)
+      fontSize: {
+        'xs-fluid': ['clamp(0.75rem, 0.7rem + 0.25vw, 0.875rem)', { lineHeight: '1.5' }],
+        'sm-fluid': ['clamp(0.875rem, 0.8rem + 0.375vw, 1rem)', { lineHeight: '1.5' }],
+        'base-fluid': ['clamp(1rem, 0.9rem + 0.5vw, 1.125rem)', { lineHeight: '1.6' }],
+        'lg-fluid': ['clamp(1.125rem, 1rem + 0.625vw, 1.25rem)', { lineHeight: '1.6' }],
+        'xl-fluid': ['clamp(1.25rem, 1.1rem + 0.75vw, 1.5rem)', { lineHeight: '1.4' }],
+        '2xl-fluid': ['clamp(1.5rem, 1.3rem + 1vw, 1.875rem)', { lineHeight: '1.3' }],
+        '3xl-fluid': ['clamp(1.875rem, 1.5rem + 1.875vw, 2.25rem)', { lineHeight: '1.2' }],
+        '4xl-fluid': ['clamp(2.25rem, 1.8rem + 2.25vw, 3rem)', { lineHeight: '1.1' }],
+      },
+      // Mobile-optimized max widths
+      maxWidth: {
+        'mobile': '100vw',
+        'mobile-safe': 'calc(100vw - 2rem)',
       },
       colors: {
         border: 'hsl(var(--border))',

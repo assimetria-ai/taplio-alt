@@ -269,4 +269,178 @@ html {
     @apply w-full h-auto;
     content-visibility: auto;
   }
+  
+  /* ========================================
+     ADVANCED MOBILE OPTIMIZATIONS
+     ======================================== */
+  
+  /* Fluid typography using clamp() */
+  .text-fluid-xs { @apply text-xs-fluid; }
+  .text-fluid-sm { @apply text-sm-fluid; }
+  .text-fluid-base { @apply text-base-fluid; }
+  .text-fluid-lg { @apply text-lg-fluid; }
+  .text-fluid-xl { @apply text-xl-fluid; }
+  .text-fluid-2xl { @apply text-2xl-fluid; }
+  .text-fluid-3xl { @apply text-3xl-fluid; }
+  .text-fluid-4xl { @apply text-4xl-fluid; }
+  
+  /* Responsive grid with auto-fit */
+  .grid-auto-fit-mobile {
+    @apply grid gap-4;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  }
+  
+  .grid-auto-fit-cards {
+    @apply grid gap-4 sm:gap-6;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
+  }
+  
+  /* Mobile-first container queries support */
+  .container-mobile {
+    container-type: inline-size;
+    container-name: mobile-container;
+  }
+  
+  /* Better tap/click feedback */
+  .tap-highlight {
+    @apply active:scale-[0.98] active:opacity-90 transition-all duration-100;
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Prevent zoom on input focus (iOS) */
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="search"],
+  input[type="tel"],
+  input[type="url"],
+  select,
+  textarea {
+    font-size: 16px; /* Prevents iOS zoom */
+  }
+  
+  /* Mobile-optimized button spacing */
+  .mobile-button-group {
+    @apply flex flex-col gap-3 sm:flex-row sm:gap-4 w-full sm:w-auto;
+  }
+  
+  .mobile-button-group > * {
+    @apply w-full sm:w-auto min-w-touch;
+  }
+  
+  /* Responsive card grid patterns */
+  .mobile-card-grid-2 {
+    @apply grid grid-cols-1 gap-4 xs:grid-cols-2 sm:gap-6;
+  }
+  
+  .mobile-card-grid-3 {
+    @apply grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 sm:gap-6;
+  }
+  
+  .mobile-card-grid-4 {
+    @apply grid grid-cols-1 gap-4 xs:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 sm:gap-6;
+  }
+  
+  /* Mobile navigation improvements */
+  .mobile-nav-stack {
+    @apply flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4;
+  }
+  
+  /* Bottom sheet / drawer support */
+  .mobile-bottom-sheet {
+    @apply fixed inset-x-0 bottom-0 z-50 rounded-t-2xl border-t bg-background shadow-2xl;
+    @apply max-h-[90vh] overflow-y-auto;
+    transform: translateY(100%);
+    transition: transform 0.3s ease-in-out;
+  }
+  
+  .mobile-bottom-sheet[data-open="true"] {
+    transform: translateY(0);
+  }
+  
+  /* Improved horizontal scroll indicators */
+  .mobile-scroll-hint {
+    @apply relative;
+  }
+  
+  .mobile-scroll-hint::after {
+    content: '';
+    @apply absolute right-0 top-0 bottom-0 w-12;
+    background: linear-gradient(to left, hsl(var(--background)), transparent);
+    pointer-events: none;
+  }
+  
+  /* Mobile-optimized modal positioning */
+  .mobile-modal {
+    @apply fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4;
+  }
+  
+  .mobile-modal-content {
+    @apply w-full max-w-full sm:max-w-lg rounded-none sm:rounded-lg;
+  }
+  
+  /* Better focus states for mobile */
+  .mobile-focus-ring {
+    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2;
+  }
+  
+  /* Prevent text selection on interactive mobile elements */
+  button,
+  .mobile-interactive {
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+  }
+  
+  /* Responsive padding for sections */
+  .section-padding-mobile {
+    @apply px-4 py-8 sm:px-6 sm:py-12 md:px-8 lg:py-16;
+  }
+  
+  /* Mobile-friendly list spacing */
+  .mobile-list-spacing {
+    @apply space-y-3 sm:space-y-4;
+  }
+  
+  /* Responsive flexbox utilities */
+  .mobile-flex-center {
+    @apply flex flex-col items-center justify-center gap-4 sm:flex-row sm:gap-6;
+  }
+  
+  /* Better landscape mobile support */
+  @media (orientation: landscape) and (max-height: 500px) {
+    .landscape-compact {
+      @apply py-2;
+    }
+    
+    .landscape-hide {
+      @apply hidden;
+    }
+  }
+  
+  /* Print styles for mobile */
+  @media print {
+    .mobile-hide-print {
+      display: none !important;
+    }
+    
+    .mobile-show-print {
+      display: block !important;
+    }
+  }
+  
+  /* Reduce motion for accessibility */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
 }
