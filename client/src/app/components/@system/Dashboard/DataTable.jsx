@@ -136,7 +136,7 @@ export function DataTable({
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className={cn(
-              'w-full pl-9 pr-4 py-2 rounded-lg border border-input bg-background',
+              'w-full pl-9 pr-4 py-2 sm:py-2.5 rounded-lg border border-input bg-background text-sm sm:text-base',
               'placeholder:text-muted-foreground',
               'focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2'
             )}
@@ -153,73 +153,79 @@ export function DataTable({
           />
         )
       ) : (
+        // Horizontal scroll wrapper for mobile
         <div className="rounded-lg border overflow-hidden">
-          <Table>
-            <Table.Header>
-              <Table.Row>
-                {columns.map((column) => (
-                  <Table.Head
-                    key={column.key}
-                    className={cn(
-                      column.sortable && 'cursor-pointer select-none hover:bg-accent',
-                      column.className
-                    )}
-                    style={{ width: column.width }}
-                    onClick={() => column.sortable && handleSort(column.key)}
-                  >
-                    <div className="flex items-center gap-2">
-                      {column.label}
-                      {column.sortable && (
-                        <span className="flex flex-col">
-                          <ChevronUp
-                            className={cn(
-                              'h-3 w-3 -mb-1',
-                              sortKey === column.key && sortDirection === 'asc'
-                                ? 'text-primary'
-                                : 'text-muted-foreground/30'
-                            )}
-                          />
-                          <ChevronDown
-                            className={cn(
-                              'h-3 w-3',
-                              sortKey === column.key && sortDirection === 'desc'
-                                ? 'text-primary'
-                                : 'text-muted-foreground/30'
-                            )}
-                          />
-                        </span>
-                      )}
-                    </div>
-                  </Table.Head>
-                ))}
-              </Table.Row>
-            </Table.Header>
-            <Table.Body>
-              {displayData.map((row) => (
-                <Table.Row
-                  key={row[keyField]}
-                  className={onRowClick && 'cursor-pointer hover:bg-accent'}
-                  onClick={() => onRowClick?.(row)}
-                >
-                  {columns.map((column) => (
-                    <Table.Cell key={column.key} className={column.className}>
-                      {column.render
-                        ? column.render(row[column.key], row)
-                        : row[column.key]}
-                    </Table.Cell>
+          <div className="overflow-x-auto">
+            <div className="min-w-[600px]">
+              <Table>
+                <Table.Header>
+                  <Table.Row>
+                    {columns.map((column) => (
+                      <Table.Head
+                        key={column.key}
+                        className={cn(
+                          column.sortable && 'cursor-pointer select-none hover:bg-accent',
+                          column.className
+                        )}
+                        style={{ width: column.width }}
+                        onClick={() => column.sortable && handleSort(column.key)}
+                      >
+                        <div className="flex items-center gap-2">
+                          {column.label}
+                          {column.sortable && (
+                            <span className="flex flex-col">
+                              <ChevronUp
+                                className={cn(
+                                  'h-3 w-3 -mb-1',
+                                  sortKey === column.key && sortDirection === 'asc'
+                                    ? 'text-primary'
+                                    : 'text-muted-foreground/30'
+                                )}
+                              />
+                              <ChevronDown
+                                className={cn(
+                                  'h-3 w-3',
+                                  sortKey === column.key && sortDirection === 'desc'
+                                    ? 'text-primary'
+                                    : 'text-muted-foreground/30'
+                                )}
+                              />
+                            </span>
+                          )}
+                        </div>
+                      </Table.Head>
+                    ))}
+                  </Table.Row>
+                </Table.Header>
+                <Table.Body>
+                  {displayData.map((row) => (
+                    <Table.Row
+                      key={row[keyField]}
+                      className={onRowClick && 'cursor-pointer hover:bg-accent active:bg-accent'}
+                      onClick={() => onRowClick?.(row)}
+                    >
+                      {columns.map((column) => (
+                        <Table.Cell key={column.key} className={column.className}>
+                          {column.render
+                            ? column.render(row[column.key], row)
+                            : row[column.key]}
+                        </Table.Cell>
+                      ))}
+                    </Table.Row>
                   ))}
-                </Table.Row>
-              ))}
-            </Table.Body>
-          </Table>
+                </Table.Body>
+              </Table>
+            </div>
+          </div>
         </div>
       )}
 
       {/* Pagination */}
       {paginated && displayData.length > 0 && (
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="text-sm text-muted-foreground">Rows per page:</span>
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          {/* Rows per page selector */}
+          <div className="flex items-center gap-2 text-sm">
+            <span className="text-muted-foreground whitespace-nowrap">Rows per page:</span>
             <Select
               value={String(pageSize)}
               onValueChange={(value) => {
@@ -235,8 +241,9 @@ export function DataTable({
             />
           </div>
 
-          <div className="flex items-center gap-2">
-            <span className="text-sm text-muted-foreground">
+          {/* Page navigation */}
+          <div className="flex items-center justify-between sm:justify-end gap-3">
+            <span className="text-sm text-muted-foreground whitespace-nowrap">
               {(currentPage - 1) * pageSize + 1}-
               {Math.min(currentPage * pageSize, processedData.length)} of{' '}
               {processedData.length}
@@ -247,6 +254,7 @@ export function DataTable({
                 size="sm"
                 onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                 disabled={currentPage === 1}
+                className="min-w-[40px]"
               >
                 <ChevronLeft className="h-4 w-4" />
               </Button>
@@ -255,6 +263,7 @@ export function DataTable({
                 size="sm"
                 onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
                 disabled={currentPage === totalPages}
+                className="min-w-[40px]"
               >
                 <ChevronRight className="h-4 w-4" />
               </Button>

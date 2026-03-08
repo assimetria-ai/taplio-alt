@@ -8,6 +8,7 @@ import { Button } from '../../../components/@system/ui/button'
 import { FormField, Input } from '../../../components/@system/Form/Form'
 import { api } from '../../../lib/@system/api'
 import { useAuthContext } from '../../../store/@system/auth'
+import { OAuthButtons } from '../../../components/@system/OAuthButtons/OAuthButtons'
 
 // @custom — to add password strength indicator, create @custom/RegisterPage.jsx that wraps or extends this
 
@@ -176,6 +177,9 @@ export function RegisterPage() {
             {isSubmitting ? 'Creating account…' : 'Create account'}
           </Button>
         </form>
+
+        {/* OAuth Buttons */}
+        <OAuthButtons className="mt-4" />
 
         {/* Login link */}
         <p className="mt-6 text-center text-sm text-muted-foreground">
