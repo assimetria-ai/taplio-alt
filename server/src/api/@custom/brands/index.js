@@ -123,7 +123,7 @@ router.post('/brands/:id/logo', authenticate, validate({ params: BrandIdParams, 
 
 // ─── DELETE /api/brands/:id/logo ────────────────────────────────────────────
 // Remove the brand logo
-router.delete('/brands/:id/logo', authenticate, async (req, res, next) => {
+router.delete('/brands/:id/logo', authenticate, validate({ params: BrandIdParams }), async (req, res, next) => {
   try {
     const brand = await BrandRepo.findById(req.params.id)
     if (!brand) return res.status(404).json({ message: 'Brand not found' })
@@ -144,7 +144,7 @@ router.delete('/brands/:id/logo', authenticate, async (req, res, next) => {
 })
 
 // ─── DELETE /api/brands/:id — soft delete ────────────────────────────────────
-router.delete('/brands/:id', authenticate, async (req, res, next) => {
+router.delete('/brands/:id', authenticate, validate({ params: BrandIdParams }), async (req, res, next) => {
   try {
     const brand = await BrandRepo.findById(req.params.id)
     if (!brand) return res.status(404).json({ message: 'Brand not found' })
@@ -174,7 +174,7 @@ router.get('/brands/deleted', authenticate, validate({ query: PaginationQuery })
 })
 
 // ─── POST /api/brands/:id/restore — restore soft-deleted brand ───────────────
-router.post('/brands/:id/restore', authenticate, async (req, res, next) => {
+router.post('/brands/:id/restore', authenticate, validate({ params: BrandIdParams }), async (req, res, next) => {
   try {
     const brand = await BrandRepo.findByIdIncludingDeleted(req.params.id)
     if (!brand) return res.status(404).json({ message: 'Brand not found' })
