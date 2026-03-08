@@ -1,44 +1,193 @@
-// @system — dialog/modal built on Radix UI
-import * as Dialog from '@radix-ui/react-dialog'
+// @system — Modal/Dialog component
+// Accessible modal with backdrop, animations, and responsive design
+//
+// Usage:
+// <Modal open={isOpen} onClose={() => setOpen(false)} title="Title">
+//   <p>Content</p>
+// </Modal>
+
+import { useEffect } from 'react'
 import { X } from 'lucide-react'
 import { cn } from '@/app/lib/@system/utils'
+import { Button } from '../ui/button'
 
+/**
+ * Modal — Accessible modal dialog component
+ * @param {Object} props
+ * @param {boolean} props.open - Modal open state
+ * @param {Function} props.onClose - Close handler
+ * @param {string} [props.title] - Modal title
+ * @param {string} [props.description] - Modal description
+ * @param {React.ReactNode} props.children - Modal content
+ * @param {React.ReactNode} [props.footer] - Modal footer content
+ * @param {string} [props.size='md'] - Modal size: 'sm', 'md', 'lg', 'xl', 'full'
+ * @param {boolean} [props.showCloseButton=true] - Show close button
+ * @param {boolean} [props.closeOnBackdrop=true] - Close on backdrop click
+ * @param {boolean} [props.closeOnEscape=true] - Close on Escape key
+ * @param {string} [props.className] - Additional CSS classes
+ */
+export function Modal({
+  open,
+  onClose,
+  title,
+  description,
+  children,
+  footer,
+  size = 'md',
+  showCloseButton = true,
+  closeOnBackdrop = true,
+  closeOnEscape = true,
+  className,
+}) {
+  // Handle escape key
+  useEffect(() => {
+    if (!open || !closeOnEscape) return
 
-function Modal({ open, onClose, title, description, children, className }) {
+    const handleEscape = (e) => {
+      if (e.key === 'Escape') {
+        onClose()
+      }
+    }
+
+    document.addEventListener('keydown', handleEscape)
+    return () => document.removeEventListener('keydown', handleEscape)
+  }, [open, closeOnEscape, onClose])
+
+  // Lock body scroll when modal is open
+  useEffect(() => {
+    if (open) {
+      document.body.style.overflow = 'hidden'
+      return () => {
+        document.body.style.overflow = ''
+      }
+    }
+  }, [open])
+
+  if (!open) return null
+
+  const sizeClasses = {
+    sm: 'max-w-sm',
+    md: 'max-w-md',
+    lg: 'max-w-lg',
+    xl: 'max-w-xl',
+    full: 'max-w-full mx-4',
+  }
+
   return (
-    <Dialog.Root open={open} onOpenChange={(v) => !v && onClose()}>
-      <Dialog.Portal>
-        <Dialog.Overlay className="fixed inset-0 z-50 bg-black/50 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0" />
-        <Dialog.Content
-          className={cn(
-            'fixed left-[50%] top-[50%] z-50 grid w-[calc(100%-2rem)] sm:w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border bg-background p-4 sm:p-6 shadow-lg duration-200 max-h-[85vh] overflow-y-auto data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%] rounded-lg',
-            className
-          )}
-        >
-          <div className="flex flex-col space-y-1.5">
-            {title && (
-              <Dialog.Title className="text-lg font-semibold leading-none tracking-tight">
-                {title}
-              </Dialog.Title>
-            )}
-            {description && (
-              <Dialog.Description className="text-sm text-muted-foreground">
-                {description}
-              </Dialog.Description>
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in"
+      onClick={closeOnBackdrop ? onClose : undefined}
+    >
+      <div
+        className={cn(
+          'relative w-full bg-background rounded-lg shadow-lg animate-in zoom-in-95',
+          sizeClasses[size],
+          className
+        )}
+        onClick={(e) => e.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={title ? 'modal-title' : undefined}
+        aria-describedby={description ? 'modal-description' : undefined}
+      >
+        {/* Header */}
+        {(title || showCloseButton) && (
+          <div className="flex items-start justify-between p-6 pb-4">
+            <div className="flex-1">
+              {title && (
+                <h2
+                  id="modal-title"
+                  className="text-xl font-semibold"
+                >
+                  {title}
+                </h2>
+              )}
+              {description && (
+                <p
+                  id="modal-description"
+                  className="text-sm text-muted-foreground mt-1"
+                >
+                  {description}
+                </p>
+              )}
+            </div>
+            {showCloseButton && (
+              <button
+                onClick={onClose}
+                className="ml-4 rounded-lg p-2 hover:bg-muted transition-colors"
+                aria-label="Close modal"
+              >
+                <X className="h-5 w-5" />
+              </button>
             )}
           </div>
+        )}
+
+        {/* Content */}
+        <div className="px-6 py-4 max-h-[70vh] overflow-y-auto">
           {children}
-          <Dialog.Close
-            onClick={onClose}
-            className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
-          >
-            <X className="h-4 w-4" />
-            <span className="sr-only">Close</span>
-          </Dialog.Close>
-        </Dialog.Content>
-      </Dialog.Portal>
-    </Dialog.Root>
+        </div>
+
+        {/* Footer */}
+        {footer && (
+          <div className="flex items-center justify-end gap-2 p-6 pt-4 border-t">
+            {footer}
+          </div>
+        )}
+      </div>
+    </div>
   )
 }
 
-export { Modal }
+/**
+ * ConfirmModal — Pre-configured confirmation modal
+ * @param {Object} props
+ * @param {boolean} props.open - Modal open state
+ * @param {Function} props.onClose - Close handler
+ * @param {Function} props.onConfirm - Confirm handler
+ * @param {string} props.title - Confirmation title
+ * @param {string} [props.description] - Confirmation message
+ * @param {string} [props.confirmText='Confirm'] - Confirm button text
+ * @param {string} [props.cancelText='Cancel'] - Cancel button text
+ * @param {string} [props.variant='default'] - Button variant: 'default', 'destructive'
+ * @param {boolean} [props.loading=false] - Loading state
+ */
+export function ConfirmModal({
+  open,
+  onClose,
+  onConfirm,
+  title,
+  description,
+  confirmText = 'Confirm',
+  cancelText = 'Cancel',
+  variant = 'default',
+  loading = false,
+}) {
+  return (
+    <Modal
+      open={open}
+      onClose={onClose}
+      title={title}
+      description={description}
+      size="sm"
+      footer={
+        <>
+          <Button
+            variant="outline"
+            onClick={onClose}
+            disabled={loading}
+          >
+            {cancelText}
+          </Button>
+          <Button
+            variant={variant}
+            onClick={onConfirm}
+            disabled={loading}
+          >
+            {loading ? 'Loading...' : confirmText}
+          </Button>
+        </>
+      }
+    />
+  )
+}
