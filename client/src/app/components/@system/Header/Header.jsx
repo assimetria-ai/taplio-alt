@@ -89,12 +89,12 @@ export function Header({ className }) {
             </>
           ) : (
             <>
-              <Link to="/auth">
+              <Link to="/login">
                 <Button variant="ghost" size="sm">
                   Sign In
                 </Button>
               </Link>
-              <Link to="/auth?tab=register">
+              <Link to="/register">
                 <Button size="sm">Get Started</Button>
               </Link>
             </>
@@ -151,12 +151,12 @@ export function Header({ className }) {
             </>
           ) : (
             <>
-              <Link to="/auth" onClick={() => setMobileOpen(false)}>
+              <Link to="/login" onClick={() => setMobileOpen(false)}>
                 <Button variant="ghost" size="sm" className="w-full">
                   Sign In
                 </Button>
               </Link>
-              <Link to="/auth?tab=register" onClick={() => setMobileOpen(false)}>
+              <Link to="/register" onClick={() => setMobileOpen(false)}>
                 <Button size="sm" className="w-full">
                   Get Started
                 </Button>

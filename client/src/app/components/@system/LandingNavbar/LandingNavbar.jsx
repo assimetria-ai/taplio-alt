@@ -83,12 +83,12 @@ export function LandingNavbar({ className }) {
             </Link>
           ) : (
             <>
-              <Link to="/auth">
+              <Link to="/login">
                 <Button variant="ghost" size="sm">
                   Log In
                 </Button>
               </Link>
-              <Link to="/auth?tab=register">
+              <Link to="/register">
                 <Button size="sm">Sign Up Free</Button>
               </Link>
             </>
@@ -129,12 +129,12 @@ export function LandingNavbar({ className }) {
                 </Link>
               ) : (
                 <>
-                  <Link to="/auth" onClick={() => setMobileOpen(false)}>
+                  <Link to="/login" onClick={() => setMobileOpen(false)}>
                     <Button variant="outline" className="w-full" size="sm">
                       Log In
                     </Button>
                   </Link>
-                  <Link to="/auth?tab=register" onClick={() => setMobileOpen(false)}>
+                  <Link to="/register" onClick={() => setMobileOpen(false)}>
                     <Button className="w-full" size="sm">
                       Sign Up Free
                     </Button>

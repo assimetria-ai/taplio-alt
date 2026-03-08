@@ -22,7 +22,7 @@ export function LoginPage() {
   const {
     register,
     handleSubmit,
-    formState } = useForm<LoginFormValues>({
+    formState: { errors, isSubmitting } } = useForm({
     resolver: zodResolver(loginSchema) })
 
   async function onSubmit(values) {
@@ -31,7 +31,7 @@ export function LoginPage() {
       const result = await api.post('/sessions', values)
       if (result?.totp_required) {
         // Password correct but TOTP required — forward credentials to the 2FA challenge page
-        navigate('/2fa/verify', { state })
+        navigate('/2fa/verify', { state: { email: values.email, password: values.password } })
         return
       }
       // Session cookie set — populate auth context then navigate

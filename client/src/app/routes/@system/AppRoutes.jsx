@@ -13,8 +13,8 @@ const LandingPage = lazy(() =>
 const NotFoundPage = lazy(() =>
   import('../../pages/static/@system/NotFoundPage').then((m) => ({ default: m.NotFoundPage }))
 )
-const AuthPage = lazy(() =>
-  import('../../pages/static/@system/AuthPage').then((m) => ({ default: m.AuthPage }))
+const LoginPage = lazy(() =>
+  import('../../pages/static/@system/LoginPage').then((m) => ({ default: m.LoginPage }))
 )
 const RegisterPage = lazy(() =>
   import('../../pages/static/@system/RegisterPage').then((m) => ({ default: m.RegisterPage }))
@@ -125,12 +125,12 @@ export function AppRoutes() {
         {/* Marketing / public */}
         <Route path="/" element={<LandingPage />} />
 
-        {/* Auth — redirect to /app when already logged in */}
+        {/* Login — redirect to /app when already logged in */}
         <Route
-          path="/auth"
+          path="/login"
           element={
             <GuestRoute>
-              <AuthPage />
+              <LoginPage />
             </GuestRoute>
           }
         />
@@ -176,7 +176,7 @@ export function AppRoutes() {
         <Route path="/register" element={<RegisterPage />} />
 
         {/* Aliases — redirect legacy paths */}
-        <Route path="/login" element={<Navigate to="/auth" replace />} />
+        <Route path="/auth" element={<Navigate to="/login" replace />} />
         <Route path="/signup" element={<Navigate to="/register" replace />} />
 
         {/* Legacy /dashboard path → authenticated area */}

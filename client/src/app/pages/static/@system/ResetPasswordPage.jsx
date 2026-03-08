@@ -41,7 +41,7 @@ export function ResetPasswordPage() {
     try {
       await api.post('/users/password/reset', { token, password })
       setSuccess(true)
-      setTimeout(() => navigate('/auth'), 3000)
+      setTimeout(() => navigate('/login'), 3000)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to reset password. The link may have expired.')
     } finally {

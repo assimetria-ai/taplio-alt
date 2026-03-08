@@ -49,7 +49,7 @@ export function RegisterPage() {
     register,
     handleSubmit,
     watch,
-    formState } = useForm<RegisterFormValues>({
+    formState: { errors, isSubmitting } } = useForm({
     resolver: zodResolver(registerSchema),
     mode: 'onTouched' })
 
