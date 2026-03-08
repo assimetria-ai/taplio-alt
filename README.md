@@ -35,10 +35,33 @@ The Product Template is the starting point for all Assimetria products. It solve
 - **JWT sessions** — Secure authentication with RS256 signing
 - **API scaffolding** — Pagination, search, and CRUD helpers for rapid API development
 - **Stripe integration** — Subscription billing ready to go
-- **Email** — AWS SES for transactional emails
 - **Security middleware** — Helmet (security headers), CSRF protection, rate limiting, input validation
 - **CORS configured** — Secure cross-origin setup
 - **Encryption** — AES-256 for sensitive data at rest
+
+### SaaS Core Features ⭐
+
+**Email System** — Multi-provider transactional emails (Resend, SMTP, SES, Console)
+- Pre-built templates (verification, password reset, welcome, invitations, magic links)
+- Email tracking & analytics (sent, delivered, bounced, failed)
+- Template preview system for testing
+- Automatic logging to database
+- See `docs/SAAS_CORE_FEATURES.md` section 1
+
+**File Upload** — Direct browser-to-cloud uploads via presigned URLs
+- S3, Cloudflare R2, or local filesystem storage
+- Zero server bandwidth usage (direct uploads)
+- File tracking & management
+- Automatic cleanup & deletion
+- See `docs/SAAS_CORE_FEATURES.md` section 2
+
+**Logging & Audit** — Production-ready logging and compliance trails
+- Structured application logging (Pino)
+- Complete audit trails (who changed what, when)
+- Before/after data snapshots
+- IP address & user agent tracking
+- Admin APIs for log analysis
+- See `docs/SAAS_CORE_FEATURES.md` section 3
 
 ### DevOps & Tooling
 
@@ -64,7 +87,7 @@ The Product Template is the starting point for all Assimetria products. It solve
 | **DB Client** | pg-promise | Promise-based, query builder, prepared statements |
 | **Auth** | JWT (RS256) | Stateless, scalable, asymmetric key signing |
 | **Payments** | Stripe | Industry standard, excellent API, global support |
-| **Email** | AWS SES | Reliable, cheap ($0.10/1k emails), high deliverability |
+| **Email** | Resend / SMTP / SES | Multi-provider support with automatic failover, template rendering, tracking |
 | **Deployment** | Railway | Zero-config deploys, preview environments, PostgreSQL included |
 | **E2E Testing** | Playwright | Cross-browser, reliable selectors, trace debugging |
 
