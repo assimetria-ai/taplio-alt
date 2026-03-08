@@ -33,6 +33,7 @@ The Product Template is the starting point for all Assimetria products. It solve
 
 - **PostgreSQL** — Relational database via `pg-promise`
 - **JWT sessions** — Secure authentication with RS256 signing
+- **API scaffolding** — Pagination, search, and CRUD helpers for rapid API development
 - **Stripe integration** — Subscription billing ready to go
 - **Email** — AWS SES for transactional emails
 - **Rate limiting** — IP-based protection on sensitive endpoints
@@ -296,6 +297,78 @@ Navigate to **http://localhost:5173**
 - Landing page loads → template is working
 - Click "Sign In" → auth flow works
 - Register a test account → database + email integration works
+
+---
+
+## API Patterns & Scaffolding
+
+The template includes **production-ready patterns** for common API operations:
+
+### 🔹 Pagination
+
+Parse `?limit`, `?offset`, and `?page` automatically:
+
+```javascript
+const { pagination } = require('./lib/@system/Middleware')
+
+router.get('/api/posts', pagination(), (req, res) => {
+  // req.pagination = { limit: 20, offset: 0, page: 1 }
+})
+```
+
+### 🔹 Search
+
+Build SQL search conditions with filtering and sorting:
+
+```javascript
+const { parseSearchQuery, buildWhereClause } = require('./lib/@system/Helpers')
+
+const search = parseSearchQuery(req.query, {
+  defaultFields: ['title', 'content']
+})
+
+const { whereClause, params } = buildWhereClause({
+  searchQuery: search.query,
+  searchFields: search.fields,
+  filters: { status: 'published' }
+})
+```
+
+### 🔹 CRUD Helpers
+
+Eliminate boilerplate with reusable handlers:
+
+```javascript
+const { handleList, handleGetById, handleCreate, handleUpdate, handleDelete } = require('./lib/@system/Helpers')
+
+// List with pagination
+router.get('/api/posts', pagination(), (req, res, next) => {
+  handleList({ repo: postsRepo, req, res, next })
+})
+
+// Get by ID
+router.get('/api/posts/:id', (req, res, next) => {
+  handleGetById({ repo: postsRepo, req, res, next })
+})
+```
+
+Or generate a complete CRUD router automatically:
+
+```javascript
+const { createCrudRouter } = require('./lib/@system/Helpers')
+
+const postsRouter = createCrudRouter({
+  repo: postsRepo,
+  validation: { create: createSchema, update: updateSchema },
+  middleware: { create: [authenticate], update: [authenticate] },
+  config: { basePath: '/api/posts', dataKey: 'post' }
+})
+
+app.use(postsRouter)  // ✅ LIST, GET, CREATE, UPDATE, DELETE routes ready
+```
+
+📖 **Full guide:** [docs/API_PATTERNS.md](./docs/API_PATTERNS.md)  
+📝 **Example:** [server/src/api/@custom/todos-example.js](./server/src/api/@custom/todos-example.js)
 
 ---
 
