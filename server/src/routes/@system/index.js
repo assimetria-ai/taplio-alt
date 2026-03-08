@@ -20,5 +20,6 @@ router.use(require('../../api/@system/ai'))
 router.use(require('../../api/@system/integrations'))
 router.use(require('../../api/@system/storage'))
 router.use(require('../../api/@system/search'))
+router.use(require('../../api/@system/teams/router'))
 
 module.exports = router

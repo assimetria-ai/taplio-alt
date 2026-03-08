@@ -6,7 +6,7 @@ const cookieParser = require('cookie-parser')
 const pinoHttp = require('pino-http')
 
 const logger = require('./lib/@system/Logger')
-const { cors, securityHeaders, csrfProtection } = require('./lib/@system/Middleware')
+const { cors, securityHeaders, csrfProtection, attachDatabase } = require('./lib/@system/Middleware')
 const { apiLimiter } = require('./lib/@system/RateLimit')
 const systemRoutes = require('./routes/@system')
 const customRoutes = require('./routes/@custom')
@@ -42,6 +42,9 @@ app.use('/api', apiLimiter)
 // Automatically validates CSRF tokens on POST/PUT/PATCH/DELETE requests
 // Clients must first GET /api/csrf-token and include the token in X-CSRF-Token header
 app.use('/api', csrfProtection)
+
+// Attach database repositories to req.db
+app.use('/api', attachDatabase)
 
 // Routes
 app.use('/api', systemRoutes)
