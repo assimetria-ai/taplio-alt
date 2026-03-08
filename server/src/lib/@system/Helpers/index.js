@@ -13,6 +13,7 @@ const queryBuilder = require('./query-builder')
 const passwordValidator = require('./password-validator')
 const apiUtils = require('./api-utils')
 const middleware = require('../Middleware')
+const BaseRepository = require('./base-repository')
 
 module.exports = {
   // Auth helpers
@@ -35,6 +36,9 @@ module.exports = {
   
   // API utilities
   ...apiUtils,
+  
+  // Base Repository class
+  BaseRepository,
   
   // Password validation
   validatePassword: passwordValidator.validatePassword,
