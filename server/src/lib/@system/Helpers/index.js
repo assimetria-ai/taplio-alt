@@ -8,6 +8,8 @@ const auth = require('./auth')
 const jwt = require('./jwt')
 const crud = require('./crud')
 const search = require('./search')
+const response = require('./response')
+const queryBuilder = require('./query-builder')
 const passwordValidator = require('./password-validator')
 
 module.exports = {
@@ -22,6 +24,12 @@ module.exports = {
   
   // Search helpers
   ...search,
+  
+  // Response helpers
+  ...response,
+  
+  // Query builder helpers
+  ...queryBuilder,
   
   // Password validation
   validatePassword: passwordValidator.validatePassword,
