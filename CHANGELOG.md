@@ -7,6 +7,130 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added - UX Components Library (Task #9432)
+
+#### 📊 Dashboard Components
+Complete set of reusable dashboard components for building admin interfaces:
+
+**Components:**
+- **DashboardLayout** - Consistent page structure with header, sidebar, and content areas
+- **StatCard & StatCardGrid** - Display key metrics with trend indicators (↑/↓) and icons
+- **QuickActions** - Grid of frequently used actions with icons
+- **RecentActivityList** - Chronological activity feed with timestamps and status variants
+- **DataTable** - Feature-rich table with sorting, search, pagination, and custom renderers
+- **WelcomeCard** - Personalized welcome message with quick actions
+- **FiltersBar** - Advanced filtering UI with multiple filter types
+- **BulkActions** - Multi-select actions for tables and lists
+- **MobileTable** - Mobile-optimized table with horizontal scroll
+
+**Features:**
+- Responsive grid layouts (1/2/3/4 columns)
+- Loading states with skeleton screens
+- Empty states with clear messaging
+- Trend indicators for metrics
+- Custom icon support (Lucide React)
+- Action buttons with callbacks
+- Flexible styling via className props
+
+#### 🚀 Onboarding System
+Multi-step wizard for new user onboarding:
+
+**Components:**
+- **OnboardingWizard** - Complete 4-step onboarding flow
+  - Step 1: Welcome (collect name)
+  - Step 2: Use Case (understand how they'll use the app)
+  - Step 3: Referral Source (track acquisition channels)
+  - Step 4: Completion (smooth transition to dashboard)
+- **GuidedTour** - Interactive product tour with highlights
+- **ProgressChecklist** - Step-by-step setup checklist widget
+
+**Features:**
+- Visual progress indicator with step icons
+- Back/forward navigation
+- Skip options on all steps
+- Data collection and API integration
+- Completion flag tracking (`onboardingCompleted`)
+- Animated transitions (Framer Motion)
+- Auto-redirect on completion
+
+**Page:**
+- `OnboardingPage.jsx` - Renders wizard in centered layout
+- Route: `/onboarding` (protected, skips if already completed)
+- Lazy-loaded for performance
+
+#### ⚙️ User Settings
+Complete user settings interface with tabbed navigation:
+
+**Components:**
+- **UserSettings** - Main container with tab navigation (7 tabs)
+- **ProfileSettings** - Name, email, bio, avatar upload, account deletion
+- **SecuritySettings** - Password change, 2FA setup, active sessions, security checklist
+- **NotificationSettings** - Email, in-app, push notification preferences
+- **PreferencesSettings** - Theme (light/dark/system), language, timezone, date format, accessibility
+- **ConnectedAccounts** - OAuth provider connections (Google, GitHub, etc.)
+- **DataExport** - Export user data, GDPR compliance
+- **KeyboardShortcuts** - Customizable keyboard shortcuts list
+
+**Features:**
+- Tab state synced with URL query params
+- Auto-save indicators
+- Form validation
+- Success/error feedback
+- Danger zones (account deletion)
+- Two-factor authentication (QR code setup)
+- Active sessions management with device detection
+- Responsive design (stacked on mobile)
+
+**Page:**
+- `SettingsPage.jsx` - Integrates UserSettings component
+- Route: `/app/settings?tab=profile`
+- Default tab support
+
+#### 🎨 Showcase & Documentation
+- **UXPatternsPage** (`/app/ux-patterns`) - Interactive demo of all components
+  - Live examples with demo data
+  - Code snippets
+  - Usage patterns
+  - Component variations
+- **UX_COMPONENTS_GUIDE.md** - Comprehensive documentation
+  - Component API reference
+  - Usage examples
+  - Best practices
+  - Customization guide
+  - Responsive design patterns
+  - Accessibility guidelines
+  - Troubleshooting
+
+#### 🧪 Design System Integration
+All components integrate with:
+- **shadcn/ui** - Button, Input, Card, Tabs primitives
+- **Tailwind CSS** - Consistent spacing, colors, responsive utilities
+- **Lucide React** - Beautiful icons for all components
+- **Framer Motion** - Smooth animations (OnboardingWizard)
+
+#### ♿ Accessibility
+All components follow WCAG 2.1 AA standards:
+- Keyboard navigation support
+- ARIA labels and roles
+- Focus management
+- Screen reader friendly
+- Color contrast compliance
+
+#### 📱 Responsive Design
+- Mobile-first approach
+- Touch-friendly targets (44px minimum)
+- Horizontal scroll patterns for tables
+- Collapsible sections
+- Mobile-optimized layouts
+
+#### 🔧 Developer Experience
+- Centralized exports via index.js files
+- Consistent prop naming
+- TypeScript-friendly (PropTypes where needed)
+- Composable component patterns
+- Clear documentation
+- Interactive showcase page
+
 ### Added - Teams & Collaboration System (Task #9429)
 
 #### 🤝 Complete Multi-Tenant Team Management
