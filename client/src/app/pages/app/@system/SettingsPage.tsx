@@ -213,7 +213,7 @@ export function SettingsPage() {
         </Sidebar>
 
         {authLoading ? <SettingsPageSkeleton /> : (
-          <main className="flex-1 overflow-auto p-8 max-w-2xl">
+          <main className="flex-1 overflow-auto p-4 sm:p-6 lg:p-8 max-w-2xl">
             <div className="mb-8">
               <h1 className="text-2xl font-bold">Settings</h1>
               <p className="mt-1 text-muted-foreground">Manage your account preferences.</p>

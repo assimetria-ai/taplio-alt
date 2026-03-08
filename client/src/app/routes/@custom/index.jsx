@@ -6,6 +6,8 @@ import { ChatbasePage } from '../../pages/app/@custom/ChatbasePage'
 import { EmailTrackingPage } from '../../pages/app/@custom/EmailTrackingPage'
 import { EmailPreviewPage } from '../../pages/app/@custom/EmailPreviewPage'
 import { ClipLibraryPage } from '../../pages/app/@custom/ClipLibraryPage'
+import { TeamsPage } from '../../pages/app/@custom/TeamsPage'
+import { TeamDetailPage } from '../../pages/app/@custom/TeamDetailPage'
 import { PrivateRoute } from '@/app/components/@system/PrivateRoute/PrivateRoute'
 
 // @custom — add your product-specific routes here.
@@ -71,6 +73,24 @@ export const customRoutes = [
     element={
       <PrivateRoute>
         <ClipLibraryPage />
+      </PrivateRoute>
+    }
+  />,
+  <Route
+    key="teams"
+    path="/app/teams"
+    element={
+      <PrivateRoute>
+        <TeamsPage />
+      </PrivateRoute>
+    }
+  />,
+  <Route
+    key="team-detail"
+    path="/app/teams/:id"
+    element={
+      <PrivateRoute>
+        <TeamDetailPage />
       </PrivateRoute>
     }
   />,

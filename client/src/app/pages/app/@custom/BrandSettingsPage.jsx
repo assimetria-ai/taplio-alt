@@ -526,7 +526,7 @@ export function BrandSettingsPage() {
           </SidebarSection>
         </Sidebar>
 
-        <main className="flex-1 overflow-auto p-8 max-w-2xl">
+        <main className="flex-1 overflow-auto p-4 sm:p-6 lg:p-8 max-w-2xl">
           {loading ? (
             <div className="flex h-40 items-center justify-center text-muted-foreground">
               Loading brands…

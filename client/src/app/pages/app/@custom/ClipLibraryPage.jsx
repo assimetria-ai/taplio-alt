@@ -485,7 +485,7 @@ export function ClipLibraryPage() {
         </Sidebar>
 
         {/* Main */}
-        <main className="flex-1 overflow-auto p-8">
+        <main className="flex-1 overflow-auto p-4 sm:p-6 lg:p-8">
           {/* Page header */}
           <div className="mb-6 flex items-start justify-between">
             <div>

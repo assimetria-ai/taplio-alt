@@ -81,10 +81,10 @@ export function AdminPage() {
           </SidebarSection>
         </Sidebar>
 
-        <main className="flex-1 overflow-auto p-8">
+        <main className="flex-1 overflow-auto p-4 sm:p-6 lg:p-8">
           <div className="mb-8 flex items-center justify-between">
             <div>
-              <h1 className="text-2xl font-bold">Admin</h1>
+              <h1 className="text-xl sm:text-2xl font-bold">Admin</h1>
               <p className="mt-1 text-muted-foreground">Manage users, subscriptions, and platform settings.</p>
             </div>
           </div>

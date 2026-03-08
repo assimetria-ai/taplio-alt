@@ -53,10 +53,10 @@ export function HomePage() {
         </Sidebar>
 
         {/* ── Main content ── */}
-        {loading ? <HomePageSkeleton /> : <main className="flex-1 overflow-auto p-8">
+        {loading ? <HomePageSkeleton /> : <main className="flex-1 overflow-auto p-4 sm:p-6 lg:p-8">
           {/* Page header */}
-          <div className="mb-8">
-            <h1 className="text-2xl font-bold">
+          <div className="mb-6 sm:mb-8">
+            <h1 className="text-xl sm:text-2xl font-bold">
               Welcome back{user?.name ? `, ${user.name.split(' ')[0]}` : ''}
             </h1>
             <p className="mt-1 text-muted-foreground">
@@ -65,7 +65,7 @@ export function HomePage() {
           </div>
 
           {/* ── Stats row — @custom: replace with real metrics ── */}
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-8">
+          <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 mb-6 sm:mb-8">
             {[
               { label: 'Total Users', value: '—', hint: 'all time' },
               { label: 'Active Subscriptions', value: '—', hint: 'this month' },

@@ -404,7 +404,7 @@ export function BlogAdminPage() {
         </Sidebar>
 
         {/* Main */}
-        <main className="flex-1 overflow-auto p-8">
+        <main className="flex-1 overflow-auto p-4 sm:p-6 lg:p-8">
           {/* Header row */}
           <div className="mb-8 flex items-center justify-between gap-4">
             <div>
