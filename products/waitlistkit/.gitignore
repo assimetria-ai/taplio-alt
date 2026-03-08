@@ -17,6 +17,10 @@ logs/
 *.log
 npm-debug.log*
 
+# Data
+api/data/
+*.json
+
 # OS files
 .DS_Store
 Thumbs.db

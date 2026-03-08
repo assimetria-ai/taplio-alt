@@ -34,10 +34,10 @@ export function LandingPage() {
           </p>
           <div className="flex gap-4 justify-center pt-4">
             <a
-              href="/auth?tab=register"
+              href="/waitlist"
               className="bg-primary text-primary-foreground px-6 py-3 rounded-md font-medium hover:opacity-90 transition-opacity"
             >
-              Start Free Trial
+              Join Waitlist
             </a>
             <a
               href="#features"
