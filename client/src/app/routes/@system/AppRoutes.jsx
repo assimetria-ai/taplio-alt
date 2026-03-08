@@ -90,6 +90,9 @@ const ApiKeysPage = lazy(() =>
 const IntegrationsPage = lazy(() =>
   import('../../pages/app/@system/IntegrationsPage').then((m) => ({ default: m.IntegrationsPage }))
 )
+const UXPatternsPage = lazy(() =>
+  import('../../pages/app/@custom/UXPatternsPage').then((m) => ({ default: m.UXPatternsPage }))
+)
 const MobileResponsiveDemo = lazy(() =>
   import('../../pages/app/@system/MobileResponsiveDemo').then((m) => ({ default: m.MobileResponsiveDemo }))
 )
@@ -213,6 +216,14 @@ export function AppRoutes() {
           element={
             <ProtectedRoute>
               <SettingsPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/app/ux-patterns"
+          element={
+            <ProtectedRoute>
+              <UXPatternsPage />
             </ProtectedRoute>
           }
         />

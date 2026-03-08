@@ -7,12 +7,15 @@
 // <UserSettings defaultTab="security" />
 
 import { useState } from 'react'
-import { User, Shield, Bell, Palette, CreditCard, Key } from 'lucide-react'
+import { User, Shield, Bell, Palette, Link2, Download, Keyboard } from 'lucide-react'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '../Tabs/Tabs'
 import { ProfileSettings } from './ProfileSettings'
 import { SecuritySettings } from './SecuritySettings'
 import { NotificationSettings } from './NotificationSettings'
 import { PreferencesSettings } from './PreferencesSettings'
+import { ConnectedAccounts } from './ConnectedAccounts'
+import { DataExport } from './DataExport'
+import { KeyboardShortcuts } from './KeyboardShortcuts'
 import { cn } from '@/app/lib/@system/utils'
 
 const SETTINGS_TABS = [
@@ -20,6 +23,9 @@ const SETTINGS_TABS = [
   { id: 'security', label: 'Security', icon: Shield },
   { id: 'notifications', label: 'Notifications', icon: Bell },
   { id: 'preferences', label: 'Preferences', icon: Palette },
+  { id: 'connections', label: 'Connections', icon: Link2 },
+  { id: 'data', label: 'Data', icon: Download },
+  { id: 'shortcuts', label: 'Shortcuts', icon: Keyboard },
 ]
 
 /**
@@ -75,6 +81,18 @@ export function UserSettings({
 
         <TabsContent value="preferences">
           <PreferencesSettings user={user} onUpdate={onUpdate} />
+        </TabsContent>
+
+        <TabsContent value="connections">
+          <ConnectedAccounts user={user} onUpdate={onUpdate} />
+        </TabsContent>
+
+        <TabsContent value="data">
+          <DataExport user={user} />
+        </TabsContent>
+
+        <TabsContent value="shortcuts">
+          <KeyboardShortcuts />
         </TabsContent>
       </Tabs>
     </div>

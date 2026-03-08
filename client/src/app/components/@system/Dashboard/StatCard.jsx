@@ -115,9 +115,9 @@ export function StatCard({
  * @param {React.ReactNode} props.children - StatCard components
  * @param {string} [props.className] - Additional CSS classes
  */
-export function StatCardGrid({ children, className }) {
+export function StatCardGrid({ children, className, ...rest }) {
   return (
-    <div className={cn('grid gap-4 sm:grid-cols-2 lg:grid-cols-4', className)}>
+    <div className={cn('grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-6', className)} {...rest}>
       {children}
     </div>
   )

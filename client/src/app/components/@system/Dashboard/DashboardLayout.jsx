@@ -177,9 +177,9 @@ DashboardLayout.Content = function DashboardContent({ children, className, noPad
  * @param {React.ReactNode} [props.actions] - Optional section actions
  * @param {string} [props.className] - Additional CSS classes
  */
-DashboardLayout.Section = function DashboardSection({ children, title, description, actions, className }) {
+DashboardLayout.Section = function DashboardSection({ children, title, description, actions, className, ...rest }) {
   return (
-    <section className={cn('mb-6 sm:mb-8', className)}>
+    <section className={cn('mb-6 sm:mb-8', className)} {...rest}>
       {(title || actions) && (
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between mb-4">
           {title && (

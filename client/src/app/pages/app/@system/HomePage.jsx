@@ -1,5 +1,7 @@
 // @system — main app dashboard page with modern UX components
 // @custom — add your dashboard widgets/sections in the main content area
+import { useState, useCallback } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { Plus, Users, DollarSign, Activity as ActivityIcon, TrendingUp, FileText } from 'lucide-react'
 import { useAuthContext } from '../../../store/@system/auth'
 import { HomePageSkeleton } from '../../../components/@system/Skeleton/Skeleton'
@@ -11,7 +13,11 @@ import {
   RecentActivityList,
   QuickActions,
   DataTable,
+  WelcomeCard,
 } from '../../../components/@system/Dashboard'
+import { CommandPalette } from '../../../components/@system/CommandPalette/CommandPalette'
+import { GuidedTour } from '../../../components/@system/Onboarding/GuidedTour'
+import { AnnouncementBanner } from '../../../components/@system/AnnouncementBanner/AnnouncementBanner'
 
 // @custom — Replace with real data from your API
 const MOCK_STATS = [
@@ -184,8 +190,75 @@ const TABLE_COLUMNS = [
   { key: 'joined', label: 'Joined', sortable: true },
 ]
 
+// @custom — Configure guided tour steps for your product
+const TOUR_STEPS = [
+  {
+    selector: '[data-tour="stats"]',
+    title: 'Your Key Metrics',
+    content: 'Track important numbers at a glance. These update in real-time as your data changes.',
+  },
+  {
+    selector: '[data-tour="quick-actions"]',
+    title: 'Quick Actions',
+    content: 'Access your most-used features in one click. You can also press ⌘K to search for any action.',
+  },
+  {
+    selector: '[data-tour="activity"]',
+    title: 'Recent Activity',
+    content: 'Stay on top of everything happening in your account with the activity feed.',
+  },
+  {
+    selector: '[data-tour="data-table"]',
+    title: 'Data Tables',
+    content: 'Search, sort, and filter your data. Click any row to view details.',
+  },
+]
+
+// @custom — Configure onboarding tasks for new users
+const ONBOARDING_TASKS = [
+  {
+    id: 'profile',
+    title: 'Complete your profile',
+    description: 'Add your name and photo',
+    route: '/app/settings',
+  },
+  {
+    id: 'billing',
+    title: 'Set up billing',
+    description: 'Add a payment method',
+    route: '/app/billing',
+  },
+  {
+    id: 'invite',
+    title: 'Invite your team',
+    description: 'Collaborate with teammates',
+    route: '/app/teams',
+  },
+  {
+    id: 'api-key',
+    title: 'Create an API key',
+    description: 'Start integrating',
+    route: '/app/api-keys',
+  },
+]
+
 export function HomePage() {
   const { user, loading } = useAuthContext()
+  const navigate = useNavigate()
+  const [tourActive, setTourActive] = useState(false)
+
+  // @custom — Replace with real completion logic from your API
+  const tasks = ONBOARDING_TASKS.map((task) => ({
+    ...task,
+    completed: user?.onboardingCompleted ? true : false,
+  }))
+
+  const handleTaskClick = useCallback(
+    (task) => {
+      if (task.route) navigate(task.route)
+    },
+    [navigate]
+  )
 
   if (loading) {
     return <HomePageSkeleton />
@@ -193,13 +266,53 @@ export function HomePage() {
 
   return (
     <DashboardLayout>
+      {/* Announcement banner — @custom: change message/variant as needed */}
+      <AnnouncementBanner
+        id="welcome-v1"
+        message="🎉 Welcome to the new dashboard! Check out our latest features."
+        variant="gradient"
+        action={{ label: 'Learn more', href: '/help' }}
+      />
+
+      {/* Command palette — available globally via ⌘K */}
+      <CommandPalette />
+
+      {/* Guided tour — starts on demand */}
+      <GuidedTour
+        steps={TOUR_STEPS}
+        isActive={tourActive}
+        onComplete={() => setTourActive(false)}
+        onSkip={() => setTourActive(false)}
+        storageKey="dashboard-tour-completed"
+      />
+
       <DashboardLayout.Content>
+        {/* Welcome card with onboarding checklist for new users */}
+        {!user?.onboardingCompleted && (
+          <div className="mb-6">
+            <WelcomeCard
+              user={user}
+              tasks={tasks}
+              onTaskClick={handleTaskClick}
+              onDismiss={() => {}}
+            />
+          </div>
+        )}
+
         {/* Page header */}
         <DashboardLayout.Header
           title={`Welcome back${user?.name ? `, ${user.name.split(' ')[0]}` : ''}`}
           description="Here's what's happening with your account today."
           actions={
             <>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setTourActive(true)}
+                className="text-muted-foreground"
+              >
+                Take a tour
+              </Button>
               <Button variant="outline" size="sm">
                 <FileText className="h-4 w-4 mr-2" />
                 Export
@@ -213,7 +326,7 @@ export function HomePage() {
         />
 
         {/* Stats grid */}
-        <StatCardGrid>
+        <StatCardGrid data-tour="stats">
           {MOCK_STATS.map((stat) => (
             <StatCard key={stat.label} {...stat} />
           ))}
@@ -224,6 +337,8 @@ export function HomePage() {
           <DashboardLayout.Section
             title="Quick Actions"
             description="Frequently used features"
+            className="[&]:mb-0"
+            data-tour="quick-actions"
           >
             <QuickActions actions={MOCK_QUICK_ACTIONS} />
           </DashboardLayout.Section>
@@ -231,6 +346,8 @@ export function HomePage() {
           <DashboardLayout.Section
             title="Recent Activity"
             description="Latest updates and events"
+            className="[&]:mb-0"
+            data-tour="activity"
           >
             <RecentActivityList items={MOCK_ACTIVITY} limit={5} />
           </DashboardLayout.Section>
@@ -238,6 +355,7 @@ export function HomePage() {
 
         {/* Recent users table */}
         <DashboardLayout.Section
+          data-tour="data-table"
           title="Recent Users"
           description="Newest account registrations"
           actions={
