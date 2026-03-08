@@ -6,6 +6,9 @@ const PRODUCT_INFO = {
   slug: 'dropmagic',
   tagline: 'File management made magical',
   description: 'Smart file organization, sharing, and collaboration platform. Drag, drop, and watch the magic happen.',
+  
+  // Competitive Differentiator
+  differentiator: 'AI-powered automatic file organization that eliminates manual sorting. While competitors like Dropbox, Google Drive, and OneDrive require users to manually organize files into folders, DropMagic uses machine learning to automatically categorize, tag, and organize files based on content, context, and usage patterns - making file management truly effortless.',
 
   // Product URLs
   url: 'https://dropmagic.io',
