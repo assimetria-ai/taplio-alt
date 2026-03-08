@@ -74,6 +74,195 @@ module.exports = createCrudRouter({
 - Configurable limits (maxLimit: 100)
 - Database indexes recommended for sort/filter fields
 
+### Added - Core SaaS Features (Task #9431)
+
+#### 📧 Email System
+Production-ready transactional email with multi-provider support:
+
+**Providers:**
+- **Resend** (native API) - Modern transactional email service
+- **SMTP** - Generic SMTP (SendGrid, Mailgun, etc.)
+- **Amazon SES** - AWS email service
+- **Console** - Development fallback (logs to console)
+
+**Files:**
+- `server/src/lib/@system/Email/index.js` (369 lines) - Email sender with multi-provider
+- `server/src/lib/@system/Email/templates.js` (329 lines) - HTML email templates
+- `server/src/lib/@system/Email/adapters/resend.js` - Resend API adapter
+- `server/src/lib/@system/Email/adapters/smtp.js` - Generic SMTP adapter
+
+**Features:**
+- 6 pre-built email templates (verification, password reset, welcome, invitation, magic link, notification)
+- HTML + plain text support
+- Email tracking and logging
+- Template variables and customization
+- Webhook support for delivery status
+- Automatic provider selection and fallback
+
+**Templates:**
+- Email verification with token
+- Password reset with secure link
+- Welcome email for new users
+- Team invitation with accept link
+- Magic link (passwordless login)
+- Generic notification emails
+
+**Usage:**
+```javascript
+const Email = require('./lib/@system/Email')
+
+await Email.sendVerificationEmail({ to, name, token })
+await Email.sendPasswordResetEmail({ to, name, token })
+await Email.sendWelcomeEmail({ to, name })
+await Email.sendInvitationEmail({ to, inviterName, orgName, token })
+await Email.sendMagicLinkEmail({ to, name, token })
+await Email.sendNotificationEmail({ to, subject, title, body, ctaLabel, ctaUrl })
+```
+
+**Configuration:**
+```bash
+# Resend
+EMAIL_PROVIDER=resend
+RESEND_API_KEY=re_xxxxxxxxxxxx
+EMAIL_FROM="Your App <noreply@yourdomain.com>"
+
+# SMTP
+SMTP_HOST=smtp.sendgrid.net
+SMTP_PORT=587
+SMTP_USER=apikey
+SMTP_PASS=SG.xxxxxxxxxxxx
+
+# Amazon SES
+EMAIL_PROVIDER=ses
+AWS_REGION=eu-west-1
+AWS_ACCESS_KEY_ID=AKIAxxxxxxxxx
+AWS_SECRET_ACCESS_KEY=xxxxxxxxxxxxxxx
+```
+
+#### 📁 File Upload System
+Multi-provider storage with direct-to-cloud uploads:
+
+**Providers:**
+- **AWS S3** - Amazon S3 storage (120 lines)
+- **Cloudflare R2** - R2 storage (127 lines)
+- **Local** - Local filesystem (145 lines)
+- **Unified Interface** - Provider-agnostic API (118 lines)
+
+**Files:**
+- `server/src/lib/@system/StorageAdapter/index.js` (118 lines) - Unified interface
+- `server/src/lib/@system/StorageAdapter/S3StorageAdapter.js` (120 lines)
+- `server/src/lib/@system/StorageAdapter/R2StorageAdapter.js` (127 lines)
+- `server/src/lib/@system/StorageAdapter/LocalStorageAdapter.js` (145 lines)
+
+**Features:**
+- Presigned URLs for direct uploads (bypasses server)
+- Automatic MIME type detection
+- File size validation
+- Path sanitization (prevents directory traversal)
+- Multipart upload support
+- File deletion and management
+- Configurable storage limits
+
+**Usage:**
+```javascript
+const StorageAdapter = require('./lib/@system/StorageAdapter')
+
+// Generate presigned upload URL
+const { url, key } = await StorageAdapter.getPresignedUploadUrl({
+  filename: 'avatar.jpg',
+  contentType: 'image/jpeg',
+  maxSizeBytes: 5 * 1024 * 1024, // 5MB
+})
+
+// Direct file upload
+const result = await StorageAdapter.uploadFile({
+  buffer: fileBuffer,
+  filename: 'document.pdf',
+  contentType: 'application/pdf',
+})
+
+// Get public URL
+const url = await StorageAdapter.getPublicUrl(key)
+
+// Delete file
+await StorageAdapter.deleteFile(key)
+```
+
+**Configuration:**
+```bash
+# AWS S3
+STORAGE_PROVIDER=s3
+AWS_S3_BUCKET=my-bucket
+AWS_S3_REGION=eu-west-1
+AWS_ACCESS_KEY_ID=AKIAxxxxxxxxx
+AWS_SECRET_ACCESS_KEY=xxxxxxxxxxxxxxx
+
+# Cloudflare R2
+STORAGE_PROVIDER=r2
+R2_BUCKET=my-bucket
+R2_ACCOUNT_ID=xxxxxxxxxxxxxxx
+R2_ACCESS_KEY_ID=xxxxxxxxxxxxxxx
+R2_SECRET_ACCESS_KEY=xxxxxxxxxxxxxxx
+
+# Local (development)
+STORAGE_PROVIDER=local
+LOCAL_STORAGE_PATH=./uploads
+```
+
+#### 📊 Logging System
+Structured logging with Pino (industry standard):
+
+**Files:**
+- `server/src/lib/@system/Logger/index.js` (28 lines)
+
+**Features:**
+- Structured JSON logging
+- Async, high-performance
+- Development mode with pretty printing
+- Production mode with JSON output
+- Configurable log levels (trace, debug, info, warn, error, fatal)
+- Request ID tracking
+- Error context preservation
+
+**Usage:**
+```javascript
+const logger = require('./lib/@system/Logger')
+
+logger.info('User logged in', { userId: 42 })
+logger.error({ err }, 'Request failed')
+logger.debug({ query }, 'Database query')
+logger.warn('Rate limit approaching', { ip: req.ip })
+```
+
+**Configuration:**
+```bash
+LOG_LEVEL=info              # trace|debug|info|warn|error|fatal
+NODE_ENV=production         # Enables JSON logging
+SERVICE_NAME=api            # Service identifier in logs
+```
+
+**Production Output:**
+```json
+{"level":30,"time":1234567890,"service":"api","env":"production","msg":"User logged in","userId":42}
+```
+
+**Development Output:**
+```
+[14:32:45] INFO: User logged in
+    userId: 42
+```
+
+#### 📚 Documentation
+- **`docs/SAAS_CORE_FEATURES.md`** - Comprehensive guide to email, storage, and logging
+- **`docs/SAAS_FEATURES_SETUP.md`** - Quick setup guide with examples
+- **`docs/SAAS_FEATURES_RESEARCH.md`** - Competitor analysis and architecture decisions
+
+**Total Implementation:**
+- Email system: 698 lines of code
+- File upload: 510 lines of code
+- Logging: 28 lines of code
+- **Total: 1,236 lines of production-ready code**
+
 ### Added - UX Components Library (Task #9432)
 
 #### 📊 Dashboard Components
