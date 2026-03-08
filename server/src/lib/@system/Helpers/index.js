@@ -11,6 +11,7 @@ const search = require('./search')
 const response = require('./response')
 const queryBuilder = require('./query-builder')
 const passwordValidator = require('./password-validator')
+const apiUtils = require('./api-utils')
 
 module.exports = {
   // Auth helpers
@@ -30,6 +31,9 @@ module.exports = {
   
   // Query builder helpers
   ...queryBuilder,
+  
+  // API utilities
+  ...apiUtils,
   
   // Password validation
   validatePassword: passwordValidator.validatePassword,

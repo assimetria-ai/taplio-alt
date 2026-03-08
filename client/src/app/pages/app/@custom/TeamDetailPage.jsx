@@ -16,6 +16,7 @@ import {
   Mail,
   Crown,
   ChevronDown,
+  Menu,
 } from 'lucide-react'
 import { Header } from '../../../components/@system/Header/Header'
 import { Sidebar, SidebarSection, SidebarItem } from '../../../components/@system/Sidebar/Sidebar'
@@ -24,9 +25,11 @@ import { FormField, Input } from '../../../components/@system/Form/Form'
 import { Button } from '../../../components/@system/ui/button'
 import { Modal } from '../../../components/@system/Modal/Modal'
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '../../../components/@system/Table/Table'
+import { ResponsiveTableWrapper } from '../../../components/@system/Table/ResponsiveTable'
 import { Badge } from '../../../components/@system/Badge/Badge'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '../../../components/@system/Tabs/Tabs'
 import { useAuthContext } from '../../../store/@system/auth'
+import { useMobileSidebar } from '../../../hooks/@system/useMobileSidebar'
 import { teamsApi } from '../../../lib/@custom/teams'
 
 // ─── Nav ─────────────────────────────────────────────────────────────────────
@@ -84,6 +87,7 @@ export function TeamDetailPage() {
   const { id } = useParams()
   const navigate = useNavigate()
   const location = useLocation()
+  const { mobileOpen, toggleMobile, closeMobile } = useMobileSidebar()
 
   const [team, setTeam] = useState(null)
   const [members, setMembers] = useState([])
@@ -238,7 +242,16 @@ export function TeamDetailPage() {
     <div className="flex h-screen flex-col bg-background">
       <Header />
       <div className="flex flex-1 overflow-hidden">
-        <Sidebar>
+        {/* Mobile menu button */}
+        <button
+          onClick={toggleMobile}
+          className="lg:hidden fixed bottom-6 right-6 z-30 flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg hover:shadow-xl transition-all focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+          aria-label="Toggle menu"
+        >
+          <Menu className="h-6 w-6" />
+        </button>
+
+        <Sidebar mobileOpen={mobileOpen} onMobileClose={closeMobile}>
           <div className="mb-6 px-3">
             <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
               Navigation
@@ -246,7 +259,7 @@ export function TeamDetailPage() {
           </div>
           <SidebarSection>
             {NAV_ITEMS.map(({ icon: Icon, label, to }) => (
-              <Link to={to} key={to}>
+              <Link to={to} key={to} onClick={closeMobile}>
                 <SidebarItem
                   icon={<Icon className="h-4 w-4" />}
                   label={label}
@@ -255,7 +268,7 @@ export function TeamDetailPage() {
               </Link>
             ))}
             {user?.role === 'admin' && (
-              <Link to="/app/admin">
+              <Link to="/app/admin" onClick={closeMobile}>
                 <SidebarItem
                   icon={<Shield className="h-4 w-4" />}
                   label="Admin"
@@ -279,35 +292,37 @@ export function TeamDetailPage() {
           </Button>
 
           {/* Page header */}
-          <div className="mb-8 flex items-start justify-between">
-            <div className="flex items-center gap-4">
-              {team.avatar_url ? (
-                <img
-                  src={team.avatar_url}
-                  alt={team.name}
-                  className="h-16 w-16 rounded-lg object-cover"
-                />
-              ) : (
-                <div className="flex h-16 w-16 items-center justify-center rounded-lg bg-muted">
-                  <Building2 className="h-8 w-8 text-muted-foreground" />
+          <div className="mb-6 sm:mb-8">
+            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+              <div className="flex items-center gap-3 sm:gap-4">
+                {team.avatar_url ? (
+                  <img
+                    src={team.avatar_url}
+                    alt={team.name}
+                    className="h-12 w-12 sm:h-16 sm:w-16 rounded-lg object-cover shrink-0"
+                  />
+                ) : (
+                  <div className="flex h-12 w-12 sm:h-16 sm:w-16 items-center justify-center rounded-lg bg-muted shrink-0">
+                    <Building2 className="h-6 w-6 sm:h-8 sm:w-8 text-muted-foreground" />
+                  </div>
+                )}
+                <div className="min-w-0">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <h1 className="text-xl sm:text-2xl font-bold truncate">{team.name}</h1>
+                    {roleBadge(team.my_role)}
+                  </div>
+                  <p className="mt-1 text-xs sm:text-sm text-muted-foreground">
+                    {team.member_count} {team.member_count === 1 ? 'member' : 'members'}
+                  </p>
                 </div>
-              )}
-              <div>
-                <div className="flex items-center gap-2">
-                  <h1 className="text-2xl font-bold">{team.name}</h1>
-                  {roleBadge(team.my_role)}
-                </div>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  {team.member_count} {team.member_count === 1 ? 'member' : 'members'}
-                </p>
               </div>
+              {canInvite && (
+                <Button onClick={() => setInviteOpen(true)} className="gap-2 w-full sm:w-auto sm:shrink-0">
+                  <Plus className="h-4 w-4" />
+                  Invite Member
+                </Button>
+              )}
             </div>
-            {canInvite && (
-              <Button onClick={() => setInviteOpen(true)} className="gap-2">
-                <Plus className="h-4 w-4" />
-                Invite Member
-              </Button>
-            )}
           </div>
 
           {/* Invite token success banner */}
@@ -352,7 +367,8 @@ export function TeamDetailPage() {
                   <CardDescription>People who have access to this team.</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <Table>
+                  <ResponsiveTableWrapper>
+                    <Table>
                     <TableHeader>
                       <TableRow>
                         <TableHead>Member</TableHead>
@@ -419,6 +435,7 @@ export function TeamDetailPage() {
                       ))}
                     </TableBody>
                   </Table>
+                  </ResponsiveTableWrapper>
                 </CardContent>
               </Card>
             </TabsContent>
@@ -435,7 +452,8 @@ export function TeamDetailPage() {
                   {invitations.length === 0 ? (
                     <p className="text-sm text-muted-foreground">No pending invitations</p>
                   ) : (
-                    <Table>
+                    <ResponsiveTableWrapper>
+                      <Table>
                       <TableHeader>
                         <TableRow>
                           <TableHead>Email</TableHead>
@@ -468,6 +486,7 @@ export function TeamDetailPage() {
                         ))}
                       </TableBody>
                     </Table>
+                    </ResponsiveTableWrapper>
                   )}
                 </CardContent>
               </Card>
