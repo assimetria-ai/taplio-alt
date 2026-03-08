@@ -28,7 +28,7 @@ function isValidLogoDataUrl(str) {
 
 // ─── GET /api/brands ─────────────────────────────────────────────────────────
 // Returns brands belonging to the authenticated user
-router.get('/brands', authenticate, async (req, res, next) => {
+router.get('/brands', authenticate, validate({ query: PaginationQuery }), async (req, res, next) => {
   try {
     const brands = await BrandRepo.findAll({ user_id: req.user.id })
     res.json({ brands })
@@ -38,7 +38,7 @@ router.get('/brands', authenticate, async (req, res, next) => {
 })
 
 // ─── GET /api/brands/:id ─────────────────────────────────────────────────────
-router.get('/brands/:id', authenticate, async (req, res, next) => {
+router.get('/brands/:id', authenticate, validate({ params: BrandIdParams }), async (req, res, next) => {
   try {
     const brand = await BrandRepo.findById(req.params.id)
     if (!brand) return res.status(404).json({ message: 'Brand not found' })
