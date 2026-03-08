@@ -80,7 +80,7 @@ function multiSort(options = {}) {
   }
 
   return (req, res, next) => {
-    const sortParam Value = req.query[sortParam]
+    const sortParamValue = req.query[sortParam]
 
     if (!sortParamValue) {
       // Use default sort
