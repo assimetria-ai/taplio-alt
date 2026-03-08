@@ -63,6 +63,17 @@ The Product Template is the starting point for all Assimetria products. It solve
 - Admin APIs for log analysis
 - See `docs/SAAS_CORE_FEATURES.md` section 3
 
+**Teams & Collaboration** — Multi-tenant workspace management with permissions
+- Team/workspace creation and management
+- Role-based access control (Owner, Admin, Member, Viewer)
+- Email invitations with secure token system
+- Member management (add, remove, change roles)
+- Team activity logging and audit trail
+- Granular permission system
+- Frontend UI components (TeamList, MemberList, InvitationManager)
+- Complete API endpoints for teams, members, and invitations
+- See `TEAMS_COLLABORATION_GUIDE.md` and `docs/TEAMS.md`
+
 ### DevOps & Tooling
 
 - **Railway deployment** — One-click deploy config included
@@ -736,6 +747,10 @@ Email templates are in `server/src/lib/@system/ses/templates/`. Modify HTML ther
 - [x] Docker containerization
 - [x] Bootstrap scripts (env + keys)
 - [x] Rate limiting on auth endpoints
+- [x] Teams & Collaboration system (multi-tenant workspaces)
+- [x] Email integration (multi-provider with tracking)
+- [x] File upload system (direct-to-cloud)
+- [x] Audit logging system
 
 ### 🚧 In Progress
 
@@ -749,10 +764,8 @@ Email templates are in `server/src/lib/@system/ses/templates/`. Modify HTML ther
 
 - [ ] GraphQL API option (Apollo Server)
 - [ ] WebSocket support (Socket.io)
-- [ ] S3 file uploads
+- [ ] S3 file uploads (presigned URLs)
 - [ ] Full-text search (PostgreSQL FTS or Algolia)
-- [ ] Audit logging
-- [ ] Multi-tenancy support
 - [ ] API versioning strategy
 
 ---
