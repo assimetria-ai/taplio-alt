@@ -15,3 +15,6 @@
 
 # Local uploads directory — kept out of git
 uploads/
+
+# Build artifacts (generated from client/dist)
+public/
