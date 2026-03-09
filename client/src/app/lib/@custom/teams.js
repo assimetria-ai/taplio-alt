@@ -55,11 +55,16 @@ export const teamsApi = {
   },
 
   async acceptInvitation(token) {
-    return api.post(`/teams/invitations/${token}/accept`)
+    return api.post(`/invitations/accept/${token}`)
   },
 
   async revokeInvitation(team_id, token) {
     return api.delete(`/teams/${team_id}/invitations/${token}`)
+  },
+
+  // Pending invitations for current user
+  async getPendingInvitations() {
+    return api.get('/invitations/pending')
   },
 
   // Permissions
