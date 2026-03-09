@@ -5,11 +5,13 @@
 
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { TeamList, CreateTeamModal } from '../../components/@system/Teams'
+import { TeamList, CreateTeamModal, PendingInvitations } from '../../components/@system/Teams'
+import { useTeamInvitations } from '../../hooks/@custom/useTeamInvitations'
 
 export function TeamsPage() {
   const navigate = useNavigate()
   const [showCreateModal, setShowCreateModal] = useState(false)
+  const { invitationCount, refresh: refreshInvitations } = useTeamInvitations()
 
   function handleTeamSelect(team) {
     navigate(`/app/teams/${team.id}`)
@@ -17,6 +19,12 @@ export function TeamsPage() {
 
   function handleTeamCreated(team) {
     navigate(`/app/teams/${team.id}`)
+  }
+
+  function handleInvitationAccepted() {
+    // Refresh invitations list
+    refreshInvitations()
+    // Could also refresh teams list here if needed
   }
 
   return (
@@ -28,6 +36,14 @@ export function TeamsPage() {
         </p>
       </div>
 
+      {/* Pending Invitations Section */}
+      {invitationCount > 0 && (
+        <div className="mb-8">
+          <PendingInvitations onInvitationAccepted={handleInvitationAccepted} />
+        </div>
+      )}
+
+      {/* Teams List */}
       <TeamList
         onTeamSelect={handleTeamSelect}
         onCreateTeam={() => setShowCreateModal(true)}

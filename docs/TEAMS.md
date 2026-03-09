@@ -337,7 +337,7 @@ Accept a team invitation (authenticated).
 ```
 
 #### `GET /api/invitations/pending`
-Get pending invitations for current user.
+Get pending invitations for current user (authenticated).
 
 **Response:**
 ```json
@@ -349,11 +349,15 @@ Get pending invitations for current user.
       "team_slug": "acme-corp",
       "role": "member",
       "inviter_name": "John Doe",
+      "inviter_email": "john@example.com",
+      "expires_at": "2024-01-08T00:00:00Z",
       "token": "abc123..."
     }
   ]
 }
 ```
+
+**Note:** This endpoint is automatically called by the `useTeamInvitations()` hook and displayed on the Teams page.
 
 ---
 
@@ -597,6 +601,68 @@ export function TeamSettings() {
         <button>Invite Member</button>
       )}
     </div>
+  )
+}
+```
+
+### Pending Invitations Hook
+
+```jsx
+// hooks/@custom/useTeamInvitations.js
+import { useTeamInvitations } from '../hooks/@custom/useTeamInvitations'
+
+export function MyComponent() {
+  const {
+    invitations,        // Array of pending invitations
+    invitationCount,    // Number of pending invitations
+    loading,            // Loading state
+    error,              // Error message if any
+    refresh,            // Function to refresh invitations
+    acceptInvitation,   // Function to accept an invitation
+  } = useTeamInvitations()
+
+  return (
+    <div>
+      {invitationCount > 0 && (
+        <span className="badge">{invitationCount} pending</span>
+      )}
+    </div>
+  )
+}
+```
+
+### Pending Invitations Component
+
+```jsx
+// Display pending invitations on Teams page
+import { PendingInvitations } from '../../components/@system/Teams'
+
+export function TeamsPage() {
+  return (
+    <div>
+      <PendingInvitations onInvitationAccepted={() => {
+        // Refresh teams list or navigate
+        console.log('Invitation accepted!')
+      }} />
+    </div>
+  )
+}
+```
+
+### Invitation Notification Badge
+
+```jsx
+// Show notification badge in navigation
+import { InvitationBadge } from '../../components/@system/Teams'
+
+export function Navigation() {
+  return (
+    <nav>
+      <a href="/app/teams">
+        Teams
+        <InvitationBadge className="ml-2" />
+      </a>
+    </nav>
   )
 }
 ```
