@@ -25,6 +25,7 @@ model User {
   assignedTasks      Task[]          @relation("TaskAssignee")
   comments           Comment[]
   activityLogs       ActivityLog[]
+  savedFilters       SavedFilter[]
 
   @@map("users")
 }
@@ -136,4 +137,18 @@ model ActivityLog {
   task   Task?   @relation(fields: [taskId], references: [id], onDelete: Cascade)
 
   @@map("activity_logs")
+}
+
+model SavedFilter {
+  id         String   @id @default(cuid())
+  name       String
+  filterData Json     // Stores the filter configuration
+  projectId  String?  // Optional: associate filter with specific project
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("saved_filters")
 }
