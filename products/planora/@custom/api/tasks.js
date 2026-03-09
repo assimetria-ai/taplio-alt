@@ -2,6 +2,12 @@
 const express = require('express');
 const { prisma } = require('../db/client');
 const { requireAuth } = require('./auth');
+const { 
+  VALID_TASK_STATUSES, 
+  VALID_TASK_PRIORITIES,
+  TASK_STATUS,
+  TASK_PRIORITY
+} = require('./constants');
 
 const router = express.Router();
 
@@ -54,6 +60,23 @@ router.post('/projects/:projectId/tasks', async (req, res) => {
   try {
     const { title, description, status, priority, assigneeId, dueDate, tags } = req.body;
 
+    // Validation
+    if (!title || title.trim() === '') {
+      return res.status(400).json({ error: 'Task title is required' });
+    }
+
+    if (status && !VALID_TASK_STATUSES.includes(status)) {
+      return res.status(400).json({ 
+        error: 'Invalid status. Must be one of: ' + VALID_TASK_STATUSES.join(', ')
+      });
+    }
+
+    if (priority && !VALID_TASK_PRIORITIES.includes(priority)) {
+      return res.status(400).json({ 
+        error: 'Invalid priority. Must be one of: ' + VALID_TASK_PRIORITIES.join(', ')
+      });
+    }
+
     // Verify user has access to project
     const membership = await prisma.projectMember.findFirst({
       where: {
@@ -68,10 +91,10 @@ router.post('/projects/:projectId/tasks', async (req, res) => {
 
     const task = await prisma.task.create({
       data: {
-        title,
-        description,
-        status: status || 'todo',
-        priority: priority || 'medium',
+        title: title.trim(),
+        description: description?.trim() || null,
+        status: status || TASK_STATUS.TODO,
+        priority: priority || TASK_PRIORITY.MEDIUM,
         projectId: req.params.projectId,
         createdById: req.userId,
         assigneeId,
@@ -80,6 +103,9 @@ router.post('/projects/:projectId/tasks', async (req, res) => {
       },
       include: {
         assignee: {
+          select: { id: true, name: true, email: true }
+        },
+        createdBy: {
           select: { id: true, name: true, email: true }
         }
       }
@@ -136,6 +162,23 @@ router.put('/tasks/:id', async (req, res) => {
   try {
     const { title, description, status, priority, assigneeId, dueDate, tags } = req.body;
 
+    // Validation
+    if (title !== undefined && title.trim() === '') {
+      return res.status(400).json({ error: 'Task title cannot be empty' });
+    }
+
+    if (status && !VALID_TASK_STATUSES.includes(status)) {
+      return res.status(400).json({ 
+        error: 'Invalid status. Must be one of: ' + VALID_TASK_STATUSES.join(', ')
+      });
+    }
+
+    if (priority && !VALID_TASK_PRIORITIES.includes(priority)) {
+      return res.status(400).json({ 
+        error: 'Invalid priority. Must be one of: ' + VALID_TASK_PRIORITIES.join(', ')
+      });
+    }
+
     // Verify user has access
     const task = await prisma.task.findUnique({
       where: { id: req.params.id },
@@ -154,19 +197,24 @@ router.put('/tasks/:id', async (req, res) => {
       return res.status(404).json({ error: 'Task not found' });
     }
 
+    // Build update data object (only update provided fields)
+    const updateData = {};
+    if (title !== undefined) updateData.title = title.trim();
+    if (description !== undefined) updateData.description = description?.trim() || null;
+    if (status !== undefined) updateData.status = status;
+    if (priority !== undefined) updateData.priority = priority;
+    if (assigneeId !== undefined) updateData.assigneeId = assigneeId;
+    if (dueDate !== undefined) updateData.dueDate = dueDate ? new Date(dueDate) : null;
+    if (tags !== undefined) updateData.tags = tags;
+
     const updated = await prisma.task.update({
       where: { id: req.params.id },
-      data: {
-        title,
-        description,
-        status,
-        priority,
-        assigneeId,
-        dueDate: dueDate ? new Date(dueDate) : undefined,
-        tags
-      },
+      data: updateData,
       include: {
         assignee: {
+          select: { id: true, name: true, email: true }
+        },
+        createdBy: {
           select: { id: true, name: true, email: true }
         }
       }
