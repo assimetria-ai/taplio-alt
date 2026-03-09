@@ -74,6 +74,16 @@ The Product Template is the starting point for all Assimetria products. It solve
 - Complete API endpoints for teams, members, and invitations
 - See `TEAMS_COLLABORATION_GUIDE.md` and `docs/TEAMS.md`
 
+**UX Components** — Production-ready UI patterns for common use cases
+- **Dashboard:** Layout, stat cards, activity feeds, data tables, quick actions, filters, bulk operations
+- **Onboarding:** Multi-step wizard, guided tours, progress checklists
+- **User Settings:** Profile, security (2FA), notifications, preferences, keyboard shortcuts, data export
+- 20 reusable components (~5,000 LOC)
+- Full mobile responsive with touch-friendly targets
+- WCAG 2.1 Level AA accessibility
+- Interactive demo at `/app/ux-patterns`
+- See `docs/UX_PATTERNS.md` and `UX_COMPONENTS_GUIDE.md`
+
 ### DevOps & Tooling
 
 - **Railway deployment** — One-click deploy config included
