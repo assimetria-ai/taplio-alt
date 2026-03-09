@@ -304,6 +304,41 @@ If we improve the template's `Header` component, products can pull that update w
 
 ---
 
+## Git Workflow & Branching Strategy
+
+The product-template uses a **dev + main branching model** to balance rapid iteration with stability.
+
+### Branch Structure
+
+- **`main`** — Stable, production-ready template code. Products fork from here.
+- **`dev`** — Active development branch. All template improvements start here.
+
+### Why Two Branches?
+
+**Template stability matters.** Products need a reliable base to fork from. The `dev` branch allows rapid iteration and testing of new features before they're promoted to `main`.
+
+**Contrast with OS tools and products:**
+- **OS repos** (flint, preflight, shelf, splice) use **main-only** — they're stable infrastructure with infrequent changes
+- **Product repos** (broadr, nestora, dropmagic) use **main-only** (recommended) — they diverge after forking and iterate independently
+
+### Quick Workflow
+
+```bash
+# Starting work on the template
+git checkout dev
+git pull origin dev
+# Make changes
+git commit -m "feat: add new pagination helper"
+git push origin dev
+
+# Promoting dev to main (weekly or as needed)
+# Open PR: dev → main
+# After review + tests pass → merge → tag release
+```
+
+📖 **Full documentation:** [docs/GIT_WORKFLOW.md](./docs/GIT_WORKFLOW.md)
+
+---
 ## Quick Start
 
 ### Prerequisites
