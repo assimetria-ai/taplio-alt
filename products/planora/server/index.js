@@ -6,10 +6,11 @@ const cors = require('cors');
 const path = require('path');
 
 // Import API routes
-const authRouter = require('../@custom/api/auth');
+const { router: authRouter } = require('../@custom/api/auth');
 const projectsRouter = require('../@custom/api/projects');
 const tasksRouter = require('../@custom/api/tasks');
 const dashboardRouter = require('../@custom/api/dashboard');
+const teamRouter = require('../@custom/api/team');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -24,10 +25,11 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 // API Routes
-app.use('/api', authRouter);
-app.use('/api', projectsRouter);
-app.use('/api', tasksRouter);
-app.use('/api', dashboardRouter);
+app.use('/api/auth', authRouter);
+app.use('/api/projects', projectsRouter);
+app.use('/api/tasks', tasksRouter);
+app.use('/api/dashboard', dashboardRouter);
+app.use('/api/team', teamRouter);
 
 // Health check
 app.get('/api/health', (req, res) => {
