@@ -1,23 +1,35 @@
 // products/planora/@custom/dashboard/index.jsx
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import TaskList from './TaskList';
 import TaskBoard from './TaskBoard';
-import BoardTable from './BoardTable';
 import ProjectHeader from './ProjectHeader';
+import SearchBar from '../components/SearchBar';
+import FilterPanel from '../components/FilterPanel';
 
 export default function Dashboard() {
   const [user, setUser] = useState(null);
   const [projects, setProjects] = useState([]);
   const [currentProject, setCurrentProject] = useState(null);
   const [tasks, setTasks] = useState([]);
-  const [viewMode, setViewMode] = useState('table'); // table, list, kanban, calendar, timeline
+  const [viewMode, setViewMode] = useState('list'); // list, board, calendar, timeline
   const [loading, setLoading] = useState(true);
+  
+  // Filter state
+  const [filters, setFilters] = useState({
+    status: [],
+    priority: [],
+    assignee: null,
+    search: '',
+    tags: []
+  });
+  const [savedFilters, setSavedFilters] = useState([]);
 
   useEffect(() => {
     fetchUser();
     fetchProjects();
+    fetchSavedFilters();
   }, []);
 
   useEffect(() => {
@@ -66,6 +78,18 @@ export default function Dashboard() {
       }
     } catch (err) {
       console.error('Failed to fetch tasks:', err);
+    }
+  };
+
+  const fetchSavedFilters = async () => {
+    try {
+      const res = await fetch('/api/filters', { credentials: 'include' });
+      if (res.ok) {
+        const data = await res.json();
+        setSavedFilters(data.filters);
+      }
+    } catch (err) {
+      console.error('Failed to fetch filters:', err);
     }
   };
 
@@ -120,6 +144,81 @@ export default function Dashboard() {
     }
   };
 
+  const handleSaveFilter = async (name, filterData) => {
+    try {
+      const res = await fetch('/api/filters', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({
+          name,
+          filterData,
+          projectId: currentProject?.id
+        })
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        setSavedFilters([...savedFilters, data.filter]);
+      }
+    } catch (err) {
+      console.error('Failed to save filter:', err);
+    }
+  };
+
+  const handleDeleteFilter = async (filterId) => {
+    try {
+      const res = await fetch(`/api/filters/${filterId}`, {
+        method: 'DELETE',
+        credentials: 'include'
+      });
+
+      if (res.ok) {
+        setSavedFilters(savedFilters.filter(f => f.id !== filterId));
+      }
+    } catch (err) {
+      console.error('Failed to delete filter:', err);
+    }
+  };
+
+  // Apply filters to tasks
+  const filteredTasks = useMemo(() => {
+    let filtered = [...tasks];
+
+    // Status filter
+    if (filters.status.length > 0) {
+      filtered = filtered.filter(task => filters.status.includes(task.status));
+    }
+
+    // Priority filter
+    if (filters.priority.length > 0) {
+      filtered = filtered.filter(task => filters.priority.includes(task.priority));
+    }
+
+    // Assignee filter
+    if (filters.assignee) {
+      filtered = filtered.filter(task => task.assignee?.id === filters.assignee);
+    }
+
+    // Search filter
+    if (filters.search) {
+      const searchLower = filters.search.toLowerCase();
+      filtered = filtered.filter(task =>
+        task.title.toLowerCase().includes(searchLower) ||
+        task.description?.toLowerCase().includes(searchLower)
+      );
+    }
+
+    // Tags filter
+    if (filters.tags.length > 0) {
+      filtered = filtered.filter(task =>
+        filters.tags.some(tag => task.tags?.includes(tag))
+      );
+    }
+
+    return filtered;
+  }, [tasks, filters]);
+
   if (loading) {
     return (
       <div className="min-h-screen bg-slate-900 flex items-center justify-center">
@@ -143,41 +242,64 @@ export default function Dashboard() {
       <div className="flex-1 flex flex-col">
         {/* Top Bar */}
         <header className="bg-slate-800 border-b border-slate-700 px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <h1 className="text-2xl font-bold text-white">
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex items-center space-x-4 min-w-0">
+              <h1 className="text-2xl font-bold text-white truncate">
                 {currentProject ? currentProject.name : 'Dashboard'}
               </h1>
               {currentProject && (
-                <span className="text-sm text-slate-400">
-                  {tasks.length} tasks
+                <span className="text-sm text-slate-400 whitespace-nowrap">
+                  {filteredTasks.length} of {tasks.length} tasks
                 </span>
               )}
             </div>
 
-            {/* View Mode Switcher */}
-            <div className="flex items-center space-x-2 bg-slate-700 rounded-lg p-1">
-              {['table', 'list', 'kanban', 'calendar', 'timeline'].map(mode => (
-                <button
-                  key={mode}
-                  onClick={() => setViewMode(mode)}
-                  className={`px-3 py-1 rounded text-sm font-medium transition-colors ${
-                    viewMode === mode
-                      ? 'bg-indigo-600 text-white'
-                      : 'text-slate-300 hover:text-white'
-                  }`}
-                >
-                  {mode.charAt(0).toUpperCase() + mode.slice(1)}
-                </button>
-              ))}
-            </div>
+            {/* Global Search Bar */}
+            <SearchBar />
 
-            <button
-              onClick={() => handleCreateTask({ title: 'New Task', status: 'todo' })}
-              className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
-            >
-              + New Task
-            </button>
+            {/* View Mode & Actions */}
+            <div className="flex items-center space-x-2">
+              {/* View Mode Switcher */}
+              <div className="flex items-center space-x-1 bg-slate-700 rounded-lg p-1">
+                {['list', 'board', 'calendar', 'timeline'].map(mode => (
+                  <button
+                    key={mode}
+                    onClick={() => setViewMode(mode)}
+                    className={`px-3 py-1 rounded text-sm font-medium transition-colors ${
+                      viewMode === mode
+                        ? 'bg-indigo-600 text-white'
+                        : 'text-slate-300 hover:text-white'
+                    }`}
+                    title={mode.charAt(0).toUpperCase() + mode.slice(1)}
+                  >
+                    {mode === 'list' && '☰'}
+                    {mode === 'board' && '▦'}
+                    {mode === 'calendar' && '📅'}
+                    {mode === 'timeline' && '📊'}
+                  </button>
+                ))}
+              </div>
+
+              {/* Filter Panel */}
+              {currentProject && (
+                <FilterPanel
+                  filters={filters}
+                  onFilterChange={setFilters}
+                  onSaveFilter={handleSaveFilter}
+                  savedFilters={savedFilters}
+                  onLoadFilter={setFilters}
+                  onDeleteFilter={handleDeleteFilter}
+                />
+              )}
+
+              {/* New Task Button */}
+              <button
+                onClick={() => handleCreateTask({ title: 'New Task', status: 'todo' })}
+                className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors whitespace-nowrap"
+              >
+                + New Task
+              </button>
+            </div>
           </div>
         </header>
 
@@ -203,22 +325,15 @@ export default function Dashboard() {
                 Create Project
               </button>
             </div>
-          ) : viewMode === 'table' ? (
-            <BoardTable
-              tasks={tasks}
-              onUpdate={handleUpdateTask}
-              onDelete={handleDeleteTask}
-              onCreate={handleCreateTask}
-            />
           ) : viewMode === 'list' ? (
             <TaskList
-              tasks={tasks}
+              tasks={filteredTasks}
               onUpdate={handleUpdateTask}
               onDelete={handleDeleteTask}
             />
-          ) : viewMode === 'kanban' ? (
+          ) : viewMode === 'board' ? (
             <TaskBoard
-              tasks={tasks}
+              tasks={filteredTasks}
               onUpdate={handleUpdateTask}
               onDelete={handleDeleteTask}
             />
