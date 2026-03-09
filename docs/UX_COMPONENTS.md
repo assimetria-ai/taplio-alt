@@ -1,22 +1,20 @@
 # UX Components Guide
 
-This template includes a comprehensive library of reusable UX components covering common patterns for dashboards, onboarding, user settings, and more.
+This template includes a comprehensive set of UX components and patterns to help you build a professional, user-friendly application. All components are **mobile-responsive** and follow **accessibility best practices**.
 
-## Component Categories
+## 📊 Dashboard Components
 
-### 📊 Dashboard Components
-
-#### DashboardLayout
-Main layout container with responsive sidebar navigation.
+### DashboardLayout
+Standard app layout with responsive sidebar and header.
 
 ```jsx
-import { DashboardLayout } from '@/app/components/@system'
+import { DashboardLayout } from '@/app/components/@system/Dashboard'
 
 <DashboardLayout>
-  <DashboardLayout.Header 
-    title="Dashboard" 
+  <DashboardLayout.Header
+    title="Dashboard"
     description="Welcome back!"
-    actions={<Button>New Item</Button>}
+    actions={<Button>Action</Button>}
   />
   <DashboardLayout.Content>
     {/* Your content */}
@@ -24,375 +22,488 @@ import { DashboardLayout } from '@/app/components/@system'
 </DashboardLayout>
 ```
 
-#### MetricCard
+**Features:**
+- Responsive sidebar (drawer on mobile, persistent on desktop)
+- Mobile hamburger menu
+- Role-based navigation items
+- Custom nav items support
+
+### StatCard & StatCardGrid
 Display key metrics with trend indicators.
 
 ```jsx
-import { MetricCard, MetricGroup } from '@/app/components/@system'
+import { StatCard, StatCardGrid } from '@/app/components/@system/Dashboard'
 
-<MetricGroup columns={3}>
-  <MetricCard
-    title="Total Revenue"
-    value="$45,231"
-    change={12.5}
-    trend="up"
-    period="vs last month"
-    icon={<DollarSign className="h-6 w-6" />}
+<StatCardGrid>
+  <StatCard
+    label="Total Users"
+    value="1,234"
+    trend={12} // Percentage change
+    description="vs last month"
+    icon={Users}
+    action={{ label: 'View all', onClick: () => {} }}
   />
-  <MetricCard
-    title="Active Users"
-    value="2,345"
-    change={-3.2}
-    trend="down"
-  />
-</MetricGroup>
+</StatCardGrid>
 ```
 
-#### StatCard, WelcomeCard, QuickActions
-Additional dashboard widgets for common patterns.
+**Features:**
+- Trend indicators (up/down arrows)
+- Optional icons
+- Loading states
+- Optional action buttons
+- Responsive grid layout (1-4 columns)
 
-### 🚀 Onboarding Components
-
-#### OnboardingWizard
-Multi-step onboarding flow with progress tracking.
+### RecentActivityList
+Display recent activity/events feed.
 
 ```jsx
-import { OnboardingWizard } from '@/app/components/@system'
+import { RecentActivityList } from '@/app/components/@system/Dashboard'
+
+<RecentActivityList
+  items={[
+    {
+      id: 1,
+      icon: Users,
+      title: 'New user signed up',
+      description: 'john@example.com',
+      timestamp: '2024-03-01T10:00:00Z',
+      variant: 'success',
+    },
+  ]}
+/>
+```
+
+**Variants:** `default`, `success`, `warning`, `danger`
+
+### QuickActions
+Quick access buttons for common actions.
+
+```jsx
+import { QuickActions } from '@/app/components/@system/Dashboard'
+
+<QuickActions
+  actions={[
+    { id: '1', icon: Plus, label: 'New Item', onClick: () => {} },
+    { id: '2', icon: Users, label: 'Add User', onClick: () => {} },
+  ]}
+/>
+```
+
+### DataTable & MobileTable
+Sortable, searchable tables with mobile support.
+
+```jsx
+import { DataTable } from '@/app/components/@system/Dashboard'
+
+<DataTable
+  title="Users"
+  data={users}
+  columns={[
+    { key: 'name', label: 'Name', sortable: true },
+    { key: 'email', label: 'Email', sortable: true },
+  ]}
+  onRowClick={(row) => console.log(row)}
+  searchPlaceholder="Search users..."
+/>
+```
+
+**Features:**
+- Client-side search and sorting
+- Custom cell renderers
+- Row click handling
+- Pagination support
+- Mobile-optimized table variant
+- Empty states
+
+### WelcomeCard
+Onboarding checklist for new users.
+
+```jsx
+import { WelcomeCard } from '@/app/components/@system/Dashboard'
+
+<WelcomeCard
+  user={user}
+  tasks={[
+    { id: '1', title: 'Complete profile', description: 'Add details', completed: false },
+  ]}
+  onTaskClick={(task) => navigate(task.route)}
+  onDismiss={() => {}}
+/>
+```
+
+---
+
+## 🎓 Onboarding Components
+
+### OnboardingWizard
+Multi-step wizard for new user onboarding.
+
+```jsx
+import { OnboardingWizard } from '@/app/components/@system/Onboarding'
 
 <OnboardingWizard />
-// Handles: welcome, profile, preferences, team invites
 ```
 
-The wizard automatically:
-- Tracks progress across 5 steps
-- Saves user data to backend
-- Supports skip functionality
-- Navigates to dashboard on completion
+**Features:**
+- Step-by-step flow
+- Progress indicator
+- Back/forward navigation
+- Skip functionality
+- Form validation
+- API integration ready
 
-### ⚙️ User Settings Components
+**Default steps:**
+1. Welcome
+2. Profile setup
+3. Preferences
+4. Team invites (optional)
+5. Completion
 
-#### UserSettings
-Complete settings interface with tabbed navigation.
+### GuidedTour
+Interactive product tour with tooltips.
 
 ```jsx
-import { UserSettings } from '@/app/components/@system'
+import { GuidedTour } from '@/app/components/@system/Onboarding'
 
-<UserSettings defaultTab="profile" />
-// Includes: profile, security, notifications, preferences, connections
+<GuidedTour
+  steps={[
+    {
+      selector: '[data-tour="stats"]',
+      title: 'Your Metrics',
+      content: 'Track important numbers here.',
+    },
+  ]}
+  isActive={tourActive}
+  onComplete={() => setTourActive(false)}
+  storageKey="dashboard-tour-completed"
+/>
 ```
 
-#### SettingsSection & SettingsRow
-Reusable building blocks for custom settings pages.
+**Features:**
+- Highlight elements with tooltips
+- Step progression
+- Skip/complete
+- localStorage persistence
+- Mobile-responsive positioning
+
+### FeatureSpotlight
+Highlight new features to users.
 
 ```jsx
-import { SettingsSection, SettingsRow } from '@/app/components/@system'
+import { FeatureSpotlight, useFeatureSpotlight } from '@/app/components/@system/FeatureSpotlight'
 
-<SettingsSection title="Privacy" description="Control your data">
-  <SettingsRow 
-    label="Make profile public"
-    description="Allow others to see your activity"
+<FeatureSpotlight
+  isOpen={isOpen}
+  onClose={() => setIsOpen(false)}
+  feature={{
+    title: 'New Dashboard',
+    description: 'Check out our redesigned dashboard...',
+    image: '/images/new-dashboard.png',
+    badge: 'New',
+    cta: { label: 'Try it now', href: '/app' },
+  }}
+/>
+```
+
+**Hook for automatic display:**
+```jsx
+const { showSpotlight, closeSpotlight } = useFeatureSpotlight('feature-id', feature)
+```
+
+### AnnouncementBanner
+Display announcements at the top of pages.
+
+```jsx
+import { AnnouncementBanner } from '@/app/components/@system/AnnouncementBanner'
+
+<AnnouncementBanner
+  id="banner-v1"
+  message="🎉 New feature is live!"
+  variant="gradient"
+  action={{ label: 'Learn more', href: '/docs' }}
+/>
+```
+
+**Variants:** `default`, `gradient`, `info`, `warning`, `success`
+
+---
+
+## ⚙️ User Settings
+
+### UserSettings
+Complete settings interface with tabs.
+
+```jsx
+import { UserSettings } from '@/app/components/@system/UserSettings'
+
+<UserSettings
+  user={user}
+  onUpdate={async (updates) => { /* API call */ }}
+  defaultTab="profile"
+  onTabChange={(tab) => {}}
+/>
+```
+
+**Included tabs:**
+- Profile (name, email, photo)
+- Security (password, 2FA)
+- Notifications (email, push preferences)
+- Preferences (theme, language)
+- Connections (OAuth accounts)
+- Data (export, delete account)
+- Shortcuts (keyboard shortcuts)
+
+### SettingsSection & SettingsRow
+Reusable components for building settings pages.
+
+```jsx
+import { SettingsSection, SettingsRow } from '@/app/components/@system/UserSettings'
+
+<SettingsSection
+  title="Notifications"
+  description="Manage how you receive notifications"
+>
+  <SettingsRow
+    label="Email notifications"
+    description="Receive updates via email"
   >
-    <Switch checked={isPublic} onCheckedChange={setPublic} />
+    <Switch checked={enabled} onCheckedChange={setEnabled} />
   </SettingsRow>
 </SettingsSection>
 ```
 
-### 🎯 Common UI Components
+---
 
-#### Modal
-Accessible modal dialogs with variants.
+## 💬 Feedback & Help
+
+### HelpWidget
+Floating help button with search and articles.
 
 ```jsx
-import { Modal, ConfirmModal } from '@/app/components/@system'
+import { HelpWidget } from '@/app/components/@system/HelpWidget'
 
-// Standard modal
-<Modal 
-  open={isOpen} 
-  onClose={() => setOpen(false)}
-  title="Edit Profile"
-  footer={
-    <>
-      <Button variant="outline">Cancel</Button>
-      <Button>Save</Button>
-    </>
-  }
->
-  <p>Modal content...</p>
-</Modal>
+<HelpWidget position="bottom-right" />
+```
 
-// Confirmation modal
-<ConfirmModal
-  open={showConfirm}
-  onClose={() => setConfirm(false)}
-  onConfirm={handleDelete}
-  title="Delete item?"
-  description="This action cannot be undone"
-  variant="destructive"
+**Features:**
+- Floating button
+- Search help articles
+- Contextual help
+- Support contact links
+- Mobile-responsive panel
+
+**Positions:** `bottom-right`, `bottom-left`, `top-right`, `top-left`
+
+### FeedbackWidget
+Collect user feedback and bug reports.
+
+```jsx
+import { FeedbackWidget } from '@/app/components/@system/FeedbackWidget'
+
+<FeedbackWidget 
+  position="bottom-left"
+  onSubmit={async (feedback) => { /* API call */ }}
 />
 ```
 
-#### Avatar & AvatarGroup
-User avatars with fallback initials and status indicators.
+**Feedback types:**
+- Bug reports
+- Feature requests
+- Improvements
+- Other
+
+**Features:**
+- Satisfaction rating
+- Screenshot attachment (optional)
+- Email follow-up
+- Multi-step form
+
+### CommandPalette
+Quick search and navigation (⌘K).
 
 ```jsx
-import { Avatar, AvatarGroup } from '@/app/components/@system'
+import { CommandPalette } from '@/app/components/@system/CommandPalette'
 
-<Avatar 
-  src="/avatar.jpg" 
-  name="John Doe"
-  status="online"
-  size="md"
-/>
-
-<AvatarGroup 
-  users={teamMembers}
-  max={3}
-  size="sm"
-/>
+<CommandPalette />
 ```
 
-#### Dropdown Menu
-Accessible dropdown with keyboard navigation.
+**Features:**
+- Keyboard shortcut (⌘K / Ctrl+K)
+- Search pages, actions
+- Recent searches
+- Keyboard navigation
+
+---
+
+## 🚨 Error Handling & States
+
+### ErrorBoundary
+Catch and display React errors gracefully.
 
 ```jsx
-import { 
-  Dropdown, 
-  DropdownItem, 
-  DropdownSeparator 
-} from '@/app/components/@system'
+import { ErrorBoundary } from '@/app/components/@system/ErrorBoundary'
 
-<Dropdown trigger={<Button>Menu</Button>}>
-  <DropdownItem icon={<Edit />} onClick={handleEdit}>
-    Edit
-  </DropdownItem>
-  <DropdownSeparator />
-  <DropdownItem 
-    icon={<Trash />} 
-    onClick={handleDelete}
-    variant="danger"
-  >
-    Delete
-  </DropdownItem>
-</Dropdown>
+<ErrorBoundary>
+  <YourComponent />
+</ErrorBoundary>
 ```
 
-#### ProgressBar
-Visual progress indicators with variants.
-
+**HOC usage:**
 ```jsx
-import { ProgressBar, CircularProgress } from '@/app/components/@system'
+import { withErrorBoundary } from '@/app/components/@system/ErrorBoundary'
 
-<ProgressBar 
-  value={75}
-  label="Uploading..."
-  showPercentage
-  variant="success"
-  animated
-/>
-
-<CircularProgress
-  value={85}
-  size="lg"
-/>
+export default withErrorBoundary(MyComponent)
 ```
 
-### 🧭 Navigation Components
+**Features:**
+- Prevents app crashes
+- User-friendly error UI
+- Error logging (Sentry integration)
+- Retry functionality
+- Dev mode error details
 
-#### Breadcrumbs
-Path navigation with auto-generation from URL.
-
-```jsx
-import { 
-  Breadcrumbs, 
-  BreadcrumbItem,
-  BreadcrumbsFromPath 
-} from '@/app/components/@system'
-
-// Manual breadcrumbs
-<Breadcrumbs>
-  <BreadcrumbItem href="/app">Dashboard</BreadcrumbItem>
-  <BreadcrumbItem href="/app/settings">Settings</BreadcrumbItem>
-  <BreadcrumbItem>Profile</BreadcrumbItem>
-</Breadcrumbs>
-
-// Auto-generated from current path
-<BreadcrumbsFromPath 
-  basePath="/app"
-  labels={{ settings: 'My Settings' }}
-  showHome
-/>
-```
-
-#### Pagination
-Page navigation with responsive design.
+### EmptyState
+Display when no data is available.
 
 ```jsx
-import { Pagination, SimplePagination } from '@/app/components/@system'
-
-<Pagination
-  currentPage={currentPage}
-  totalPages={totalPages}
-  onPageChange={setCurrentPage}
-  siblingCount={1}
-/>
-
-// Simpler variant
-<SimplePagination
-  currentPage={1}
-  totalPages={10}
-  onPageChange={handlePageChange}
-/>
-```
-
-#### CommandPalette
-Cmd+K style quick navigation.
-
-```jsx
-import { CommandPalette, useCommandPalette } from '@/app/components/@system'
-
-function App() {
-  const { open, setOpen } = useCommandPalette()
-
-  const commands = [
-    {
-      id: 'dashboard',
-      label: 'Dashboard',
-      category: 'Navigation',
-      href: '/app',
-      icon: Home,
-      shortcut: '⌘D'
-    },
-    {
-      id: 'settings',
-      label: 'Settings',
-      category: 'Navigation',
-      href: '/app/settings',
-      icon: Settings
-    }
-  ]
-
-  return (
-    <>
-      <Button onClick={() => setOpen(true)}>Open ⌘K</Button>
-      <CommandPalette
-        open={open}
-        onOpenChange={setOpen}
-        commands={commands}
-      />
-    </>
-  )
-}
-```
-
-## Design Patterns
-
-### Responsive Design
-All components are mobile-first and responsive:
-- Stack vertically on mobile
-- Use hamburger menus for navigation
-- Touch-friendly hit areas
-- Adaptive typography
-
-### Accessibility
-Components follow WCAG guidelines:
-- Keyboard navigation support
-- ARIA labels and roles
-- Focus management
-- Screen reader friendly
-
-### Loading States
-Most components support loading states:
-
-```jsx
-<MetricCard loading />
-<DataTable loading />
-<Skeleton className="h-20" />
-```
-
-### Empty States
-
-```jsx
-import { EmptyState } from '@/app/components/@system'
+import { EmptyState } from '@/app/components/@system/EmptyState'
 
 <EmptyState
-  icon={<Inbox />}
-  title="No messages"
-  description="You're all caught up!"
-  action={<Button>Compose</Button>}
+  icon={FileText}
+  title="No projects yet"
+  description="Create your first project to get started"
+  action={<Button>Create Project</Button>}
 />
 ```
 
-## Customization
-
-### Styling
-All components accept `className` prop for Tailwind customization:
+### Alert
+Alert messages with variants.
 
 ```jsx
-<Card className="border-primary shadow-lg">
-  {/* content */}
-</Card>
+import { Alert } from '@/app/components/@system/Alert'
+
+<Alert variant="success">
+  <CheckCircle className="h-4 w-4" />
+  <div>
+    <h4 className="font-medium">Success</h4>
+    <p className="text-sm">Your changes were saved.</p>
+  </div>
+</Alert>
 ```
 
-### Variants
-Many components support variant props:
+**Variants:** `default`, `success`, `warning`, `destructive`
+
+### Skeleton Loaders
+Loading states for async content.
 
 ```jsx
-<Button variant="destructive" size="lg">Delete</Button>
-<Alert variant="warning">Warning message</Alert>
-<Badge variant="success">Active</Badge>
+import { HomePageSkeleton, SettingsPageSkeleton } from '@/app/components/@system/Skeleton'
+
+{loading ? <HomePageSkeleton /> : <HomePage />}
 ```
 
-## Best Practices
+---
 
-### Component Composition
-Build complex UIs by composing simple components:
+## 🎨 Best Practices
 
-```jsx
-<DashboardLayout>
-  <DashboardLayout.Header title="Analytics" />
-  <DashboardLayout.Content>
-    <MetricGroup columns={3}>
-      <MetricCard {...} />
-      <MetricCard {...} />
-      <MetricCard {...} />
-    </MetricGroup>
-    
-    <Card className="mt-6">
-      <DataTable {...} />
-    </Card>
-  </DashboardLayout.Content>
-</DashboardLayout>
-```
+### Mobile Responsiveness
+All components use mobile-first responsive design:
+- Tailwind breakpoints: `sm:`, `md:`, `lg:`, `xl:`
+- Touch-friendly targets (44x44px minimum)
+- Responsive typography
+- Mobile-optimized tables and forms
 
-### Reusability
-Extract common patterns into custom components:
-
-```jsx
-// components/DashboardPage.jsx
-export function DashboardPage({ title, children }) {
-  return (
-    <DashboardLayout>
-      <DashboardLayout.Header title={title} />
-      <DashboardLayout.Content>
-        {children}
-      </DashboardLayout.Content>
-    </DashboardLayout>
-  )
-}
-```
+### Accessibility
+- ARIA labels and roles
+- Keyboard navigation
+- Focus management
+- Screen reader support
+- Reduced motion support
 
 ### Performance
-- Use `loading` states for async operations
-- Implement skeleton screens for better perceived performance
-- Lazy load heavy components
+- Lazy loading
+- Code splitting
+- Memoization
+- Virtualized lists (large datasets)
 
-## Examples
+### Customization
+- All components accept `className` prop
+- Custom variants and themes
+- Extensible with Tailwind utilities
+- Override via `@custom` directory
 
-See `/e2e` tests for comprehensive usage examples of all components.
+---
 
-## Support
+## 📱 Mobile UX Utilities
 
-For questions or issues with components, check:
-- Component source code in `/client/src/app/components/@system`
-- Test examples in `/e2e/@system`
-- This documentation
+The template includes mobile-specific utilities in `index.css`:
+
+### Touch Targets
+```jsx
+<button className="touch-target">Click me</button>
+```
+
+### Safe Area Padding
+```jsx
+<div className="safe-padding-all">Content with notch support</div>
+```
+
+### Mobile Stack Layouts
+```jsx
+<div className="mobile-stack">
+  {/* Stacks on mobile, row on desktop */}
+</div>
+```
+
+### Horizontal Scrolling
+```jsx
+<div className="mobile-scroll-x">
+  {/* Horizontal scroll on mobile */}
+</div>
+```
+
+### Responsive Grid Patterns
+```jsx
+<div className="mobile-card-grid-3">
+  {/* 1 column mobile, 2 tablet, 3 desktop */}
+</div>
+```
+
+---
+
+## 🧪 Testing & Showcase
+
+Visit `/app/ux-showcase` to see all components in action with interactive examples and documentation.
+
+---
+
+## 🔧 Adding Custom UX Components
+
+1. Create component in `client/src/app/components/@custom/`
+2. Export from `@custom/index.jsx`
+3. Import and use in your pages
+4. (Optional) Add to UX showcase for documentation
+
+**Example:**
+```jsx
+// @custom/MyComponent.jsx
+export function MyComponent() {
+  return <div>My custom component</div>
+}
+
+// @custom/index.jsx
+export { MyComponent } from './MyComponent'
+```
+
+---
+
+## 📚 Resources
+
+- [Tailwind CSS Documentation](https://tailwindcss.com/docs)
+- [shadcn/ui Components](https://ui.shadcn.com)
+- [Lucide Icons](https://lucide.dev)
+- [React Router](https://reactrouter.com)
+
+---
+
+**Need help?** Check the UX Showcase page (`/app/ux-showcase`) or open an issue.
