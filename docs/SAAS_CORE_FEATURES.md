@@ -1,31 +1,13 @@
 # SaaS Core Features Guide
 
-This template includes production-ready implementations of essential SaaS features:
-
-1. **Email System** - Multi-provider transactional emails with template rendering
-2. **File Upload** - Direct-to-cloud uploads with S3/R2/local storage  
-3. **Logging & Audit** - Structured application logging and full audit trails
-
----
+This document provides detailed usage instructions for the core SaaS features implemented in the product-template.
 
 ## Table of Contents
 
-- [1. Email System](#1-email-system)
-  - [Provider Setup](#provider-setup)
-  - [Sending Emails](#sending-emails)
-  - [Email Templates](#email-templates)
-  - [Email Tracking](#email-tracking)
-  - [Email Analytics API](#email-analytics-api)
-- [2. File Upload System](#2-file-upload-system)
-  - [Storage Providers](#storage-providers)
-  - [Upload Flow](#upload-flow)
-  - [Client Integration](#client-integration)
-  - [File Management](#file-management)
-- [3. Logging & Audit](#3-logging--audit)
-  - [Application Logging](#application-logging)
-  - [Audit Trails](#audit-trails)
-  - [Audit API](#audit-api)
-- [4. Integration Examples](#4-integration-examples)
+1. [Email System](#1-email-system)
+2. [File Upload System](#2-file-upload-system)
+3. [Logging & Audit System](#3-logging--audit-system)
+4. [Error Tracking](#4-error-tracking)
 
 ---
 
@@ -33,318 +15,180 @@ This template includes production-ready implementations of essential SaaS featur
 
 ### Overview
 
-The email system supports multiple providers with automatic failover:
+The template includes a multi-provider email system with background queue processing, template support, and retry logic.
 
-- **Resend** (native API) - Modern transactional email service
-- **SMTP** - Any SMTP provider (SendGrid, Mailgun, Resend SMTP, etc.)
-- **Amazon SES** - AWS email service
-- **Console** - Development fallback (logs to console)
+### Providers Supported
 
-### Provider Setup
+- **Resend** (recommended, modern API)
+- **AWS SES** (scalable, low-cost)
+- **SMTP** (generic, works with any provider)
+- **Console** (development fallback)
 
-#### Option 1: Resend (Recommended)
+### Basic Usage
 
-```bash
-# .env
-EMAIL_PROVIDER=resend
-RESEND_API_KEY=re_xxxxxxxxxxxxxxxxxxxxxxxxxxxx
-EMAIL_FROM="Your App <noreply@yourdomain.com>"
-APP_URL=https://yourdomain.com
-APP_NAME="Your App Name"
-```
-
-#### Option 2: SMTP (Generic)
-
-```bash
-# .env
-EMAIL_PROVIDER=smtp
-SMTP_HOST=smtp.sendgrid.net
-SMTP_PORT=587
-SMTP_USER=apikey
-SMTP_PASS=SG.xxxxxxxxxxxxxxxxxxxxxxxxxxxx
-EMAIL_FROM="Your App <noreply@yourdomain.com>"
-```
-
-#### Option 3: Amazon SES
-
-```bash
-# .env
-EMAIL_PROVIDER=ses
-AWS_REGION=eu-west-1
-AWS_ACCESS_KEY_ID=AKIAxxxxxxxxxxxxxxxxx
-AWS_SECRET_ACCESS_KEY=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-EMAIL_FROM="Your App <noreply@yourdomain.com>"
-SES_FROM_EMAIL=noreply@yourdomain.com  # Fallback
-```
-
-#### Option 4: Console (Development)
-
-```bash
-# .env
-# No email config needed - emails logged to console
-APP_URL=http://localhost:5173
-```
-
-### Sending Emails
-
-#### Basic Usage
+#### Direct Send (Synchronous)
 
 ```javascript
 const Email = require('./lib/@system/Email')
 
-// Send verification email
-await Email.sendVerificationEmail({
-  to: 'user@example.com',
-  name: 'Alex Smith',
-  token: 'abc123...',
-  userId: 42,  // Optional - for tracking
-})
-
-// Send password reset
-await Email.sendPasswordResetEmail({
-  to: 'user@example.com',
-  name: 'Alex Smith',
-  token: 'xyz789...',
-  userId: 42,
-})
-
-// Send welcome email
-await Email.sendWelcomeEmail({
-  to: 'user@example.com',
-  name: 'Alex Smith',
-  userId: 42,
-})
-
-// Send team invitation
-await Email.sendInvitationEmail({
-  to: 'newuser@example.com',
-  inviterName: 'Jordan Lee',
-  orgName: 'Acme Corp',
-  token: 'inv456...',
-  userId: null,  // Invitee not registered yet
-})
-
-// Send magic link (passwordless login)
-await Email.sendMagicLinkEmail({
-  to: 'user@example.com',
-  name: 'Alex Smith',
-  token: 'ml789...',
-  userId: 42,
-})
-
-// Send generic notification
-await Email.sendNotificationEmail({
-  to: 'user@example.com',
-  subject: 'Your report is ready',
-  title: 'Monthly Report Available',
-  body: '<p>Your monthly analytics report has been generated.</p>',
-  ctaLabel: 'View Report',
-  ctaUrl: 'https://app.example.com/reports/monthly',
-  userId: 42,
-})
-```
-
-#### Custom Email
-
-```javascript
+// Simple email
 await Email.send({
   to: 'user@example.com',
-  subject: 'Custom Email',
-  html: '<h1>Hello World</h1><p>Custom HTML content</p>',
-  text: 'Hello World\n\nCustom plain text content',
-  template: 'custom',  // Optional - for tracking
-  userId: 42,          // Optional - for tracking
-  replyTo: 'support@example.com',
+  subject: 'Hello',
+  html: '<p>Welcome!</p>',
+  text: 'Welcome!',
+})
+
+// With CC/BCC
+await Email.send({
+  to: 'user@example.com',
   cc: ['manager@example.com'],
-  bcc: ['archive@example.com'],
+  bcc: ['audit@example.com'],
+  subject: 'Team Update',
+  html: '<p>Important update</p>',
+})
+
+// With attachments
+await Email.send({
+  to: 'user@example.com',
+  subject: 'Invoice',
+  html: '<p>Your invoice is attached</p>',
   attachments: [
     {
-      filename: 'report.pdf',
-      path: '/tmp/report.pdf',  // or buffer/stream
-      contentType: 'application/pdf',
+      filename: 'invoice.pdf',
+      path: '/path/to/invoice.pdf',
     },
   ],
 })
 ```
 
-### Email Templates
-
-All templates use a consistent design system. Templates are located in:
-
-```
-server/src/lib/@system/Email/templates.js
-```
-
-#### Available Templates
-
-1. **verification** - Email address verification link
-2. **password_reset** - Password reset link
-3. **welcome** - Welcome email after registration
-4. **invitation** - Team/workspace invitation
-5. **magic_link** - Passwordless login link
-6. **notification** - Generic notification with optional CTA
-
-#### Customizing Templates
-
-Edit `server/src/lib/@system/Email/templates.js`:
+#### Template-Based Emails
 
 ```javascript
-function customTemplate({ name, actionUrl }) {
-  return baseTemplate({
-    title: `Hello ${name}`,
-    body: `
-      <p>Your custom email content here.</p>
-      <p>Click the button below to continue:</p>
-    `,
-    ctaLabel: 'Continue',
-    ctaUrl: actionUrl,
-  })
-}
+// Verification email
+await Email.sendVerificationEmail({
+  to: 'user@example.com',
+  name: 'John Doe',
+  token: 'abc123xyz',
+})
 
-module.exports = {
-  verification,
-  welcome,
-  passwordReset,
-  invitation,
-  magicLink,
-  notification,
-  customTemplate,  // Add your custom template
-}
-```
+// Password reset
+await Email.sendPasswordResetEmail({
+  to: 'user@example.com',
+  name: 'John Doe',
+  resetToken: 'reset-token-123',
+})
 
-#### Template Preview
+// Welcome email
+await Email.sendWelcomeEmail({
+  to: 'user@example.com',
+  name: 'John Doe',
+})
 
-Preview templates in your browser:
-
-```bash
-# Start server
-npm run dev
-
-# Open browser
-http://localhost:3001/api/email-logs/preview/verification
-http://localhost:3001/api/email-logs/preview/welcome
-http://localhost:3001/api/email-logs/preview/password_reset
-```
-
-Or use the admin dashboard (requires admin role):
-```
-http://localhost:5173/app/email-tracking
-```
-
-### Email Tracking
-
-All sent emails are automatically logged to the `email_logs` table for analytics and debugging.
-
-#### Database Schema
-
-```sql
-CREATE TABLE email_logs (
-  id            SERIAL PRIMARY KEY,
-  to_address    TEXT NOT NULL,
-  subject       TEXT NOT NULL,
-  template      TEXT,                    -- 'verification' | 'password_reset' | etc.
-  status        TEXT NOT NULL,            -- 'sent' | 'delivered' | 'bounced' | 'failed'
-  message_id    TEXT,                     -- Provider message ID
-  provider      TEXT,                     -- 'resend' | 'smtp' | 'ses' | 'console'
-  error         TEXT,                     -- Error message if failed
-  metadata      JSONB,                    -- Extra context
-  user_id       INTEGER REFERENCES users(id),
-  sent_at       TIMESTAMPTZ DEFAULT now(),
-  created_at    TIMESTAMPTZ DEFAULT now(),
-  updated_at    TIMESTAMPTZ DEFAULT now()
-);
-```
-
-#### Enable Tracking
-
-In your app initialization:
-
-```javascript
-// server/src/app.js or server/src/index.js
-const Email = require('./lib/@system/Email')
-const EmailLogRepo = require('./db/repos/@custom/EmailLogRepo')
-
-// Register callback to log all sent emails
-Email.setEmailSentCallback(async (emailData) => {
-  await EmailLogRepo.create(emailData)
+// Invitation email
+await Email.sendInvitationEmail({
+  to: 'new-member@example.com',
+  inviterName: 'Jane Smith',
+  teamName: 'Acme Corp',
+  inviteUrl: 'https://app.example.com/invite/abc123',
 })
 ```
 
-### Email Analytics API
+#### Queued Send (Asynchronous)
 
-All endpoints require admin authentication.
+```javascript
+const EmailQueue = require('./lib/@system/EmailQueue')
 
-#### List Email Logs
+// Initialize queue (do this once at app startup)
+await EmailQueue.init({
+  redisUrl: process.env.REDIS_URL,
+  startWorker: true,
+  concurrency: 5,
+})
 
-```bash
-GET /api/email-logs?status=sent&template=verification&limit=50&offset=0
+// Queue a single email
+await EmailQueue.queueEmail({
+  to: 'user@example.com',
+  subject: 'Hello',
+  html: '<p>Welcome!</p>',
+})
 
-Response:
-{
-  "logs": [
-    {
-      "id": 123,
-      "to_address": "user@example.com",
-      "subject": "Verify your email address",
-      "template": "verification",
-      "status": "sent",
-      "message_id": "abc123@mail.example.com",
-      "provider": "resend",
-      "sent_at": "2024-03-08T10:30:00Z",
-      "user_id": 42
-    }
+// Queue with delay (send in 1 hour)
+await EmailQueue.queueEmail(
+  {
+    to: 'user@example.com',
+    subject: 'Reminder',
+    html: '<p>Dont forget!</p>',
+  },
+  { delay: 60 * 60 * 1000 }
+)
+
+// Queue verification email
+await EmailQueue.queueVerificationEmail({
+  to: 'user@example.com',
+  name: 'John Doe',
+  token: 'abc123',
+})
+
+// Bulk email send (automatically batched)
+await EmailQueue.queueBulkEmail({
+  recipients: [
+    { email: 'user1@example.com' },
+    { email: 'user2@example.com' },
+    // ... up to thousands
   ],
-  "total": 1523
-}
+  subject: 'Newsletter',
+  html: '<p>Monthly update</p>',
+  text: 'Monthly update',
+})
 ```
 
-#### Email Statistics
+#### Queue Monitoring
 
-```bash
-GET /api/email-logs/stats
+```javascript
+// Get queue status
+const status = await EmailQueue.getQueueStatus()
+console.log(status)
+// {
+//   enabled: true,
+//   waiting: 10,
+//   active: 2,
+//   completed: 150,
+//   failed: 3,
+//   delayed: 5,
+//   total: 170
+// }
 
-Response:
-{
-  "stats": {
-    "total": 10523,
-    "sent": 10102,
-    "delivered": 9856,
-    "bounced": 45,
-    "failed": 621,
-    "last_7_days": 842
-  }
-}
+// Clean old jobs (keep last 24 hours)
+await EmailQueue.cleanQueue(24 * 60 * 60 * 1000)
 ```
 
-#### Volume by Day
+### Environment Variables
 
 ```bash
-GET /api/email-logs/volume?days=30
+# Email Provider (choose one)
+EMAIL_PROVIDER=resend  # or 'ses', 'smtp', 'console'
 
-Response:
-{
-  "volume": [
-    { "date": "2024-03-01", "count": 234 },
-    { "date": "2024-03-02", "count": 189 },
-    ...
-  ]
-}
-```
+# Resend
+RESEND_API_KEY=re_xxxxx
 
-#### Template Breakdown
+# AWS SES
+AWS_SES_ACCESS_KEY_ID=AKIA...
+AWS_SES_SECRET_ACCESS_KEY=...
+AWS_SES_REGION=us-east-1
 
-```bash
-GET /api/email-logs/templates
+# SMTP
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USER=your-email@gmail.com
+SMTP_PASS=your-app-password
 
-Response:
-{
-  "templates": [
-    { "template": "verification", "count": 4523 },
-    { "template": "password_reset", "count": 892 },
-    { "template": "welcome", "count": 2314 },
-    ...
-  ]
-}
+# Sender
+EMAIL_FROM=noreply@yourdomain.com
+EMAIL_FROM_NAME=Your App Name
+
+# Email Queue (optional, enables background processing)
+REDIS_URL=redis://localhost:6379
 ```
 
 ---
@@ -353,707 +197,546 @@ Response:
 
 ### Overview
 
-The file upload system supports direct browser-to-storage uploads via presigned URLs. This keeps uploaded files off your application server.
+Multi-provider file storage with direct browser-to-cloud uploads, validation, and security features.
 
-**Supported Storage Providers:**
+### Providers Supported
 
-- **AWS S3** - Industry standard object storage
-- **Cloudflare R2** - S3-compatible, zero egress fees
-- **Local Filesystem** - Development and self-hosted deployments
+- **AWS S3** (production-ready, scalable)
+- **Cloudflare R2** (S3-compatible, zero egress fees)
+- **Local Filesystem** (development only)
 
-### Storage Providers
+### Basic Usage
 
-#### Option 1: AWS S3
-
-```bash
-# .env
-STORAGE_PROVIDER=s3
-AWS_REGION=eu-west-1
-AWS_ACCESS_KEY_ID=AKIAxxxxxxxxxxxxxxxxx
-AWS_SECRET_ACCESS_KEY=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-S3_BUCKET=your-bucket-name
-S3_PUBLIC_URL=https://your-bucket.s3.eu-west-1.amazonaws.com
-```
-
-**Required IAM permissions:**
-
-```json
-{
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Effect": "Allow",
-      "Action": [
-        "s3:PutObject",
-        "s3:GetObject",
-        "s3:DeleteObject",
-        "s3:HeadObject"
-      ],
-      "Resource": "arn:aws:s3:::your-bucket-name/*"
-    }
-  ]
-}
-```
-
-#### Option 2: Cloudflare R2
-
-```bash
-# .env
-STORAGE_PROVIDER=r2
-R2_ACCOUNT_ID=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-R2_ACCESS_KEY_ID=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-R2_SECRET_ACCESS_KEY=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-R2_BUCKET=your-bucket-name
-R2_PUBLIC_URL=https://pub-xxxxxxxxxxxx.r2.dev
-```
-
-#### Option 3: Local Filesystem
-
-```bash
-# .env
-STORAGE_PROVIDER=local
-LOCAL_STORAGE_PATH=./uploads
-LOCAL_STORAGE_URL=http://localhost:3001/uploads
-```
-
-**Note:** For production, serve the `uploads/` directory with a static file server or CDN.
-
-### Upload Flow
-
-#### 1. Request Presigned URL (Server)
+#### Generate Upload URL (Presigned)
 
 ```javascript
-const Storage = require('./lib/@system/StorageAdapter')
+const StorageAdapter = require('./lib/@system/StorageAdapter')
 
-const { url, key, publicUrl, expiresAt } = await Storage.createUploadUrl({
-  filename: 'profile.jpg',
+// Get presigned upload URL
+const uploadData = await StorageAdapter.getUploadUrl({
+  key: `uploads/${userId}/avatar.jpg`,
   contentType: 'image/jpeg',
-  folder: 'avatars',      // Optional - default: 'uploads'
-  expiresIn: 300,         // Optional - seconds, default: 300
+  expiresIn: 300, // 5 minutes
 })
 
-// url: Presigned upload URL (PUT for S3/R2, POST for local)
-// key: Storage key for later retrieval (e.g., 'avatars/abc123.jpg')
-// publicUrl: Public read URL
-// expiresAt: Expiration timestamp
+// Return to client for direct upload
+res.json({
+  uploadUrl: uploadData.url,
+  fields: uploadData.fields,
+  key: uploadData.key,
+})
 ```
 
-#### 2. Upload from Browser (Client)
-
-**For S3/R2:**
+#### Client-Side Direct Upload (Browser)
 
 ```javascript
-// Upload directly to presigned URL
-const response = await fetch(url, {
-  method: 'PUT',
-  body: file,
-  headers: {
-    'Content-Type': file.type,
-  },
+// Client-side JavaScript
+async function uploadFile(file) {
+  // 1. Request upload URL from backend
+  const response = await fetch('/api/storage/upload-url', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      filename: file.name,
+      contentType: file.type,
+      size: file.size,
+    }),
+  })
+
+  const { uploadUrl, fields, key } = await response.json()
+
+  // 2. Upload directly to storage (bypasses server)
+  const formData = new FormData()
+  Object.entries(fields || {}).forEach(([k, v]) => formData.append(k, v))
+  formData.append('file', file)
+
+  await fetch(uploadUrl, {
+    method: 'POST',
+    body: formData,
+  })
+
+  // 3. Confirm upload with backend
+  await fetch('/api/storage/confirm', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ key }),
+  })
+
+  return key
+}
+```
+
+#### File Validation
+
+```javascript
+const { validateUpload, validateFileMiddleware } = require('./lib/@system/StorageAdapter/validators')
+
+// Validate programmatically
+const validation = validateUpload({
+  filename: 'document.pdf',
+  contentType: 'application/pdf',
+  size: 5 * 1024 * 1024, // 5MB
 })
 
-if (!response.ok) {
-  throw new Error('Upload failed')
+if (!validation.valid) {
+  console.error('Validation errors:', validation.errors)
 }
 
-// File is now accessible at: publicUrl
+// As Express middleware
+app.post('/api/storage/upload-url',
+  authenticate,
+  validateFileMiddleware({ allowedTypes: ['image'] }),
+  async (req, res) => {
+    // File is validated, proceed with upload URL generation
+  }
+)
 ```
 
-**For Local:**
+#### Download URLs
 
 ```javascript
-// For local storage, URL is a POST endpoint with token
-const formData = new FormData()
-formData.append('file', file)
+// Get presigned download URL (private files)
+const downloadUrl = await StorageAdapter.getDownloadUrl('uploads/file.pdf', 300)
 
-const response = await fetch(url, {
-  method: 'POST',
-  body: file,  // Raw binary for local adapter
-})
-
-if (!response.ok) {
-  throw new Error('Upload failed')
-}
+// Get public URL (for public files)
+const publicUrl = StorageAdapter.getPublicUrl('public/logo.png')
 ```
 
-#### 3. Confirm Upload (Optional)
-
-Track successful uploads in database:
+#### File Operations
 
 ```javascript
-const FileUploadRepo = require('./db/repos/@custom/FileUploadRepo')
+// Check if file exists
+const exists = await StorageAdapter.fileExists('uploads/file.pdf')
 
-await FileUploadRepo.create({
-  user_id: req.user.id,
-  key,
-  filename: 'profile.jpg',
-  content_type: 'image/jpeg',
-  size_bytes: file.size,
-  bucket: process.env.S3_BUCKET,
-  status: 'uploaded',
-})
+// Delete file
+await StorageAdapter.deleteFile('uploads/file.pdf')
+
+// Get file metadata
+const metadata = await StorageAdapter.fileExists('uploads/file.pdf')
+console.log(metadata) // { exists: true, size: 12345, lastModified: Date }
 ```
 
-### Client Integration
+### File Upload API Example
 
-#### React Component
+```javascript
+// server/src/api/@system/storage/index.js
+const express = require('express')
+const router = express.Router()
+const StorageAdapter = require('../../../lib/@system/StorageAdapter')
+const { validateFileMiddleware } = require('../../../lib/@system/StorageAdapter/validators')
+const { authenticate } = require('../../../lib/@system/Middleware')
 
-```jsx
-// client/src/app/components/@system/FileUpload/FileUpload.jsx
-import { useState } from 'react'
-import { uploadFile } from '../../../lib/storage'
-
-export function FileUpload({ onUpload }) {
-  const [uploading, setUploading] = useState(false)
-  const [error, setError] = useState(null)
-
-  async function handleFileChange(e) {
-    const file = e.target.files?.[0]
-    if (!file) return
-
-    setUploading(true)
-    setError(null)
-
+// Request upload URL
+router.post('/upload-url',
+  authenticate,
+  validateFileMiddleware({ allowedTypes: ['image', 'document'] }),
+  async (req, res, next) => {
     try {
-      // 1. Get presigned URL from your API
-      const response = await fetch('/api/storage/upload-url', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          filename: file.name,
-          contentType: file.type,
-          folder: 'uploads',
-        }),
+      const { filename, contentType, size } = req.body
+      const userId = req.user.id
+
+      // Generate unique key
+      const key = `uploads/${userId}/${Date.now()}-${filename}`
+
+      // Get presigned upload URL
+      const uploadData = await StorageAdapter.getUploadUrl({
+        key,
+        contentType,
+        expiresIn: 300, // 5 minutes
       })
 
-      if (!response.ok) {
-        throw new Error('Failed to get upload URL')
-      }
-
-      const { url, key, publicUrl } = await response.json()
-
-      // 2. Upload directly to storage
-      const uploadResponse = await fetch(url, {
-        method: 'PUT',
-        body: file,
-        headers: { 'Content-Type': file.type },
+      // Log for audit
+      await req.auditLog('file.upload_requested', 'file', key, {
+        filename,
+        contentType,
+        size,
       })
 
-      if (!uploadResponse.ok) {
-        throw new Error('Upload failed')
-      }
-
-      // 3. Notify parent component
-      onUpload({ key, publicUrl, filename: file.name })
+      res.json({
+        success: true,
+        uploadUrl: uploadData.url,
+        fields: uploadData.fields,
+        key: uploadData.key,
+      })
     } catch (err) {
-      console.error('Upload error:', err)
-      setError(err.message)
-    } finally {
-      setUploading(false)
+      next(err)
     }
   }
+)
 
-  return (
-    <div>
-      <input
-        type="file"
-        onChange={handleFileChange}
-        disabled={uploading}
-      />
-      {uploading && <p>Uploading...</p>}
-      {error && <p style={{ color: 'red' }}>{error}</p>}
-    </div>
-  )
-}
+module.exports = router
 ```
 
-### File Management
+### Environment Variables
 
-#### Delete File
+```bash
+# Storage Provider
+STORAGE_PROVIDER=s3  # or 'r2', 'local'
 
-```javascript
-const Storage = require('./lib/@system/StorageAdapter')
+# AWS S3
+AWS_S3_ACCESS_KEY_ID=AKIA...
+AWS_S3_SECRET_ACCESS_KEY=...
+AWS_S3_REGION=us-east-1
+AWS_S3_BUCKET=my-app-uploads
 
-await Storage.delete(key)
+# Cloudflare R2
+R2_ACCOUNT_ID=...
+R2_ACCESS_KEY_ID=...
+R2_SECRET_ACCESS_KEY=...
+R2_BUCKET=my-app-uploads
 
-// Also remove from database
-await FileUploadRepo.delete(uploadId)
-```
+# Local Storage (dev only)
+LOCAL_STORAGE_PATH=./uploads
 
-#### Generate Download URL
-
-For private files that need temporary access:
-
-```javascript
-const { url, expiresAt } = await Storage.createDownloadUrl({
-  key: 'private/document.pdf',
-  expiresIn: 3600,  // 1 hour
-})
-
-// Share this URL - it expires after 1 hour
-```
-
-#### Check if File Exists
-
-```javascript
-const { exists, size, contentType } = await Storage.exists(key)
-
-if (exists) {
-  console.log(`File size: ${size} bytes, type: ${contentType}`)
-}
-```
-
-#### Storage Health Check
-
-```javascript
-const health = await Storage.health()
-
-// {
-//   provider: 's3',
-//   configured: true,
-//   bucket: 'your-bucket-name',
-//   region: 'eu-west-1'
-// }
+# File Upload Limits
+MAX_FILE_SIZE_MB=50
 ```
 
 ---
 
-## 3. Logging & Audit
+## 3. Logging & Audit System
+
+### Overview
+
+Structured application logging with Pino and comprehensive audit trails for compliance and security monitoring.
 
 ### Application Logging
-
-#### Basic Usage
 
 ```javascript
 const logger = require('./lib/@system/Logger')
 
-logger.info('User logged in')
-logger.debug('Processing request')
-logger.warn({ userId: 42 }, 'Rate limit approaching')
-logger.error({ err }, 'Payment failed')
+// Info logging
+logger.info('User registered successfully')
+logger.info({ userId: 123, email: 'user@example.com' }, 'User registered')
+
+// Error logging
+logger.error({ err }, 'Failed to process payment')
+
+// Debug logging
+logger.debug({ query, params }, 'Database query executed')
+
+// Warning
+logger.warn({ userId: 123 }, 'Multiple failed login attempts')
 ```
 
-#### Structured Logging
+### Audit Logging
 
 ```javascript
-// Add context to every log
-logger.info({
-  userId: req.user.id,
-  action: 'create_post',
-  postId: 123,
-  duration: 45,
-}, 'Post created successfully')
+const AuditLog = require('./lib/@system/AuditLog')
 
-// Output (production):
-// {"level":30,"userId":42,"action":"create_post","postId":123,"duration":45,"msg":"Post created successfully"}
+// Log user action
+await AuditLog.logAction({
+  userId: 123,
+  action: 'user.update',
+  resourceType: 'user',
+  resourceId: '123',
+  details: { fields: ['email', 'name'] },
+  ipAddress: req.ip,
+  userAgent: req.get('user-agent'),
+})
 
-// Output (development - pretty printed):
-// [10:30:15] INFO: Post created successfully
-//   userId: 42
-//   action: "create_post"
-//   postId: 123
-//   duration: 45
-```
+// Log data change (with before/after)
+await AuditLog.logDataChange({
+  userId: 123,
+  action: 'update',
+  resourceType: 'subscription',
+  resourceId: 'sub_123',
+  before: { plan: 'free' },
+  after: { plan: 'pro' },
+  ipAddress: req.ip,
+  userAgent: req.get('user-agent'),
+})
 
-#### Log Levels
+// Log authentication event
+await AuditLog.logAuthEvent({
+  userId: 123,
+  action: 'login',
+  success: true,
+  ipAddress: req.ip,
+  userAgent: req.get('user-agent'),
+  metadata: { method: '2fa' },
+})
 
-Set `LOG_LEVEL` in `.env`:
-
-- `debug` - Everything (use in development)
-- `info` - Informational (default in production)
-- `warn` - Warnings only
-- `error` - Errors only
-- `fatal` - Fatal errors only
-
-```bash
-# .env (development)
-LOG_LEVEL=debug
-NODE_ENV=development
-
-# .env (production)
-LOG_LEVEL=info
-NODE_ENV=production
-```
-
-#### Custom Service Name
-
-```bash
-# .env
-SERVICE_NAME=api-server
-```
-
-#### Request Logging
-
-The template automatically logs all HTTP requests:
-
-```javascript
-// Logs: GET /api/users 200 45ms
-```
-
-Disable for specific routes:
-
-```javascript
-app.use('/api/health', (req, res) => {
-  req.log.silent = true  // Don't log this endpoint
-  res.json({ ok: true })
+// Log security event
+await AuditLog.logSecurityEvent({
+  userId: 123,
+  event: 'suspicious_activity',
+  severity: 'high',
+  details: { reason: 'Login from new location' },
+  ipAddress: req.ip,
+  userAgent: req.get('user-agent'),
 })
 ```
 
-### Audit Trails
+### Audit Middleware
 
-Track every data change with full before/after snapshots.
+```javascript
+const { auditMiddleware } = require('./lib/@system/AuditLog')
 
-#### Database Schema
+// Apply middleware globally
+app.use(auditMiddleware)
+
+// Use in routes
+app.post('/api/posts', authenticate, async (req, res) => {
+  const post = await createPost(req.body)
+
+  // Audit log helper attached to request
+  await req.auditLog('post.create', 'post', post.id, {
+    title: post.title,
+  })
+
+  res.json(post)
+})
+
+// Audit data changes
+app.put('/api/posts/:id', authenticate, async (req, res) => {
+  const before = await getPost(req.params.id)
+  const after = await updatePost(req.params.id, req.body)
+
+  await req.auditDataChange('update', 'post', req.params.id, before, after)
+
+  res.json(after)
+})
+```
+
+### Querying Audit Logs
+
+```javascript
+// Get user's audit logs
+const userLogs = await AuditLog.getUserLogs(userId, 50, 0)
+
+// Get resource history
+const postHistory = await AuditLog.getResourceLogs('post', 'post_123', 20)
+
+// Advanced query
+const logs = await AuditLog.queryLogs({
+  userId: 123,
+  action: 'user.%',  // Wildcard
+  resourceType: 'user',
+  startDate: new Date('2024-01-01'),
+  endDate: new Date(),
+  limit: 100,
+  offset: 0,
+})
+```
+
+### Audit Log Cleanup
+
+```javascript
+// Clean logs older than 90 days (run as cron job)
+const deletedCount = await AuditLog.cleanOldLogs(90)
+console.log(`Deleted ${deletedCount} old audit logs`)
+```
+
+### Database Schema
+
+The audit logs table is created via migration:
 
 ```sql
 CREATE TABLE audit_logs (
-  id            SERIAL PRIMARY KEY,
-  user_id       INTEGER REFERENCES users(id),
-  actor_email   TEXT,                -- Snapshot of email at time
-  action        TEXT NOT NULL,       -- 'create' | 'update' | 'delete' | 'login'
-  resource_type TEXT NOT NULL,       -- 'user' | 'post' | 'payment'
-  resource_id   TEXT,                -- Resource PK
-  old_data      JSONB,               -- Before (null for creates)
-  new_data      JSONB,               -- After (null for deletes)
-  ip_address    TEXT,
-  user_agent    TEXT,
-  metadata      JSONB,               -- Extra context
-  created_at    TIMESTAMPTZ DEFAULT now()
+  id BIGSERIAL PRIMARY KEY,
+  user_id INTEGER REFERENCES users(id),
+  action VARCHAR(100) NOT NULL,
+  resource_type VARCHAR(50),
+  resource_id VARCHAR(100),
+  details JSONB DEFAULT '{}'::jsonb,
+  ip_address INET,
+  user_agent TEXT,
+  status VARCHAR(20) DEFAULT 'success',
+  created_at TIMESTAMPTZ DEFAULT NOW()
 );
 ```
 
-#### Creating Audit Logs
+### Environment Variables
+
+```bash
+# Audit Log Retention
+AUDIT_LOG_RETENTION_DAYS=90
+```
+
+---
+
+## 4. Error Tracking
+
+### Overview
+
+Sentry integration for error monitoring, performance tracking, and alerting.
+
+### Initialization
 
 ```javascript
-const AuditLogRepo = require('./db/repos/@custom/AuditLogRepo')
+// server/src/index.js
+const ErrorTracking = require('./lib/@system/ErrorTracking')
 
-// CREATE
-await AuditLogRepo.create({
-  user_id: req.user.id,
-  actor_email: req.user.email,
-  action: 'create',
-  resource_type: 'post',
-  resource_id: String(newPost.id),
-  old_data: null,
-  new_data: newPost,
-  ip_address: req.ip,
-  user_agent: req.headers['user-agent'],
-  metadata: { route: req.path },
+// Initialize Sentry
+ErrorTracking.init({
+  dsn: process.env.SENTRY_DSN,
+  environment: process.env.NODE_ENV,
+  tracesSampleRate: 0.1, // 10% of transactions
 })
 
-// UPDATE
-await AuditLogRepo.create({
-  user_id: req.user.id,
-  actor_email: req.user.email,
-  action: 'update',
-  resource_type: 'post',
-  resource_id: String(post.id),
-  old_data: oldPost,  // Before update
-  new_data: updatedPost,  // After update
-  ip_address: req.ip,
-  user_agent: req.headers['user-agent'],
-})
+// Apply middleware
+app.use(ErrorTracking.requestHandler())
+app.use(ErrorTracking.tracingHandler())
 
-// DELETE
-await AuditLogRepo.create({
-  user_id: req.user.id,
-  actor_email: req.user.email,
-  action: 'delete',
-  resource_type: 'post',
-  resource_id: String(post.id),
-  old_data: post,  // What was deleted
-  new_data: null,
-  ip_address: req.ip,
-  user_agent: req.headers['user-agent'],
-})
+// ... your routes ...
 
-// LOGIN
-await AuditLogRepo.create({
-  user_id: user.id,
-  actor_email: user.email,
-  action: 'login',
-  resource_type: 'session',
-  resource_id: null,
-  old_data: null,
-  new_data: { method: 'password', success: true },
-  ip_address: req.ip,
-  user_agent: req.headers['user-agent'],
+// Error handler (must be LAST middleware)
+app.use(ErrorTracking.errorHandler())
+```
+
+### Capturing Errors
+
+```javascript
+const ErrorTracking = require('./lib/@system/ErrorTracking')
+
+// Capture exception
+try {
+  await riskyOperation()
+} catch (err) {
+  ErrorTracking.captureError(err, {
+    user: { id: req.user.id, email: req.user.email },
+    extra: { operation: 'riskyOperation', input: data },
+    tags: { component: 'payment' },
+    level: 'error',
+  })
+}
+
+// Capture message
+ErrorTracking.captureMessage('Unusual activity detected', {
+  level: 'warning',
+  extra: { userId: 123, action: 'bulk_delete' },
+  tags: { feature: 'admin' },
 })
 ```
 
-#### Audit Middleware
-
-Automatically audit all model changes:
+### User Context
 
 ```javascript
-// Example middleware for automatic audit logging
-function auditMiddleware(resourceType) {
-  return async (req, res, next) => {
-    const originalJson = res.json.bind(res)
-    
-    res.json = function (data) {
-      // Capture the response before sending
-      if (req.method !== 'GET' && data) {
-        AuditLogRepo.create({
-          user_id: req.user?.id,
-          actor_email: req.user?.email,
-          action: req.method === 'POST' ? 'create' : 
-                  req.method === 'PATCH' ? 'update' : 
-                  req.method === 'DELETE' ? 'delete' : 'unknown',
-          resource_type: resourceType,
-          resource_id: req.params.id ?? data.id,
-          old_data: req.originalData ?? null,  // Set this before update
-          new_data: data,
-          ip_address: req.ip,
-          user_agent: req.headers['user-agent'],
-        }).catch(err => logger.error({ err }, 'Audit log failed'))
-      }
-      
-      return originalJson(data)
-    }
-    
-    next()
+// Set user context (for all subsequent errors)
+ErrorTracking.setUser({
+  id: req.user.id,
+  email: req.user.email,
+  username: req.user.username,
+})
+
+// Clear user context (on logout)
+ErrorTracking.clearUser()
+```
+
+### Breadcrumbs
+
+```javascript
+// Add breadcrumb for context trail
+ErrorTracking.addBreadcrumb({
+  message: 'User clicked checkout button',
+  category: 'ui',
+  level: 'info',
+  data: { cartTotal: 99.99 },
+})
+```
+
+### Performance Monitoring
+
+```javascript
+// Start transaction
+const transaction = ErrorTracking.startTransaction('POST /api/orders', 'http.server')
+
+// Create spans for operations
+const dbSpan = ErrorTracking.startSpan(transaction, 'db.query', 'SELECT * FROM orders')
+await queryDatabase()
+dbSpan?.finish()
+
+const apiSpan = ErrorTracking.startSpan(transaction, 'http.client', 'POST to payment gateway')
+await callPaymentApi()
+apiSpan?.finish()
+
+transaction?.finish()
+```
+
+### Environment Variables
+
+```bash
+# Sentry
+SENTRY_DSN=https://xxx@sentry.io/xxx
+
+# Optional
+GIT_SHA=abc123  # For release tracking
+```
+
+---
+
+## Dependencies
+
+Add these to `package.json`:
+
+```json
+{
+  "dependencies": {
+    "@sentry/node": "^7.0.0",
+    "@sentry/tracing": "^7.0.0",
+    "bullmq": "^4.0.0",
+    "pino": "^8.0.0",
+    "pino-pretty": "^10.0.0"
   }
-}
-
-// Usage
-router.patch('/api/posts/:id', auditMiddleware('post'), async (req, res) => {
-  const existing = await postsRepo.findById(req.params.id)
-  req.originalData = existing  // Store for audit
-  
-  const updated = await postsRepo.update(req.params.id, req.body)
-  res.json(updated)
-})
-```
-
-### Audit API
-
-All endpoints require admin authentication.
-
-#### List Audit Logs
-
-```bash
-GET /api/audit-logs?user_id=42&action=update&resource_type=post&limit=50
-
-Response:
-{
-  "logs": [
-    {
-      "id": 789,
-      "user_id": 42,
-      "actor_email": "alex@example.com",
-      "action": "update",
-      "resource_type": "post",
-      "resource_id": "123",
-      "old_data": { "title": "Old Title", "status": "draft" },
-      "new_data": { "title": "New Title", "status": "published" },
-      "ip_address": "203.0.113.42",
-      "user_agent": "Mozilla/5.0...",
-      "created_at": "2024-03-08T10:30:00Z"
-    }
-  ],
-  "total": 1523
-}
-```
-
-#### Get Audit Log by ID
-
-```bash
-GET /api/audit-logs/789
-
-Response:
-{
-  "log": { ... }
-}
-```
-
-#### Resource History
-
-```bash
-GET /api/audit-logs/resource/post/123
-
-Response:
-{
-  "logs": [
-    { "action": "create", "created_at": "2024-03-01T08:00:00Z", ... },
-    { "action": "update", "created_at": "2024-03-02T09:15:00Z", ... },
-    { "action": "update", "created_at": "2024-03-08T10:30:00Z", ... }
-  ]
-}
-```
-
-#### User Activity
-
-```bash
-GET /api/audit-logs/user/42?limit=100
-
-Response:
-{
-  "logs": [
-    { "action": "login", "created_at": "2024-03-08T08:00:00Z", ... },
-    { "action": "create", "resource_type": "post", ... },
-    { "action": "update", "resource_type": "post", ... }
-  ]
 }
 ```
 
 ---
 
-## 4. Integration Examples
+## Testing
 
-### Complete Registration Flow
-
-```javascript
-const Email = require('./lib/@system/Email')
-const AuditLogRepo = require('./db/repos/@custom/AuditLogRepo')
-
-router.post('/api/auth/register', async (req, res, next) => {
-  try {
-    const { email, password, name } = req.body
-    
-    // 1. Create user
-    const user = await usersRepo.create({
-      email,
-      password_hash: await hashPassword(password),
-      name,
-    })
-    
-    // 2. Send verification email
-    const token = await generateEmailToken(user.id)
-    await Email.sendVerificationEmail({
-      to: user.email,
-      name: user.name,
-      token,
-      userId: user.id,
-    })
-    
-    // 3. Audit log
-    await AuditLogRepo.create({
-      user_id: user.id,
-      actor_email: user.email,
-      action: 'create',
-      resource_type: 'user',
-      resource_id: String(user.id),
-      old_data: null,
-      new_data: { id: user.id, email: user.email, name: user.name },
-      ip_address: req.ip,
-      user_agent: req.headers['user-agent'],
-      metadata: { method: 'email_password' },
-    })
-    
-    res.status(201).json({ user })
-  } catch (err) {
-    next(err)
-  }
-})
-```
-
-### Profile Update with Avatar Upload
+### Unit Tests
 
 ```javascript
-router.patch('/api/user/profile', authenticate, async (req, res, next) => {
-  try {
-    const { name, bio, avatar_key } = req.body
-    
-    const oldProfile = await usersRepo.findById(req.user.id)
-    
-    // Update profile
-    const updated = await usersRepo.update(req.user.id, {
-      name,
-      bio,
-      avatar_key,
-    })
-    
-    // If avatar changed, clean up old one
-    if (avatar_key && oldProfile.avatar_key && avatar_key !== oldProfile.avatar_key) {
-      await Storage.delete(oldProfile.avatar_key)
-    }
-    
-    // Audit log
-    await AuditLogRepo.create({
-      user_id: req.user.id,
-      actor_email: req.user.email,
-      action: 'update',
-      resource_type: 'user',
-      resource_id: String(req.user.id),
-      old_data: { name: oldProfile.name, bio: oldProfile.bio },
-      new_data: { name: updated.name, bio: updated.bio },
-      ip_address: req.ip,
-      user_agent: req.headers['user-agent'],
-    })
-    
-    res.json({ user: updated })
-  } catch (err) {
-    next(err)
-  }
-})
-```
+// File upload validation
+const { validateUpload } = require('./lib/@system/StorageAdapter/validators')
 
-### Team Invitation with Email
+describe('File Upload Validation', () => {
+  it('should reject oversized files', () => {
+    const result = validateUpload({
+      filename: 'large.jpg',
+      contentType: 'image/jpeg',
+      size: 100 * 1024 * 1024, // 100MB
+    })
 
-```javascript
-router.post('/api/teams/:teamId/invite', authenticate, async (req, res, next) => {
-  try {
-    const { email, role } = req.body
-    const team = await teamsRepo.findById(req.params.teamId)
-    
-    // Generate invitation token
-    const token = await generateInvitationToken({
-      team_id: team.id,
-      email,
-      role,
-      inviter_id: req.user.id,
+    expect(result.valid).toBe(false)
+    expect(result.errors).toContain(/exceeds maximum/)
+  })
+
+  it('should reject dangerous extensions', () => {
+    const result = validateUpload({
+      filename: 'virus.exe',
+      contentType: 'application/x-msdownload',
+      size: 1024,
     })
-    
-    // Send invitation email
-    await Email.sendInvitationEmail({
-      to: email,
-      inviterName: req.user.name,
-      orgName: team.name,
-      token,
-      userId: null,  // Invitee not a user yet
-    })
-    
-    // Audit log
-    await AuditLogRepo.create({
-      user_id: req.user.id,
-      actor_email: req.user.email,
-      action: 'create',
-      resource_type: 'invitation',
-      resource_id: token,
-      old_data: null,
-      new_data: { team_id: team.id, email, role },
-      ip_address: req.ip,
-      user_agent: req.headers['user-agent'],
-    })
-    
-    res.json({ invited: true, email })
-  } catch (err) {
-    next(err)
-  }
+
+    expect(result.valid).toBe(false)
+  })
 })
 ```
 
 ---
 
-## Summary
+## Production Checklist
 
-This template includes production-ready implementations of:
+- [ ] Configure email provider credentials
+- [ ] Set up Redis for email queue
+- [ ] Configure S3/R2 for file storage
+- [ ] Set up Sentry project and get DSN
+- [ ] Run audit logs migration
+- [ ] Configure file upload limits
+- [ ] Set audit log retention policy
+- [ ] Test email deliverability
+- [ ] Test file upload from browser
+- [ ] Verify error tracking works
+- [ ] Set up monitoring dashboards
 
-- ✅ **Email System**: Multi-provider transactional emails with tracking
-- ✅ **File Upload**: Direct-to-cloud uploads (S3/R2/local)
-- ✅ **Logging**: Structured application logging (Pino)
-- ✅ **Audit Trails**: Complete change history with before/after snapshots
+---
 
-All features are:
-- 🚀 Production-ready
-- 📊 Analytics-enabled
-- 🔒 Security-hardened
-- 📝 Fully documented
-- 🧪 Testable
+## Support
 
-For more details, see:
-- Email templates: `server/src/lib/@system/Email/templates.js`
-- Storage adapters: `server/src/lib/@system/StorageAdapter/`
-- Audit repository: `server/src/db/repos/@custom/AuditLogRepo.js`
-- Email logs repository: `server/src/db/repos/@custom/EmailLogRepo.js`
+For issues or questions:
+- Check the implementation code in `server/src/lib/@system/`
+- Review test files for usage examples
+- Consult the SAAS-CORE-FEATURES-RESEARCH.md for design decisions

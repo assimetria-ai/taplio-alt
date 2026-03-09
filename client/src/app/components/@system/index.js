@@ -64,6 +64,8 @@ export { PreferencesSettings } from './UserSettings/PreferencesSettings'
 
 // Onboarding
 export { OnboardingWizard } from './Onboarding/OnboardingWizard'
+export { GuidedTour } from './Onboarding/GuidedTour'
+export { ProgressChecklist } from './Onboarding/ProgressChecklist'
 
 // Auth & Security
 export { ProtectedRoute } from './ProtectedRoute/ProtectedRoute'
