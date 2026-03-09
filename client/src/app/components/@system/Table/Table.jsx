@@ -1,9 +1,9 @@
-// @system — data table primitives
+// @system — data table primitives with mobile-responsive padding and overflow
 import { cn } from '@/app/lib/@system/utils'
 
 function Table({ className, ...props }) {
   return (
-    <div className="relative w-full overflow-auto">
+    <div className="mobile-table-wrapper">
       <table className={cn('w-full caption-bottom text-sm', className)} {...props} />
     </div>
   )
@@ -31,6 +31,8 @@ function TableRow({ className, ...props }) {
     <tr
       className={cn(
         'border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted',
+        // Better touch feedback on mobile
+        'active:bg-muted/70',
         className
       )}
       {...props}
@@ -42,7 +44,11 @@ function TableHead({ className, ...props }) {
   return (
     <th
       className={cn(
-        'h-12 px-4 text-left align-middle font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0',
+        // Mobile-responsive padding: smaller on mobile, standard on desktop
+        'h-10 sm:h-12 px-3 sm:px-4 text-left align-middle font-medium text-muted-foreground',
+        // Responsive text size
+        'text-xs sm:text-sm',
+        '[&:has([role=checkbox])]:pr-0',
         className
       )}
       {...props}
@@ -53,7 +59,14 @@ function TableHead({ className, ...props }) {
 function TableCell({ className, ...props }) {
   return (
     <td
-      className={cn('p-4 align-middle [&:has([role=checkbox])]:pr-0', className)}
+      className={cn(
+        // Mobile-responsive padding
+        'px-3 py-3 sm:px-4 sm:py-4 align-middle',
+        // Responsive text size
+        'text-xs sm:text-sm',
+        '[&:has([role=checkbox])]:pr-0',
+        className
+      )}
       {...props}
     />
   )
@@ -61,7 +74,7 @@ function TableCell({ className, ...props }) {
 
 function TableCaption({ className, ...props }) {
   return (
-    <caption className={cn('mt-4 text-sm text-muted-foreground', className)} {...props} />
+    <caption className={cn('mt-3 sm:mt-4 text-xs sm:text-sm text-muted-foreground', className)} {...props} />
   )
 }
 

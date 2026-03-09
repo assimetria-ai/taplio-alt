@@ -1,5 +1,6 @@
 // @system — Modal/Dialog component
-// Accessible modal with backdrop, animations, and responsive design
+// Accessible modal with backdrop, animations, and mobile-responsive design
+// Mobile-first: Full-height on mobile, centered dialog on desktop
 //
 // Usage:
 // <Modal open={isOpen} onClose={() => setOpen(false)} title="Title">
@@ -24,6 +25,7 @@ import { Button } from '../ui/button'
  * @param {boolean} [props.showCloseButton=true] - Show close button
  * @param {boolean} [props.closeOnBackdrop=true] - Close on backdrop click
  * @param {boolean} [props.closeOnEscape=true] - Close on Escape key
+ * @param {boolean} [props.fullScreenMobile=false] - Use full screen on mobile devices
  * @param {string} [props.className] - Additional CSS classes
  */
 export function Modal({
@@ -37,6 +39,7 @@ export function Modal({
   showCloseButton = true,
   closeOnBackdrop = true,
   closeOnEscape = true,
+  fullScreenMobile = false,
   className,
 }) {
   // Handle escape key
@@ -66,21 +69,28 @@ export function Modal({
   if (!open) return null
 
   const sizeClasses = {
-    sm: 'max-w-sm',
-    md: 'max-w-md',
-    lg: 'max-w-lg',
-    xl: 'max-w-xl',
-    full: 'max-w-full mx-4',
+    sm: 'w-full sm:max-w-sm',
+    md: 'w-full sm:max-w-md',
+    lg: 'w-full sm:max-w-lg',
+    xl: 'w-full sm:max-w-xl',
+    full: 'w-full sm:max-w-full sm:mx-4',
   }
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in"
+      className={cn(
+        'fixed inset-0 z-50 flex bg-black/50 backdrop-blur-sm animate-in fade-in',
+        fullScreenMobile ? 'items-end sm:items-center sm:justify-center sm:p-4' : 'items-center justify-center p-4'
+      )}
       onClick={closeOnBackdrop ? onClose : undefined}
     >
       <div
         className={cn(
-          'relative w-full bg-background rounded-lg shadow-lg animate-in zoom-in-95',
+          'relative bg-background shadow-lg animate-in',
+          fullScreenMobile
+            ? 'h-full w-full rounded-t-xl sm:h-auto sm:rounded-lg slide-in-from-bottom sm:zoom-in-95'
+            : 'rounded-lg zoom-in-95 max-h-[90vh] sm:max-h-[85vh]',
+          fullScreenMobile ? 'flex flex-col' : '',
           sizeClasses[size],
           className
         )}
@@ -92,12 +102,15 @@ export function Modal({
       >
         {/* Header */}
         {(title || showCloseButton) && (
-          <div className="flex items-start justify-between p-6 pb-4">
-            <div className="flex-1">
+          <div className={cn(
+            'flex items-start justify-between border-b',
+            fullScreenMobile ? 'p-4 sm:p-6' : 'p-4 sm:p-6 pb-3 sm:pb-4'
+          )}>
+            <div className="flex-1 pr-8">
               {title && (
                 <h2
                   id="modal-title"
-                  className="text-xl font-semibold"
+                  className="text-lg sm:text-xl font-semibold leading-tight"
                 >
                   {title}
                 </h2>
@@ -105,7 +118,7 @@ export function Modal({
               {description && (
                 <p
                   id="modal-description"
-                  className="text-sm text-muted-foreground mt-1"
+                  className="text-sm text-muted-foreground mt-1.5"
                 >
                   {description}
                 </p>
@@ -114,7 +127,7 @@ export function Modal({
             {showCloseButton && (
               <button
                 onClick={onClose}
-                className="ml-4 rounded-lg p-2 hover:bg-muted transition-colors"
+                className="touch-target rounded-md hover:bg-muted transition-colors shrink-0"
                 aria-label="Close modal"
               >
                 <X className="h-5 w-5" />
@@ -124,13 +137,19 @@ export function Modal({
         )}
 
         {/* Content */}
-        <div className="px-6 py-4 max-h-[70vh] overflow-y-auto">
+        <div className={cn(
+          'overflow-y-auto',
+          fullScreenMobile ? 'flex-1 p-4 sm:p-6' : 'p-4 sm:p-6 max-h-[60vh] sm:max-h-[70vh]'
+        )}>
           {children}
         </div>
 
         {/* Footer */}
         {footer && (
-          <div className="flex items-center justify-end gap-2 p-6 pt-4 border-t">
+          <div className={cn(
+            'border-t p-4 sm:p-6',
+            'flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-end sm:gap-2'
+          )}>
             {footer}
           </div>
         )}
@@ -141,6 +160,7 @@ export function Modal({
 
 /**
  * ConfirmModal — Pre-configured confirmation modal
+ * Mobile-optimized: stacked buttons on mobile, horizontal on desktop
  * @param {Object} props
  * @param {boolean} props.open - Modal open state
  * @param {Function} props.onClose - Close handler
@@ -176,6 +196,7 @@ export function ConfirmModal({
             variant="outline"
             onClick={onClose}
             disabled={loading}
+            className="w-full sm:w-auto"
           >
             {cancelText}
           </Button>
@@ -183,6 +204,7 @@ export function ConfirmModal({
             variant={variant}
             onClick={onConfirm}
             disabled={loading}
+            className="w-full sm:w-auto"
           >
             {loading ? 'Loading...' : confirmText}
           </Button>
