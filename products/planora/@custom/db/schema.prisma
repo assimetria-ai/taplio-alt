@@ -19,13 +19,15 @@ model User {
   updatedAt     DateTime @updatedAt
 
   // Relations
-  projectMemberships ProjectMember[]
-  createdProjects    Project[]       @relation("ProjectCreator")
-  createdTasks       Task[]          @relation("TaskCreator")
-  assignedTasks      Task[]          @relation("TaskAssignee")
-  comments           Comment[]
-  activityLogs       ActivityLog[]
-  savedFilters       SavedFilter[]
+  projectMemberships     ProjectMember[]
+  createdProjects        Project[]            @relation("ProjectCreator")
+  createdTasks           Task[]               @relation("TaskCreator")
+  assignedTasks          Task[]               @relation("TaskAssignee")
+  comments               Comment[]
+  activityLogs           ActivityLog[]
+  savedFilters           SavedFilter[]
+  notificationSettings   NotificationSettings?
+  workspaceSettings      WorkspaceSettings[]
 
   @@map("users")
 }
@@ -151,4 +153,39 @@ model SavedFilter {
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("saved_filters")
+}
+
+model NotificationSettings {
+  id                    String   @id @default(cuid())
+  emailNotifications    Boolean  @default(true)
+  taskAssigned          Boolean  @default(true)
+  taskCompleted         Boolean  @default(true)
+  taskComments          Boolean  @default(true)
+  projectInvites        Boolean  @default(true)
+  weeklyDigest          Boolean  @default(true)
+  pushNotifications     Boolean  @default(false)
+  browserNotifications  Boolean  @default(true)
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("notification_settings")
+}
+
+model WorkspaceSettings {
+  id         String   @id @default(cuid())
+  name       String   @default("My Workspace")
+  timezone   String   @default("UTC")
+  dateFormat String   @default("MM/DD/YYYY")
+  timeFormat String   @default("12h")
+  weekStart  String   @default("monday")
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("workspace_settings")
 }

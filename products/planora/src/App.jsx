@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { useState, useEffect } from 'react';
 import DashboardHome from '../@custom/dashboard/DashboardHome';
 import Dashboard from '../@custom/dashboard';
+import TeamManagement from '../@custom/team';
 import Sidebar from '../@custom/dashboard/Sidebar';
 
 function App() {
@@ -67,6 +68,10 @@ function App() {
           
           {/* Task Detail View */}
           <Route path="/tasks/:taskId" element={<Dashboard />} />
+          
+          {/* Team Management */}
+          <Route path="/team" element={<TeamManagement />} />
+          <Route path="/projects/:projectId/team" element={<TeamManagement />} />
           
           {/* Redirect unknown routes to dashboard */}
           <Route path="*" element={<Navigate to="/dashboard" replace />} />

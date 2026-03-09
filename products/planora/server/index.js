@@ -11,6 +11,8 @@ const projectsRouter = require('../@custom/api/projects');
 const tasksRouter = require('../@custom/api/tasks');
 const dashboardRouter = require('../@custom/api/dashboard');
 const teamRouter = require('../@custom/api/team');
+const userRouter = require('../@custom/api/user');
+const workspaceRouter = require('../@custom/api/workspace');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -30,6 +32,8 @@ app.use('/api/projects', projectsRouter);
 app.use('/api/tasks', tasksRouter);
 app.use('/api/dashboard', dashboardRouter);
 app.use('/api/team', teamRouter);
+app.use('/api/user', userRouter);
+app.use('/api/workspace', workspaceRouter);
 
 // Health check
 app.get('/api/health', (req, res) => {

@@ -149,4 +149,7 @@ const requireAuth = async (req, res, next) => {
   }
 };
 
-module.exports = { router, requireAuth };
+// Export with both names for compatibility
+const authenticateToken = requireAuth;
+
+module.exports = { router, requireAuth, authenticateToken };
