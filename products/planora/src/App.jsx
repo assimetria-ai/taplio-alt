@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import DashboardHome from '../@custom/dashboard/DashboardHome';
 import Dashboard from '../@custom/dashboard';
 import TeamManagement from '../@custom/team';
+import Settings from '../@custom/dashboard/Settings';
 import Sidebar from '../@custom/dashboard/Sidebar';
 
 function App() {
@@ -72,6 +73,10 @@ function App() {
           {/* Team Management */}
           <Route path="/team" element={<TeamManagement />} />
           <Route path="/projects/:projectId/team" element={<TeamManagement />} />
+          
+          {/* Settings */}
+          <Route path="/settings" element={<Settings />} />
+          <Route path="/dashboard/settings" element={<Settings />} />
           
           {/* Redirect unknown routes to dashboard */}
           <Route path="*" element={<Navigate to="/dashboard" replace />} />
