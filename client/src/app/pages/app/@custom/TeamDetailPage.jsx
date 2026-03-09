@@ -300,6 +300,7 @@ export function TeamDetailPage() {
                     src={team.avatar_url}
                     alt={team.name}
                     className="h-12 w-12 sm:h-16 sm:w-16 rounded-lg object-cover shrink-0"
+                    loading="lazy"
                   />
                 ) : (
                   <div className="flex h-12 w-12 sm:h-16 sm:w-16 items-center justify-center rounded-lg bg-muted shrink-0">
@@ -387,6 +388,7 @@ export function TeamDetailPage() {
                                   src={member.user_avatar}
                                   alt={member.user_name}
                                   className="h-8 w-8 rounded-full object-cover"
+                                  loading="lazy"
                                 />
                               ) : (
                                 <div className="flex h-8 w-8 items-center justify-center rounded-full bg-muted">

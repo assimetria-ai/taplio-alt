@@ -148,6 +148,7 @@ export function TwoFactorSetup({ enabled, onStatusChange }) {
             src={setupData.qrCodeDataUrl}
             alt="TOTP QR Code"
             className="h-48 w-48 rounded-md border"
+            loading="lazy"
           />
         </div>
         <div className="space-y-1">

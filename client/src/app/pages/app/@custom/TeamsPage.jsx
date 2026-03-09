@@ -50,6 +50,7 @@ function TeamCard({ team, onSelect }) {
             src={team.team_avatar}
             alt={team.team_name}
             className="h-12 w-12 rounded-lg object-cover"
+            loading="lazy"
           />
         ) : (
           <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-muted">

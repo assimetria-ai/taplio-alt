@@ -212,6 +212,7 @@ function Avatar({ src, alt, size = 'md', fallback, className }) {
         sizes[size],
         className
       )}
+      loading="lazy"
     />
   )
 }

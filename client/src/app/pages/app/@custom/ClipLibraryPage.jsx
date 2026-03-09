@@ -123,6 +123,7 @@ function ClipCard({ clip, onDelete, onTagClick, activeTags }) {
             src={clip.thumbnail_url}
             alt={clip.name}
             className="w-full h-full object-cover"
+            loading="lazy"
           />
         ) : (
           <div className="flex flex-col items-center gap-1 text-muted-foreground/40">

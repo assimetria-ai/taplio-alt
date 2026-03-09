@@ -82,6 +82,7 @@ export function Avatar({
             src={src}
             alt={alt || name || 'Avatar'}
             className="h-full w-full object-cover"
+            loading="lazy"
           />
         ) : initials ? (
           <span className="select-none">{initials}</span>
