@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import TaskList from './TaskList';
 import TaskBoard from './TaskBoard';
+import BoardTable from './BoardTable';
 import ProjectHeader from './ProjectHeader';
 
 export default function Dashboard() {
@@ -11,7 +12,7 @@ export default function Dashboard() {
   const [projects, setProjects] = useState([]);
   const [currentProject, setCurrentProject] = useState(null);
   const [tasks, setTasks] = useState([]);
-  const [viewMode, setViewMode] = useState('list'); // list, board, calendar, timeline
+  const [viewMode, setViewMode] = useState('table'); // table, list, kanban, calendar, timeline
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -156,7 +157,7 @@ export default function Dashboard() {
 
             {/* View Mode Switcher */}
             <div className="flex items-center space-x-2 bg-slate-700 rounded-lg p-1">
-              {['list', 'board', 'calendar', 'timeline'].map(mode => (
+              {['table', 'list', 'kanban', 'calendar', 'timeline'].map(mode => (
                 <button
                   key={mode}
                   onClick={() => setViewMode(mode)}
@@ -202,13 +203,20 @@ export default function Dashboard() {
                 Create Project
               </button>
             </div>
+          ) : viewMode === 'table' ? (
+            <BoardTable
+              tasks={tasks}
+              onUpdate={handleUpdateTask}
+              onDelete={handleDeleteTask}
+              onCreate={handleCreateTask}
+            />
           ) : viewMode === 'list' ? (
             <TaskList
               tasks={tasks}
               onUpdate={handleUpdateTask}
               onDelete={handleDeleteTask}
             />
-          ) : viewMode === 'board' ? (
+          ) : viewMode === 'kanban' ? (
             <TaskBoard
               tasks={tasks}
               onUpdate={handleUpdateTask}
