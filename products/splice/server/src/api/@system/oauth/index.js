@@ -113,7 +113,12 @@ async function handleOAuthSuccess({ res, provider, providerId, email, name }) {
   }
 
   const token = await signTokenAsync({ userId: user.id })
-  res.cookie('access_token', token, { httpOnly: true, secure: true, sameSite: 'strict', maxAge: SESSION_TTL * 1000 })
+  res.cookie('access_token', token, { 
+    httpOnly: true, 
+    secure: true, 
+    sameSite: 'lax', // Task #10362 - CSRF protection with better usability
+    maxAge: SESSION_TTL * 1000 
+  })
   
   // SECURITY: Use safe redirect helper
   res.redirect(safeRedirectUrl('/app'))

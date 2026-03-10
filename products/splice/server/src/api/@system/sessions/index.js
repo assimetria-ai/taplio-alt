@@ -71,7 +71,7 @@ async function isBlacklisted(token) {
 function setAccessCookie(res, token) {
   res.cookie('access_token', token, {
     httpOnly: true,
-    sameSite: 'strict',
+    sameSite: 'lax', // Task #10362 - CSRF protection with better usability
     secure: true,
     maxAge: ACCESS_TOKEN_TTL_MS,
     path: '/',
@@ -81,7 +81,7 @@ function setAccessCookie(res, token) {
 function setRefreshCookie(res, token) {
   res.cookie('refresh_token', token, {
     httpOnly: true,
-    sameSite: 'strict',
+    sameSite: 'lax', // Task #10362 - CSRF protection with better usability
     secure: true,
     maxAge: REFRESH_TOKEN_TTL_MS,
     path: '/api/sessions', // scoped: only sent to token-rotation endpoint

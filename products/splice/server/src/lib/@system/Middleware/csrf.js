@@ -29,7 +29,7 @@ const csrfProtection = csrf({
     path: '/',
     httpOnly: true, // Cannot be accessed by JavaScript
     secure: process.env.NODE_ENV === 'production', // HTTPS only in production
-    sameSite: 'strict', // Strict SameSite policy for maximum protection
+    sameSite: 'lax', // Task #10362 - CSRF protection with better usability
     maxAge: 3600, // 1 hour in seconds
   },
 
