@@ -16,12 +16,13 @@ model Newsletter {
   htmlContent     String    @map("html_content") @db.Text
   plainContent    String?   @map("plain_content") @db.Text
   subject         String?
-  status          String    @default("draft") // draft, scheduled, published
+  status          String    @default("draft") // draft, scheduled, publishing, published, failed
   publishedAt     DateTime? @map("published_at")
   scheduledFor    DateTime? @map("scheduled_for")
   subscriberCount Int       @default(0) @map("subscriber_count")
   openRate        Float     @default(0) @map("open_rate")
   clickRate       Float     @default(0) @map("click_rate")
+  metadata        Json?     @default("{}") // Scheduling metadata (timezone, listIds, errors)
   createdAt       DateTime  @default(now()) @map("created_at")
   updatedAt       DateTime  @updatedAt @map("updated_at")
 
