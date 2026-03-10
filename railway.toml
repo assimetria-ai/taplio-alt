@@ -42,3 +42,18 @@ healthcheckPath = "/api/health"
 healthcheckTimeout = 100
 restartPolicyType = "ON_FAILURE"
 restartPolicyMaxRetries = 10
+
+[[services]]
+name = "planora"
+source = "products/planora"
+
+[services.planora.build]
+builder = "NIXPACKS"
+buildCommand = "npm ci && npm run build"
+
+[services.planora.deploy]
+startCommand = "npm start"
+healthcheckPath = "/api/health"
+healthcheckTimeout = 30
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 10
