@@ -1,437 +1,409 @@
-# CSRF Protection Guide
-**Task #10361 - Implement csurf middleware in product template**
+# CSRF Protection Implementation Guide
+**Task #10361 & #10362 - CSRF Defense**
 
 ## Overview
 
-This application implements CSRF (Cross-Site Request Forgery) protection using the `csurf` middleware package. CSRF protection prevents attackers from tricking authenticated users into performing unwanted actions on your application.
+CSRF (Cross-Site Request Forgery) protection has been implemented in the product template using the `csurf` middleware package with `SameSite=Lax` cookie attributes.
 
-## How CSRF Works
+## Implementation Summary
 
-### The Attack Scenario (Without Protection)
+### ✅ What Was Implemented
 
-1. User logs into your app at `yourapp.com` and gets a session cookie
-2. User visits a malicious site `evil.com`
-3. `evil.com` contains a form that submits to `yourapp.com/api/delete-account`
-4. Browser automatically includes the session cookie with the request
-5. Your app processes the request as if the user intentionally submitted it
-6. ❌ User's account gets deleted without their knowledge
+#### Task #10361: CSRF Middleware
+- **CSRF token middleware** (`csrf.js`)
+  - Synchronizer token pattern using cookies
+  - Token validation on state-changing requests (POST, PUT, PATCH, DELETE)
+  - Multiple token delivery methods (header, body, query string)
+  - Error handling with user-friendly messages
+  - Security logging for CSRF violations
 
-### The Protection (With CSRF Tokens)
+#### Task #10362: SameSite Cookie Attribute
+- **Session cookies** updated to `SameSite=Lax`:
+  - Access tokens
+  - Refresh tokens
+  - OAuth tokens
+  - CSRF tokens
 
-1. Server generates a unique CSRF token and stores it in a cookie
-2. Client must include this token in state-changing requests (POST, PUT, DELETE)
-3. Server validates that the token in the request matches the cookie
-4. Malicious sites can't read the token (Same-Origin Policy)
-5. ✅ Unauthorized requests are rejected
+## How CSRF Protection Works
 
-## Implementation Details
+### Token Generation
+1. Server generates CSRF token and stores it in cookie: `_csrf`
+2. Cookie is `httpOnly` (JavaScript cannot read it)
+3. Cookie has `sameSite: 'lax'` (sent on top-level navigation)
 
-### Server-Side
+### Token Validation
+Client must include token in requests via:
+- **Header** (recommended): `X-CSRF-Token` or `CSRF-Token`
+- **Body**: `_csrf` field
+- **Query string**: `?_csrf=token` (fallback)
 
-CSRF protection is automatically applied to:
-- ✅ POST requests
-- ✅ PUT requests
-- ✅ PATCH requests
-- ✅ DELETE requests
+### Safe Methods
+GET, HEAD, OPTIONS requests bypass CSRF protection (read-only operations).
 
-CSRF protection is **NOT** applied to:
-- ❌ GET requests (read-only, should be safe)
-- ❌ HEAD requests
-- ❌ OPTIONS requests
+## Usage
 
-### Token Storage
+### Backend Setup
 
-The CSRF token is stored in a cookie with these security settings:
+CSRF middleware is automatically applied in `app.js`:
 
 ```javascript
-{
-  key: '_csrf',
-  httpOnly: true,      // JavaScript cannot access it
-  secure: true,        // HTTPS only (production)
-  sameSite: 'strict',  // Maximum protection
-  maxAge: 3600,        // 1 hour lifetime
-}
+// CSRF Protection (after cookieParser)
+app.use(csrfProtection)
+
+// CSRF token endpoint
+app.get('/api/csrf-token', getCsrfToken)
+
+// CSRF error handler
+app.use(csrfErrorHandler)
 ```
 
-## Client-Side Integration
+### Frontend Integration
 
-### React Example (Recommended)
-
-```javascript
-// src/lib/api.js
-import axios from 'axios';
-
-// Create axios instance
-const api = axios.create({
-  baseURL: '/api',
-  withCredentials: true, // Important: Send cookies with requests
-});
-
-// Fetch CSRF token on app initialization
-let csrfToken = null;
-
-export async function initCsrfProtection() {
-  try {
-    const response = await api.get('/csrf-token');
-    csrfToken = response.data.csrfToken;
-  } catch (error) {
-    console.error('Failed to fetch CSRF token:', error);
-  }
-}
-
-// Add CSRF token to all requests
-api.interceptors.request.use((config) => {
-  // Skip for GET/HEAD/OPTIONS
-  if (['post', 'put', 'patch', 'delete'].includes(config.method)) {
-    if (csrfToken) {
-      // Add token to header (recommended)
-      config.headers['X-CSRF-Token'] = csrfToken;
-    }
-  }
-  return config;
-});
-
-// Handle CSRF errors (token expired/invalid)
-api.interceptors.response.use(
-  (response) => response,
-  async (error) => {
-    if (error.response?.status === 403 && 
-        error.response?.data?.error === 'invalid_csrf_token') {
-      // Token expired, get a new one
-      await initCsrfProtection();
-      // Retry the original request
-      return api.request(error.config);
-    }
-    return Promise.reject(error);
-  }
-);
-
-export default api;
-```
+#### 1. Get CSRF Token on App Load
 
 ```javascript
-// src/index.js or src/App.js
-import { initCsrfProtection } from './lib/api';
-
-// Initialize CSRF protection when app loads
-initCsrfProtection();
-```
-
-### Vanilla JavaScript / Fetch API
-
-```javascript
-// Get CSRF token
-let csrfToken = null;
-
-async function getCsrfToken() {
+// Fetch token when app initializes
+async function initCsrfToken() {
   const response = await fetch('/api/csrf-token', {
-    credentials: 'include', // Include cookies
-  });
-  const data = await response.json();
-  csrfToken = data.csrfToken;
-}
-
-// Call on page load
-getCsrfToken();
-
-// Use in requests
-async function deleteItem(id) {
-  const response = await fetch(`/api/items/${id}`, {
-    method: 'DELETE',
-    credentials: 'include',
-    headers: {
-      'Content-Type': 'application/json',
-      'X-CSRF-Token': csrfToken, // Add CSRF token
-    },
-  });
+    credentials: 'include' // Important: include cookies
+  })
+  const { csrfToken } = await response.json()
   
-  if (response.status === 403) {
-    // CSRF token invalid, refresh and retry
-    await getCsrfToken();
-    return deleteItem(id); // Retry
-  }
-  
-  return response.json();
+  // Store token for later use
+  sessionStorage.setItem('csrfToken', csrfToken)
+  return csrfToken
 }
 ```
 
-### Form Submissions (Traditional HTML Forms)
+#### 2. Include Token in State-Changing Requests
 
+**Option A: Custom Header (Recommended)**
+```javascript
+const csrfToken = sessionStorage.getItem('csrfToken')
+
+fetch('/api/posts', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    'X-CSRF-Token': csrfToken
+  },
+  credentials: 'include',
+  body: JSON.stringify({ title: 'Hello' })
+})
+```
+
+**Option B: Request Body**
+```javascript
+fetch('/api/posts', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json'
+  },
+  credentials: 'include',
+  body: JSON.stringify({
+    _csrf: csrfToken,
+    title: 'Hello'
+  })
+})
+```
+
+**Option C: Form Submission**
 ```html
-<!-- Add hidden input with CSRF token -->
-<form action="/api/profile" method="POST">
-  <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-  <input type="text" name="name" placeholder="Your name">
-  <button type="submit">Update Profile</button>
+<form method="POST" action="/api/posts">
+  <input type="hidden" name="_csrf" value="{{ csrfToken }}">
+  <input type="text" name="title">
+  <button type="submit">Submit</button>
 </form>
 ```
 
-## Token Passing Methods
-
-The client can pass the CSRF token in three ways (in order of preference):
-
-### 1. Custom Header (Recommended)
+#### 3. React/Vue Example
 
 ```javascript
-headers: {
-  'X-CSRF-Token': token,  // or 'CSRF-Token'
+// Create axios instance with CSRF token
+import axios from 'axios'
+
+const api = axios.create({
+  baseURL: '/api',
+  withCredentials: true
+})
+
+// Add CSRF token to all requests
+api.interceptors.request.use(config => {
+  const csrfToken = sessionStorage.getItem('csrfToken')
+  if (csrfToken && ['post', 'put', 'patch', 'delete'].includes(config.method)) {
+    config.headers['X-CSRF-Token'] = csrfToken
+  }
+  return config
+})
+
+// Handle CSRF errors (token expired, refresh)
+api.interceptors.response.use(
+  response => response,
+  async error => {
+    if (error.response?.status === 403 && 
+        error.response?.data?.error === 'invalid_csrf_token') {
+      // Refresh CSRF token and retry
+      await initCsrfToken()
+      return api.request(error.config)
+    }
+    return Promise.reject(error)
+  }
+)
+```
+
+## SameSite=Lax vs Strict
+
+### Why Lax?
+
+**SameSite=Lax** provides:
+- ✅ CSRF protection for POST/PUT/PATCH/DELETE
+- ✅ Allows cookies on top-level navigation (clicking links)
+- ✅ Better user experience
+- ✅ Works with email links, bookmarks, etc.
+
+**SameSite=Strict** would:
+- ❌ Block cookies even on legitimate navigation
+- ❌ Force re-authentication after clicking email links
+- ❌ Break legitimate cross-site workflows
+
+### When to Use Each
+
+| Use Case | SameSite Setting |
+|----------|------------------|
+| Session cookies | `lax` (recommended) |
+| CSRF tokens | `lax` |
+| Highly sensitive operations | `strict` (with usability trade-off) |
+| Embedded widgets | `none` (requires HTTPS) |
+
+## Security Features
+
+### Defense in Depth
+
+1. **CSRF Tokens** - Primary defense
+2. **SameSite Cookies** - Browser-level protection
+3. **CORS Headers** - Restrict cross-origin requests
+4. **Origin Validation** - Check request origin
+5. **Custom Headers** - Require non-simple requests
+
+### Protection Against
+
+- ✅ Cross-site form submissions
+- ✅ AJAX requests from malicious sites
+- ✅ Image/script tags as attack vectors
+- ✅ Clickjacking (via X-Frame-Options)
+- ✅ Token reuse attacks
+- ✅ Session fixation
+
+### What's NOT Protected
+
+- ❌ XSS attacks (use CSP + input validation)
+- ❌ SQL injection (use parameterized queries)
+- ❌ Brute force (use rate limiting)
+- ❌ Man-in-the-middle (use HTTPS)
+
+## Error Handling
+
+### CSRF Validation Failure
+
+**Server Response:**
+```json
+{
+  "error": "invalid_csrf_token",
+  "message": "Invalid or missing CSRF token. Please refresh the page and try again."
 }
 ```
 
-**Pros:**
-- Clean and explicit
-- Works with all content types
-- Preferred for AJAX/SPA applications
+**HTTP Status:** `403 Forbidden`
 
-### 2. Request Body
+### Frontend Error Handling
 
 ```javascript
-// JSON
-body: JSON.stringify({
-  _csrf: token,
-  data: {...}
-})
-
-// Form data
-const formData = new FormData();
-formData.append('_csrf', token);
+try {
+  const response = await fetch('/api/posts', {
+    method: 'POST',
+    headers: { 'X-CSRF-Token': csrfToken },
+    body: JSON.stringify(data)
+  })
+  
+  if (response.status === 403) {
+    const error = await response.json()
+    if (error.error === 'invalid_csrf_token') {
+      // Refresh token and retry
+      await initCsrfToken()
+      alert('Session expired. Please try again.')
+    }
+  }
+} catch (error) {
+  console.error('Request failed:', error)
+}
 ```
 
-**Pros:**
-- Works with traditional form submissions
+## Configuration
 
-**Cons:**
-- Pollutes request body
-- Need to filter out `_csrf` field in backend
+### Environment Variables
 
-### 3. Query String (Least Secure)
-
-```
-POST /api/items?_csrf=token
+```env
+# Automatically configured based on NODE_ENV
+NODE_ENV=production  # Enables secure cookies (HTTPS only)
 ```
 
-**Pros:**
-- Simple for testing
+### Custom Configuration
 
-**Cons:**
-- Token may be logged in server logs
-- Token visible in browser history
-- **Not recommended for production**
+To exclude specific routes from CSRF protection:
+
+```javascript
+const { conditionalCsrf } = require('./lib/@system/Middleware')
+
+// Exclude public API endpoints
+app.use(conditionalCsrf(['/api/public', '/api/webhooks']))
+```
 
 ## Testing
 
-### Manual Testing with cURL
+### Manual Testing
 
 ```bash
 # 1. Get CSRF token
-curl -c cookies.txt http://localhost:3000/api/csrf-token
+curl -c cookies.txt http://localhost:4000/api/csrf-token
 
-# 2. Make request with token
-TOKEN=$(curl -b cookies.txt http://localhost:3000/api/csrf-token | jq -r '.csrfToken')
-
-curl -X POST http://localhost:3000/api/items \
-  -b cookies.txt \
+# 2. Make protected request WITH token
+curl -b cookies.txt \
+  -H "X-CSRF-Token: <token>" \
   -H "Content-Type: application/json" \
-  -H "X-CSRF-Token: $TOKEN" \
-  -d '{"name": "Test Item"}'
+  -d '{"title":"Test"}' \
+  http://localhost:4000/api/posts
+
+# 3. Make protected request WITHOUT token (should fail)
+curl -b cookies.txt \
+  -H "Content-Type: application/json" \
+  -d '{"title":"Test"}' \
+  http://localhost:4000/api/posts
 ```
 
-### Testing CSRF Protection
-
-```bash
-# This should FAIL with 403 (no token)
-curl -X POST http://localhost:3000/api/items \
-  -b cookies.txt \
-  -H "Content-Type: application/json" \
-  -d '{"name": "Test Item"}'
-
-# Response: {"error":"invalid_csrf_token","message":"Invalid or missing CSRF token..."}
-```
-
-### Jest/Integration Tests
+### Automated Testing
 
 ```javascript
-const request = require('supertest');
-const app = require('../src/app');
-
+// In your test suite
 describe('CSRF Protection', () => {
-  it('should reject POST without CSRF token', async () => {
+  it('should require CSRF token for POST requests', async () => {
     const response = await request(app)
-      .post('/api/items')
-      .send({ name: 'Test' })
-      .expect(403);
+      .post('/api/posts')
+      .send({ title: 'Test' })
+      .expect(403)
     
-    expect(response.body.error).toBe('invalid_csrf_token');
-  });
-
-  it('should accept POST with valid CSRF token', async () => {
-    // Get CSRF token
+    expect(response.body.error).toBe('invalid_csrf_token')
+  })
+  
+  it('should accept valid CSRF token', async () => {
+    // Get token
     const tokenResponse = await request(app)
       .get('/api/csrf-token')
-      .expect(200);
+      .expect(200)
     
-    const csrfToken = tokenResponse.body.csrfToken;
-    const cookies = tokenResponse.headers['set-cookie'];
-
-    // Make request with token
-    const response = await request(app)
-      .post('/api/items')
+    const csrfToken = tokenResponse.body.csrfToken
+    const cookies = tokenResponse.headers['set-cookie']
+    
+    // Use token
+    await request(app)
+      .post('/api/posts')
       .set('Cookie', cookies)
       .set('X-CSRF-Token', csrfToken)
-      .send({ name: 'Test Item' })
-      .expect(201);
-    
-    expect(response.body).toHaveProperty('id');
-  });
-});
+      .send({ title: 'Test' })
+      .expect(201)
+  })
+})
 ```
 
-## Disabling CSRF (Development Only)
+## Production Checklist
 
-For development or specific endpoints (like webhooks), you can conditionally disable CSRF:
+- ✅ CSRF middleware enabled
+- ✅ SameSite=Lax on all session cookies
+- ✅ HTTPS enabled (secure cookies)
+- ✅ CORS configured correctly
+- ✅ CSP headers set
+- ✅ Error logging for CSRF violations
+- ✅ Frontend CSRF token handling
+- ✅ Token refresh on expiry
+- ✅ Tests for CSRF protection
 
-### Option 1: Exclude Specific Routes
+## Monitoring
 
-```javascript
-// app.js
-const { conditionalCsrf } = require('./lib/@system/Middleware');
+### Log CSRF Violations
 
-// Exclude webhook endpoints from CSRF
-app.use(conditionalCsrf([
-  '/api/webhooks/stripe',
-  '/api/webhooks/github',
-]));
-```
+CSRF failures are automatically logged with:
+- Request method and URL
+- Client IP address
+- User agent
+- Timestamp
 
-### Option 2: Disable in Test Environment
-
-```javascript
-// app.js
-if (process.env.NODE_ENV !== 'test') {
-  app.use(csrfProtection);
+Example log entry:
+```json
+{
+  "level": "warn",
+  "type": "csrf_violation",
+  "method": "POST",
+  "url": "/api/posts",
+  "ip": "192.168.1.100",
+  "userAgent": "Mozilla/5.0...",
+  "time": "2026-03-10T17:30:00.000Z"
 }
 ```
 
-### Option 3: Per-Route Exemption
+### Alerts
 
-```javascript
-// routes/webhooks.js
-const express = require('express');
-const router = express.Router();
+Set up alerts for:
+- High rate of CSRF violations (possible attack)
+- CSRF failures from specific IPs
+- Unusual patterns (e.g., old tokens being reused)
 
-// This route bypasses CSRF (called before global CSRF middleware)
-router.post('/webhooks/stripe', express.raw({ type: 'application/json' }), (req, res) => {
-  // Handle webhook
-});
+## Troubleshooting
 
-module.exports = router;
-```
+### Token Expired Error
 
-## Security Best Practices
+**Symptom:** Users see "Invalid CSRF token" after page idle
 
-### ✅ DO
+**Solution:** 
+- Token expires after 1 hour (configurable)
+- Frontend should refresh token when it expires
+- Implement token refresh on 403 errors
 
-- Always use HTTPS in production
-- Set `secure: true` on cookies in production
-- Use `sameSite: 'strict'` for maximum protection
-- Rotate CSRF tokens on authentication state changes
-- Log CSRF violations for security monitoring
-- Keep tokens short-lived (1 hour is good)
+### Token Not Being Sent
 
-### ❌ DON'T
+**Symptom:** All POST requests fail with CSRF error
 
-- Don't disable CSRF in production without good reason
-- Don't pass tokens in URLs (use headers or body)
-- Don't store tokens in localStorage (XSS risk)
-- Don't use the same token for multiple sessions
-- Don't expose tokens in error messages or logs
-
-## Common Issues & Solutions
-
-### Issue: "Invalid CSRF token" on every request
-
-**Cause:** Cookies not being sent with requests
+**Causes:**
+1. Missing `credentials: 'include'` in fetch
+2. CORS not configured correctly
+3. Cookies blocked by browser
 
 **Solution:**
 ```javascript
-// Make sure withCredentials is set
-axios.defaults.withCredentials = true;
-
-// Or with fetch
-fetch(url, { credentials: 'include' });
+fetch('/api/posts', {
+  credentials: 'include', // ✅ Required!
+  headers: { 'X-CSRF-Token': token }
+})
 ```
 
----
+### Development Mode Issues
 
-### Issue: CSRF token works in Postman but not in browser
+**Issue:** CSRF protection interfering with development
 
-**Cause:** CORS or cookie settings
-
-**Solution:**
-- Check CORS allows credentials: `credentials: true`
-- Check cookie domain matches your frontend domain
-- Verify `sameSite` setting (use 'lax' if frontend is on different subdomain)
-
----
-
-### Issue: Token expires too quickly
-
-**Solution:** Increase token lifetime
+**Solution:** Disable CSRF in development:
 ```javascript
-// csrf.js
-cookie: {
-  maxAge: 7200, // 2 hours instead of 1
+if (process.env.NODE_ENV !== 'development') {
+  app.use(csrfProtection)
 }
 ```
-
----
-
-### Issue: Breaking change for existing API clients
-
-**Solution:** Gradual rollout
-```javascript
-// Start with warnings only (don't reject)
-const csrfProtection = csrf({
-  ignoreMethods: ['GET', 'HEAD', 'OPTIONS', 'POST'], // Temporarily allow POST
-});
-
-// Monitor logs, then remove POST from ignoreMethods
-```
-
-## Webhooks & External Services
-
-External services (Stripe, GitHub, etc.) can't include CSRF tokens. Exclude these endpoints:
-
-```javascript
-// app.js
-
-// Webhook routes (no CSRF needed - use webhook signatures instead)
-app.post('/api/webhooks/stripe', stripeWebhook);
-app.post('/api/webhooks/github', githubWebhook);
-
-// Then apply CSRF to remaining routes
-app.use(csrfProtection);
-app.use('/api', apiRoutes);
-```
-
-## Migration from No CSRF
-
-If you're adding CSRF to an existing application:
-
-1. **Add the middleware** (this PR)
-2. **Update frontend** to fetch and include tokens
-3. **Monitor errors** - watch for 403s in production
-4. **Gradual rollout** - start with warning logs only
-5. **Update documentation** - notify API consumers
-6. **Test thoroughly** - especially form submissions
 
 ## References
 
 - [OWASP CSRF Prevention Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Cross-Site_Request_Forgery_Prevention_Cheat_Sheet.html)
 - [csurf npm package](https://www.npmjs.com/package/csurf)
-- [Express.js Security Best Practices](https://expressjs.com/en/advanced/best-practice-security.html)
+- [SameSite Cookies Explained](https://web.dev/samesite-cookies-explained/)
+- [MDN: SameSite cookies](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie/SameSite)
 
 ---
 
-**Last Updated:** Task #10361  
-**Status:** Implemented and ready for use
+**Implementation Date:** March 10, 2026  
+**Tasks:** #10361 (CSRF Middleware), #10362 (SameSite=Lax)  
+**Status:** ✅ Complete and Production-Ready
