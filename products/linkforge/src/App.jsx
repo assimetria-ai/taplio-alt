@@ -1,12 +1,14 @@
 /**
  * LinkForge Main App Component
  * Task #10278 - Dashboard Links List UI
+ * Task #10314 - Build bulk link import via CSV
  */
 
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import Dashboard from './pages/Dashboard';
 import Login from './pages/Login';
+import Import from './pages/Import';
 import './App.css';
 
 function App() {
@@ -15,6 +17,7 @@ function App() {
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/import" element={<Import />} />
         <Route path="/" element={<Navigate to="/dashboard" replace />} />
       </Routes>
     </div>

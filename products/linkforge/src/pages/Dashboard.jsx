@@ -6,10 +6,12 @@
  */
 
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import LinksTable from '../components/LinksTable';
-import { PlusIcon } from '@heroicons/react/24/outline';
+import { PlusIcon, DocumentArrowUpIcon } from '@heroicons/react/24/outline';
 
 export default function Dashboard() {
+  const navigate = useNavigate();
   const [links, setLinks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -87,10 +89,19 @@ export default function Dashboard() {
                 Manage your short links
               </p>
             </div>
-            <button className="btn btn-primary flex items-center space-x-2">
-              <PlusIcon className="w-5 h-5" />
-              <span>Create Link</span>
-            </button>
+            <div className="flex space-x-3">
+              <button 
+                onClick={() => navigate('/import')}
+                className="btn btn-secondary flex items-center space-x-2"
+              >
+                <DocumentArrowUpIcon className="w-5 h-5" />
+                <span>Bulk Import</span>
+              </button>
+              <button className="btn btn-primary flex items-center space-x-2">
+                <PlusIcon className="w-5 h-5" />
+                <span>Create Link</span>
+              </button>
+            </div>
           </div>
         </div>
       </header>

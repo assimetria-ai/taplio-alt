@@ -1,5 +1,6 @@
 // products/linkforge/@custom/db/schema.prisma - LinkForge Database Schema
 // Task #10311 - Custom Short Domain Configuration
+// Task #10314 - Bulk link import via CSV (added title, tags)
 
 datasource db {
   provider = "postgresql"
@@ -14,6 +15,8 @@ model Link {
   id         String   @id @default(cuid())
   slug       String   @unique
   targetUrl  String   @map("target_url")
+  title      String?  // Link title/description
+  tags       String[] @default([]) // Tags for organization
   userId     String?  @map("user_id")
   domainId   String?  @map("domain_id") // Link to custom domain
   clicks     Int      @default(0)

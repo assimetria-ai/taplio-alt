@@ -14,7 +14,8 @@ import {
   MagnifyingGlassIcon,
   ChartBarIcon,
   TrashIcon,
-  PencilIcon
+  PencilIcon,
+  QrCodeIcon
 } from '@heroicons/react/24/outline';
 import { CheckIcon } from '@heroicons/react/24/solid';
 
@@ -73,6 +74,18 @@ export default function LinksTable({ links, onDelete, onEdit }) {
       setTimeout(() => setCopiedId(null), 2000);
     } catch (err) {
       console.error('Failed to copy:', err);
+    }
+  };
+
+  // Download QR code
+  const downloadQRCode = async (link, format = 'png') => {
+    try {
+      const url = `/api/qrcode/${link.slug}?format=${format}&size=500&download=1`;
+      
+      // Open in new tab to trigger download
+      window.open(url, '_blank');
+    } catch (err) {
+      console.error('Failed to download QR code:', err);
     }
   };
 
@@ -273,6 +286,13 @@ export default function LinksTable({ links, onDelete, onEdit }) {
                 {/* Actions */}
                 <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                   <div className="flex items-center justify-end space-x-2">
+                    <button
+                      onClick={() => downloadQRCode(link, 'png')}
+                      className="p-2 hover:bg-purple-50 text-purple-600 rounded transition-colors"
+                      title="Download QR code"
+                    >
+                      <QrCodeIcon className="w-4 h-4" />
+                    </button>
                     <button
                       onClick={() => onEdit && onEdit(link)}
                       className="p-2 hover:bg-blue-50 text-blue-600 rounded transition-colors"
