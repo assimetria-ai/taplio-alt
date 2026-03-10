@@ -4,6 +4,7 @@ const express = require('express');
 const cookieParser = require('cookie-parser');
 const cors = require('cors');
 const path = require('path');
+const securityHeaders = require('./middleware/security');
 
 // Import API routes
 const { router: authRouter } = require('../@custom/api/auth');
@@ -16,6 +17,9 @@ const workspaceRouter = require('../@custom/api/workspace');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+// Security headers (CSP for XSS protection) - must be first
+app.use(securityHeaders);
 
 // Middleware
 app.use(cors({

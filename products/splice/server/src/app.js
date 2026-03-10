@@ -6,7 +6,7 @@ const cookieParser = require('cookie-parser')
 const pinoHttp = require('pino-http')
 
 const logger = require('./lib/@system/Logger')
-const { cors, securityHeaders } = require('./lib/@system/Middleware')
+const { cors, securityHeaders, csrfProtection, csrfErrorHandler, getCsrfToken } = require('./lib/@system/Middleware')
 const systemRoutes = require('./routes/@system')
 const customRoutes = require('./routes/@custom')
 
@@ -23,13 +23,23 @@ app.use(compression())
 app.use(express.json({ limit: '10mb' }))
 app.use(cookieParser())
 
+// CSRF Protection (Task #10361)
+// Must be after cookieParser as it relies on cookies
+app.use(csrfProtection)
+
 if (process.env.NODE_ENV !== 'test') {
   app.use(pinoHttp({ logger }))
 }
 
+// CSRF token endpoint - GET only, so CSRF doesn't apply to itself
+app.get('/api/csrf-token', getCsrfToken)
+
 // Routes
 app.use('/api', systemRoutes)
 app.use('/api', customRoutes)
+
+// CSRF error handler - must be before general error handler
+app.use(csrfErrorHandler)
 
 // Serve React SPA in production
 const publicDir = path.join(__dirname, '..', 'public')

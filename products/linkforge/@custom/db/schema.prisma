@@ -1,4 +1,5 @@
 // products/linkforge/@custom/db/schema.prisma - LinkForge Database Schema
+// Task #10311 - Custom Short Domain Configuration
 
 datasource db {
   provider = "postgresql"
@@ -14,16 +15,19 @@ model Link {
   slug       String   @unique
   targetUrl  String   @map("target_url")
   userId     String?  @map("user_id")
+  domainId   String?  @map("domain_id") // Link to custom domain
   clicks     Int      @default(0)
   createdAt  DateTime @default(now()) @map("created_at")
   updatedAt  DateTime @updatedAt @map("updated_at")
 
   // Relations
-  user       User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
-  clickEvents ClickEvent[]
+  user         User?         @relation(fields: [userId], references: [id], onDelete: SetNull)
+  customDomain CustomDomain? @relation(fields: [domainId], references: [id], onDelete: SetNull)
+  clickEvents  ClickEvent[]
 
   @@index([slug])
   @@index([userId])
+  @@index([domainId])
   @@map("links")
 }
 
@@ -36,9 +40,45 @@ model User {
   updatedAt DateTime @updatedAt @map("updated_at")
 
   // Relations
-  links     Link[]
+  links         Link[]
+  customDomains CustomDomain[]
 
   @@map("users")
+}
+
+model CustomDomain {
+  id                String    @id @default(cuid())
+  userId            String    @map("user_id")
+  domain            String    @unique // e.g., "go.brand.com"
+  status            String    @default("pending") // pending, verified, active, failed
+  
+  // DNS Verification
+  verificationToken String    @map("verification_token") // Random token for DNS TXT record
+  verifiedAt        DateTime? @map("verified_at")
+  lastCheckedAt     DateTime? @map("last_checked_at")
+  
+  // SSL Configuration
+  sslStatus         String    @default("pending") @map("ssl_status") // pending, active, failed
+  sslProvider       String?   @map("ssl_provider") // letsencrypt, cloudflare, custom
+  sslExpiresAt      DateTime? @map("ssl_expires_at")
+  
+  // Settings
+  isDefault         Boolean   @default(false) @map("is_default") // Default domain for user's links
+  redirectHttps     Boolean   @default(true) @map("redirect_https")
+  
+  // Metadata
+  metadata          Json?     @default("{}") // Store additional config (CDN, etc.)
+  createdAt         DateTime  @default(now()) @map("created_at")
+  updatedAt         DateTime  @updatedAt @map("updated_at")
+
+  // Relations
+  user              User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  links             Link[]
+
+  @@index([userId])
+  @@index([status])
+  @@index([domain])
+  @@map("custom_domains")
 }
 
 model ClickEvent {
