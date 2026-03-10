@@ -1,0 +1,117 @@
+// Prisma Schema for Taplio-Alt
+// Task #10266 - LinkedIn OAuth Token Storage
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// User model (simplified - extend as needed)
+model User {
+  id            String        @id @default(cuid())
+  email         String        @unique
+  name          String?
+  passwordHash  String?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  
+  // Relations
+  oauthTokens   OAuthToken[]
+  posts         Post[]
+  
+  @@map("users")
+}
+
+// OAuth Token Storage
+// Stores access tokens, refresh tokens, and profile data from OAuth providers
+model OAuthToken {
+  id            String    @id @default(cuid())
+  userId        String
+  provider      String    // 'linkedin', 'twitter', etc.
+  accessToken   String    // Encrypted in production
+  refreshToken  String?   // Optional, encrypted in production
+  expiresAt     DateTime? // When the access token expires
+  scope         String    // Granted permissions
+  tokenType     String    @default("Bearer")
+  
+  // LinkedIn profile data (JSON)
+  profile       Json?     // Stores profile data from LinkedIn
+  
+  // Timestamps
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  
+  // Relations
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Composite unique constraint
+  @@unique([userId, provider])
+  @@index([userId])
+  @@index([provider])
+  @@map("oauth_tokens")
+}
+
+// Social Media Posts
+// Tracks published content across platforms
+model Post {
+  id              String    @id @default(cuid())
+  userId          String
+  content         String    @db.Text
+  scheduledAt     DateTime?
+  publishedAt     DateTime?
+  status          PostStatus @default(DRAFT)
+  
+  // LinkedIn-specific data
+  linkedinPostId  String?   // LinkedIn post URN
+  linkedinUrl     String?   // Public URL to the post
+  
+  // Metadata
+  mediaUrls       Json?     // Array of media URLs
+  hashtags        String[]  // Array of hashtags
+  mentions        String[]  // Array of mentioned profiles
+  
+  // Analytics
+  impressions     Int       @default(0)
+  likes           Int       @default(0)
+  comments        Int       @default(0)
+  shares          Int       @default(0)
+  
+  // Timestamps
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  
+  // Relations
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([userId])
+  @@index([status])
+  @@index([scheduledAt])
+  @@map("posts")
+}
+
+// Post Status Enum
+enum PostStatus {
+  DRAFT
+  SCHEDULED
+  PUBLISHING
+  PUBLISHED
+  FAILED
+}
+
+// API Usage Tracking (for rate limiting)
+model ApiUsage {
+  id            String    @id @default(cuid())
+  userId        String
+  provider      String    // 'linkedin'
+  endpoint      String    // API endpoint called
+  requestCount  Int       @default(1)
+  date          DateTime  @default(now())
+  
+  @@unique([userId, provider, endpoint, date])
+  @@index([userId, provider, date])
+  @@map("api_usage")
+}
