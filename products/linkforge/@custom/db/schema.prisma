@@ -1,0 +1,60 @@
+// products/linkforge/@custom/db/schema.prisma - LinkForge Database Schema
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Link {
+  id         String   @id @default(cuid())
+  slug       String   @unique
+  targetUrl  String   @map("target_url")
+  userId     String?  @map("user_id")
+  clicks     Int      @default(0)
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  user       User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  clickEvents ClickEvent[]
+
+  @@index([slug])
+  @@index([userId])
+  @@map("links")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  password  String
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  links     Link[]
+
+  @@map("users")
+}
+
+model ClickEvent {
+  id         String   @id @default(cuid())
+  linkId     String   @map("link_id")
+  userAgent  String?  @map("user_agent")
+  referer    String?
+  ipAddress  String?  @map("ip_address")
+  country    String?
+  city       String?
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  // Relations
+  link       Link     @relation(fields: [linkId], references: [id], onDelete: Cascade)
+
+  @@index([linkId])
+  @@index([createdAt])
+  @@map("click_events")
+}
