@@ -12,7 +12,7 @@ const { authenticate, extractAccessToken } = require('../../../lib/@system/Helpe
 const UserRepo = require('../../../db/repos/@system/UserRepo')
 const RefreshTokenRepo = require('../../../db/repos/@system/RefreshTokenRepo')
 const SessionRepo = require('../../../db/repos/@system/SessionRepo')
-const { signAccessTokenAsync, verifyTokenAsync } = require('../../../lib/@system/Helpers/jwt')
+const { signAccessTokenAsync, verifyTokenAsync, generateFingerprint } = require('../../../lib/@system/Helpers/jwt')
 const bcrypt = require('bcryptjs')
 const { client: redis, isReady: redisReady } = require('../../../lib/@system/Redis')
 const { loginLimiter, refreshLimiter } = require('../../../lib/@system/RateLimit')
@@ -160,7 +160,9 @@ router.post('/sessions', loginLimiter, validate({ body: LoginBody }), async (req
     // ────────────────────────────────────────────────────────────────────────
 
     // Issue short-lived access token + opaque refresh token (starts a new family)
-    const accessToken = await signAccessTokenAsync({ userId: user.id })
+    // Include fingerprint for session binding (Task #10364 - JWT security)
+    const fingerprint = generateFingerprint(req)
+    const accessToken = await signAccessTokenAsync({ userId: user.id }, { fingerprint })
     const { token: refreshToken, record: refreshRecord } = await RefreshTokenRepo.create({ userId: user.id })
 
     // Persist session record for UI listing and revocation
@@ -214,7 +216,9 @@ router.post('/sessions/refresh', refreshLimiter, async (req, res, next) => {
 
     // Rotate: revoke old token, issue new pair in same family
     const { token: newRefreshToken, record: newRefreshRecord } = await RefreshTokenRepo.rotate(record)
-    const newAccessToken = await signAccessTokenAsync({ userId: user.id })
+    // Include fingerprint for session binding (Task #10364 - JWT security)
+    const fingerprint = generateFingerprint(req)
+    const newAccessToken = await signAccessTokenAsync({ userId: user.id }, { fingerprint })
 
     // Keep the session row in sync with the new refresh token hash
     await SessionRepo.updateTokenHash(
