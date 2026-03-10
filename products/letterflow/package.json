@@ -1,0 +1,63 @@
+{
+  "name": "letterflow",
+  "version": "1.0.0",
+  "description": "Email newsletter platform with analytics",
+  "main": "server/index.js",
+  "scripts": {
+    "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
+    "dev:server": "nodemon server/index.js",
+    "dev:client": "vite",
+    "build": "vite build",
+    "start": "node server/index.js",
+    "db:migrate": "prisma migrate dev",
+    "db:seed": "node @custom/db/seeds/index.js",
+    "db:studio": "prisma studio",
+    "db:generate": "prisma generate",
+    "test": "jest",
+    "lint": "eslint . --ext .js,.jsx,.ts,.tsx"
+  },
+  "keywords": [
+    "newsletter",
+    "email-marketing",
+    "email-campaigns",
+    "analytics",
+    "saas"
+  ],
+  "author": "LetterFlow Team",
+  "license": "PROPRIETARY",
+  "dependencies": {
+    "@prisma/client": "^5.7.0",
+    "bcrypt": "^5.1.1",
+    "cookie-parser": "^1.4.6",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "jsonwebtoken": "^9.0.2",
+    "nodemailer": "^6.9.7",
+    "mjml": "^4.14.1",
+    "juice": "^10.0.0",
+    "date-fns": "^2.30.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-router-dom": "^6.20.1",
+    "react-query": "^3.39.3",
+    "recharts": "^2.10.3"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.43",
+    "@types/react-dom": "^18.2.17",
+    "@vitejs/plugin-react": "^4.2.1",
+    "autoprefixer": "^10.4.16",
+    "concurrently": "^8.2.2",
+    "eslint": "^8.55.0",
+    "nodemon": "^3.0.2",
+    "postcss": "^8.4.32",
+    "prisma": "^5.7.0",
+    "tailwindcss": "^3.3.6",
+    "typescript": "^5.3.3",
+    "vite": "^5.0.8"
+  },
+  "prisma": {
+    "schema": "@custom/db/schema.prisma"
+  }
+}

@@ -1,0 +1,154 @@
+// products/letterflow/@custom/db/schema.prisma - LetterFlow Database Schema
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Newsletter {
+  id              String    @id @default(cuid())
+  title           String
+  userId          String    @map("user_id")
+  htmlContent     String    @map("html_content") @db.Text
+  plainContent    String?   @map("plain_content") @db.Text
+  subject         String?
+  status          String    @default("draft") // draft, scheduled, published
+  publishedAt     DateTime? @map("published_at")
+  scheduledFor    DateTime? @map("scheduled_for")
+  subscriberCount Int       @default(0) @map("subscriber_count")
+  openRate        Float     @default(0) @map("open_rate")
+  clickRate       Float     @default(0) @map("click_rate")
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+
+  // Relations
+  user            User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  deliveries      NewsletterDelivery[]
+  analytics       NewsletterAnalytics[]
+
+  @@index([userId])
+  @@index([status])
+  @@index([publishedAt])
+  @@map("newsletters")
+}
+
+model User {
+  id              String   @id @default(cuid())
+  email           String   @unique
+  name            String?
+  password        String
+  emailVerified   Boolean  @default(false) @map("email_verified")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  newsletters     Newsletter[]
+  subscriberLists SubscriberList[]
+
+  @@map("users")
+}
+
+model Subscriber {
+  id              String   @id @default(cuid())
+  email           String   @unique
+  name            String?
+  status          String   @default("active") // active, unsubscribed, bounced
+  source          String?  // signup, import, api
+  tags            String[] @default([])
+  metadata        Json?    @default("{}")
+  subscribedAt    DateTime @default(now()) @map("subscribed_at")
+  unsubscribedAt  DateTime? @map("unsubscribed_at")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  lists           SubscriberListMember[]
+  deliveries      NewsletterDelivery[]
+
+  @@index([email])
+  @@index([status])
+  @@map("subscribers")
+}
+
+model SubscriberList {
+  id          String   @id @default(cuid())
+  userId      String   @map("user_id")
+  name        String
+  description String?
+  isDefault   Boolean  @default(false) @map("is_default")
+  count       Int      @default(0)
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  user        User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  members     SubscriberListMember[]
+
+  @@index([userId])
+  @@map("subscriber_lists")
+}
+
+model SubscriberListMember {
+  id            String   @id @default(cuid())
+  listId        String   @map("list_id")
+  subscriberId  String   @map("subscriber_id")
+  addedAt       DateTime @default(now()) @map("added_at")
+
+  // Relations
+  list          SubscriberList @relation(fields: [listId], references: [id], onDelete: Cascade)
+  subscriber    Subscriber     @relation(fields: [subscriberId], references: [id], onDelete: Cascade)
+
+  @@unique([listId, subscriberId])
+  @@index([listId])
+  @@index([subscriberId])
+  @@map("subscriber_list_members")
+}
+
+model NewsletterDelivery {
+  id            String    @id @default(cuid())
+  newsletterId  String    @map("newsletter_id")
+  subscriberId  String    @map("subscriber_id")
+  status        String    @default("pending") // pending, sent, delivered, opened, clicked, bounced, failed
+  sentAt        DateTime? @map("sent_at")
+  deliveredAt   DateTime? @map("delivered_at")
+  openedAt      DateTime? @map("opened_at")
+  clickedAt     DateTime? @map("clicked_at")
+  bouncedAt     DateTime? @map("bounced_at")
+  errorMessage  String?   @map("error_message")
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+
+  // Relations
+  newsletter    Newsletter @relation(fields: [newsletterId], references: [id], onDelete: Cascade)
+  subscriber    Subscriber @relation(fields: [subscriberId], references: [id], onDelete: Cascade)
+
+  @@unique([newsletterId, subscriberId])
+  @@index([newsletterId])
+  @@index([subscriberId])
+  @@index([status])
+  @@map("newsletter_deliveries")
+}
+
+model NewsletterAnalytics {
+  id            String   @id @default(cuid())
+  newsletterId  String   @map("newsletter_id")
+  event         String   // open, click, unsubscribe, bounce
+  subscriberId  String?  @map("subscriber_id")
+  ipAddress     String?  @map("ip_address")
+  userAgent     String?  @map("user_agent")
+  linkUrl       String?  @map("link_url")
+  metadata      Json?    @default("{}")
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  // Relations
+  newsletter    Newsletter @relation(fields: [newsletterId], references: [id], onDelete: Cascade)
+
+  @@index([newsletterId])
+  @@index([event])
+  @@index([createdAt])
+  @@map("newsletter_analytics")
+}
