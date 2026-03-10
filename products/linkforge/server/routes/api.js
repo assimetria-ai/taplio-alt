@@ -1,15 +1,11 @@
-// server/routes/api.js - API routes placeholder
+// server/routes/api.js - Main API routes
+// Task #10278 - Dashboard Links List UI
 
 const express = require('express');
 const router = express.Router();
+const linksRouter = require('./links');
 
-// Placeholder for future API routes
-// POST /api/links - Create link
-// GET /api/links - List links
-// GET /api/links/:id - Get link details
-// GET /api/links/:id/analytics - Get link analytics
-// DELETE /api/links/:id - Delete link
-
+// Health check
 router.get('/status', (req, res) => {
   res.json({ 
     status: 'ok',
@@ -17,5 +13,8 @@ router.get('/status', (req, res) => {
     timestamp: new Date().toISOString()
   });
 });
+
+// Links management routes
+router.use('/links', linksRouter);
 
 module.exports = router;
