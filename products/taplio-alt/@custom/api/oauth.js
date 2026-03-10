@@ -1,16 +1,19 @@
 /**
  * LinkedIn OAuth 2.0 Integration
  * Task #10266 - Feature 5: LinkedIn OAuth integration
+ * Task #10273 - Enhanced with secure token management
  * 
  * This module handles the OAuth callback flow for LinkedIn authentication:
  * 1. Receives authorization code from LinkedIn
  * 2. Exchanges code for access token
- * 3. Stores tokens securely
+ * 3. Stores tokens securely with encryption
  * 4. Fetches LinkedIn profile data
+ * 5. Handles token refresh automatically
  */
 
 const express = require('express');
 const router = express.Router();
+const { storeEncryptedToken, revokeToken } = require('./token-manager');
 
 // LinkedIn OAuth 2.0 endpoints
 const LINKEDIN_AUTH_URL = 'https://www.linkedin.com/oauth/v2/authorization';
@@ -99,7 +102,7 @@ router.get('/linkedin/callback', async (req, res) => {
       // Continue anyway - we have the token
     }
 
-    // Store tokens securely in database
+    // Store tokens securely in database with encryption
     const userId = req.user?.id || req.session?.userId; // Assumes user is authenticated
     if (!userId) {
       return res.status(401).json({
@@ -114,14 +117,12 @@ router.get('/linkedin/callback', async (req, res) => {
       provider: 'linkedin',
       accessToken: access_token,
       refreshToken: refresh_token || null,
-      expiresAt: new Date(Date.now() + expires_in * 1000),
+      expiresIn: expires_in,
       profile: profileData.success ? profileData.data : null,
-      scope: 'r_liteprofile r_emailaddress w_member_social',
-      createdAt: new Date(),
-      updatedAt: new Date()
+      scope: 'r_liteprofile r_emailaddress w_member_social'
     };
 
-    await storeTokens(tokenData);
+    await storeEncryptedToken(tokenData);
 
     // Clear OAuth state from session
     if (req.session) {
@@ -237,55 +238,7 @@ async function fetchLinkedInProfile(accessToken) {
   }
 }
 
-/**
- * Stores OAuth tokens in database
- * @param {Object} tokenData - Token and profile data
- * @returns {Promise<Object>} Storage result
- */
-async function storeTokens(tokenData) {
-  const prisma = require('../db/client');
-  
-  try {
-    const result = await prisma.oAuthToken.upsert({
-      where: {
-        userId_provider: {
-          userId: tokenData.userId,
-          provider: tokenData.provider
-        }
-      },
-      update: {
-        accessToken: tokenData.accessToken,
-        refreshToken: tokenData.refreshToken,
-        expiresAt: tokenData.expiresAt,
-        profile: tokenData.profile,
-        scope: tokenData.scope,
-        updatedAt: tokenData.updatedAt
-      },
-      create: {
-        userId: tokenData.userId,
-        provider: tokenData.provider,
-        accessToken: tokenData.accessToken,
-        refreshToken: tokenData.refreshToken,
-        expiresAt: tokenData.expiresAt,
-        profile: tokenData.profile,
-        scope: tokenData.scope,
-        tokenType: 'Bearer'
-      }
-    });
-    
-    console.log('Tokens stored successfully for user:', tokenData.userId);
-    
-    return {
-      success: true,
-      message: 'Tokens stored successfully',
-      tokenId: result.id
-    };
-
-  } catch (error) {
-    console.error('Token storage error:', error);
-    throw error;
-  }
-}
+// Token storage moved to token-manager.js for encryption support
 
 /**
  * Generates a random state string for CSRF protection
@@ -345,8 +298,6 @@ async function refreshAccessToken(refreshToken) {
  * @route POST /api/oauth/linkedin/revoke
  */
 router.post('/linkedin/revoke', async (req, res) => {
-  const prisma = require('../db/client');
-  
   try {
     const userId = req.user?.id;
     if (!userId) {
@@ -356,32 +307,23 @@ router.post('/linkedin/revoke', async (req, res) => {
       });
     }
 
-    // Remove tokens from database
-    await prisma.oAuthToken.delete({
-      where: {
-        userId_provider: {
-          userId: userId,
-          provider: 'linkedin'
-        }
-      }
-    });
+    // Revoke and remove tokens from database
+    const revoked = await revokeToken(userId, 'linkedin');
 
-    console.log('LinkedIn access revoked for user:', userId);
+    if (revoked) {
+      return res.json({
+        success: true,
+        message: 'LinkedIn account disconnected successfully'
+      });
+    }
 
-    res.json({
-      success: true,
-      message: 'LinkedIn account disconnected successfully'
+    res.status(500).json({
+      success: false,
+      error: 'revocation_failed',
+      message: 'Failed to revoke token'
     });
 
   } catch (error) {
-    if (error.code === 'P2025') {
-      // Record not found - already disconnected
-      return res.json({
-        success: true,
-        message: 'LinkedIn account was not connected'
-      });
-    }
-    
     console.error('Token revocation error:', error);
     res.status(500).json({
       success: false,

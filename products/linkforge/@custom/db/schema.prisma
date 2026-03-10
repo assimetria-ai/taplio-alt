@@ -49,6 +49,10 @@ model ClickEvent {
   ipAddress  String?  @map("ip_address")
   country    String?
   city       String?
+  isConversion Boolean @default(false) @map("is_conversion")
+  conversionType String? @map("conversion_type")
+  conversionValue Float? @map("conversion_value")
+  metadata   Json?    @default("{}")
   createdAt  DateTime @default(now()) @map("created_at")
 
   // Relations
@@ -56,5 +60,6 @@ model ClickEvent {
 
   @@index([linkId])
   @@index([createdAt])
+  @@index([isConversion])
   @@map("click_events")
 }

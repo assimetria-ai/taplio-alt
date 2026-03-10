@@ -44,7 +44,7 @@ User accounts for link management:
 
 ### Click Events Table
 
-Detailed analytics for each click:
+Detailed analytics for each click and conversion:
 
 | Field | Type | Description |
 |-------|------|-------------|
@@ -55,11 +55,16 @@ Detailed analytics for each click:
 | `ip_address` | String (nullable) | Visitor IP |
 | `country` | String (nullable) | Geolocation country |
 | `city` | String (nullable) | Geolocation city |
+| `is_conversion` | Boolean | Whether this is a conversion event |
+| `conversion_type` | String (nullable) | Type: purchase, signup, download, etc. |
+| `conversion_value` | Float (nullable) | Monetary value for ROI tracking |
+| `metadata` | JSON (nullable) | Additional conversion data |
 | `created_at` | DateTime | Click timestamp |
 
 **Indexes:**
 - `link_id` - Fast link analytics queries
 - `created_at` - Time-series queries
+- `is_conversion` - Filter conversions vs clicks
 
 ## Setup
 
@@ -93,15 +98,30 @@ Detailed analytics for each click:
 - **Styling**: Tailwind CSS
 - **Authentication**: JWT + bcrypt
 
-## API Endpoints (Planned)
+## API Endpoints
+
+### Implemented ✅
+
+- `GET /:slug` - **Redirect to target URL and capture analytics**
+  - Tracks: timestamp, referrer, user-agent, IP, geolocation
+  - Returns 302 redirect
+  - Captures click event asynchronously
+  
+- `POST /api/conversions` - **Track conversion event**
+  - Body: `{ linkId, conversionType, value, extra }`
+  - Use on target page to track purchases, signups, etc.
+  
+- `GET /api/conversions/:linkId` - **Get conversion analytics**
+  - Returns total conversions, total value, and conversion list
+
+### Planned
 
 - `POST /api/links` - Create short link
 - `GET /api/links` - List user's links
 - `GET /api/links/:id` - Get link details
 - `PUT /api/links/:id` - Update link
 - `DELETE /api/links/:id` - Delete link
-- `GET /api/links/:id/analytics` - Get link analytics
-- `GET /:slug` - Redirect to target URL (and track click)
+- `GET /api/links/:id/analytics` - Get detailed link analytics
 
 ## License
 

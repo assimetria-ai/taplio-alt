@@ -28,12 +28,22 @@ model User {
 
 // OAuth Token Storage
 // Stores access tokens, refresh tokens, and profile data from OAuth providers
+// Task #10273 - Enhanced with encryption support
 model OAuthToken {
   id            String    @id @default(cuid())
   userId        String
   provider      String    // 'linkedin', 'twitter', etc.
-  accessToken   String    // Encrypted in production
-  refreshToken  String?   // Optional, encrypted in production
+  
+  // Access token (encrypted)
+  accessToken   String    @db.Text
+  accessTokenIv String?   // Initialization vector for encryption
+  accessTokenTag String?  // Auth tag for encryption validation
+  
+  // Refresh token (encrypted)
+  refreshToken  String?   @db.Text
+  refreshTokenIv String?  // Initialization vector for encryption
+  refreshTokenTag String? // Auth tag for encryption validation
+  
   expiresAt     DateTime? // When the access token expires
   scope         String    // Granted permissions
   tokenType     String    @default("Bearer")
