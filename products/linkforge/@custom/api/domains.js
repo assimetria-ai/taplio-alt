@@ -11,6 +11,8 @@ const crypto = require('crypto');
 const dns = require('dns').promises;
 const { PrismaClient } = require('@prisma/client');
 
+const { sanitizeMetadata } = require('../../server/utils/sanitize');
+
 const prisma = new PrismaClient();
 
 /**
@@ -254,7 +256,22 @@ router.put('/:id', async (req, res) => {
     }
 
     const { id } = req.params;
-    const { isDefault, redirectHttps, sslStatus } = req.body;
+    // Whitelist allowed fields — reject unknown fields like custom_css to prevent injection
+    const ALLOWED_FIELDS = ['isDefault', 'redirectHttps', 'sslStatus', 'metadata'];
+    const unknownFields = Object.keys(req.body).filter(k => !ALLOWED_FIELDS.includes(k));
+    if (unknownFields.length > 0) {
+      return res.status(400).json({ 
+        error: `Unknown fields not allowed: ${unknownFields.join(', ')}` 
+      });
+    }
+
+    const { isDefault, redirectHttps, sslStatus, metadata } = req.body;
+
+    // Validate sslStatus if provided
+    const VALID_SSL_STATUSES = ['pending', 'active', 'failed'];
+    if (sslStatus && !VALID_SSL_STATUSES.includes(sslStatus)) {
+      return res.status(400).json({ error: `Invalid sslStatus. Must be one of: ${VALID_SSL_STATUSES.join(', ')}` });
+    }
 
     const customDomain = await prisma.customDomain.findFirst({
       where: { id, userId }
@@ -272,12 +289,16 @@ router.put('/:id', async (req, res) => {
       });
     }
 
+    // Sanitize metadata to strip CSS/script injection keys
+    const sanitizedMetadata = metadata ? sanitizeMetadata(metadata) : undefined;
+
     const updated = await prisma.customDomain.update({
       where: { id },
       data: {
         ...(typeof isDefault === 'boolean' && { isDefault }),
         ...(typeof redirectHttps === 'boolean' && { redirectHttps }),
-        ...(sslStatus && { sslStatus })
+        ...(sslStatus && { sslStatus }),
+        ...(sanitizedMetadata !== undefined && { metadata: sanitizedMetadata })
       }
     });
 

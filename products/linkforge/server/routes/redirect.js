@@ -7,6 +7,8 @@ const router = express.Router();
 const bcrypt = require('bcrypt');
 const { captureClick } = require('../utils/analytics');
 const { getGeoFromIP } = require('../utils/geo');
+const { escapeHtml } = require('../utils/sanitize');
+const { hashIP } = require('../utils/ipAnonymizer');
 
 // Rate limit: max failed attempts per IP per link in a time window
 const MAX_FAILED_ATTEMPTS = 5;
@@ -113,7 +115,7 @@ function passwordPromptPage(slug, error = null, domain = null) {
       </div>
       <button type="submit">Continue</button>
     </form>
-    ${domain ? `<div class="domain-label">${domain}</div>` : ''}
+    ${domain ? `<div class="domain-label">${escapeHtml(domain)}</div>` : ''}
   </div>
 </body>
 </html>`;
@@ -183,15 +185,16 @@ async function findLink(prisma, slug, customDomain) {
  * Perform redirect with analytics tracking
  */
 async function performRedirect(req, res, prisma, link) {
+  const rawIP = req.ip || req.connection.remoteAddress || null;
   const analyticsData = {
     linkId: link.id,
     userAgent: req.headers['user-agent'] || null,
     referer: req.headers['referer'] || req.headers['referrer'] || null,
-    ipAddress: req.ip || req.connection.remoteAddress || null,
+    ipAddress: rawIP, // will be truncated by captureClick/analytics.js
     timestamp: new Date()
   };
 
-  const geoData = await getGeoFromIP(analyticsData.ipAddress);
+  const geoData = await getGeoFromIP(rawIP); // geo lookup uses raw IP (not stored)
   if (geoData) {
     analyticsData.country = geoData.country;
     analyticsData.city = geoData.city;
@@ -242,7 +245,7 @@ function render404(req, res, slug) {
           <div class="container">
             <h1>404</h1>
             <p>Link not found</p>
-            <div class="domain">${req.customDomain.domain}</div>
+            <div class="domain">${escapeHtml(req.customDomain.domain)}</div>
           </div>
         </body>
       </html>
@@ -260,7 +263,8 @@ router.post('/:slug/unlock', express.urlencoded({ extended: false }), async (req
   const { slug } = req.params;
   const { password } = req.body;
   const prisma = req.app.locals.prisma;
-  const ipAddress = req.ip || req.connection.remoteAddress || 'unknown';
+  const rawIP = req.ip || req.connection.remoteAddress || 'unknown';
+  const ipAddress = hashIP(rawIP); // GDPR: hash IP for rate-limiting storage
 
   try {
     const link = await findLink(prisma, slug, req.customDomain);
