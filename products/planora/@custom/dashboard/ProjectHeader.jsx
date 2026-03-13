@@ -1,8 +1,10 @@
 // products/planora/@custom/dashboard/ProjectHeader.jsx
 import { useState } from 'react';
+import CSVUpload from './CSVUpload';
 
 export default function ProjectHeader({ project, onUpdate }) {
   const [showMenu, setShowMenu] = useState(false);
+  const [showCSVUpload, setShowCSVUpload] = useState(false);
 
   return (
     <div className="bg-slate-800/50 border-b border-slate-700 px-6 py-3">
@@ -38,6 +40,17 @@ export default function ProjectHeader({ project, onUpdate }) {
             )}
           </div>
 
+          <button
+            onClick={() => setShowCSVUpload(true)}
+            className="px-3 py-1.5 bg-slate-700 text-slate-300 text-sm rounded hover:bg-slate-600 transition-colors flex items-center gap-1.5"
+            title="Import tasks from CSV"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+            </svg>
+            Import CSV
+          </button>
+
           <button className="px-3 py-1.5 bg-slate-700 text-slate-300 text-sm rounded hover:bg-slate-600 transition-colors">
             + Invite
           </button>
@@ -64,6 +77,12 @@ export default function ProjectHeader({ project, onUpdate }) {
                 <button className="block w-full text-left px-4 py-2 text-sm text-slate-300 hover:bg-slate-600">
                   Duplicate
                 </button>
+                <button
+                  onClick={() => { setShowCSVUpload(true); setShowMenu(false); }}
+                  className="block w-full text-left px-4 py-2 text-sm text-slate-300 hover:bg-slate-600"
+                >
+                  Import from CSV
+                </button>
                 <hr className="my-1 border-slate-600" />
                 <button className="block w-full text-left px-4 py-2 text-sm text-red-400 hover:bg-slate-600">
                   Archive Project
@@ -73,6 +92,17 @@ export default function ProjectHeader({ project, onUpdate }) {
           </div>
         </div>
       </div>
+
+      {/* CSV Upload Modal */}
+      {showCSVUpload && (
+        <CSVUpload
+          projectId={project.id}
+          onImportComplete={() => {
+            if (onUpdate) onUpdate();
+          }}
+          onClose={() => setShowCSVUpload(false)}
+        />
+      )}
     </div>
   );
 }
