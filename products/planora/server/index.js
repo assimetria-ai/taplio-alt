@@ -16,6 +16,7 @@ const userRouter = require('../@custom/api/user');
 const workspaceRouter = require('../@custom/api/workspace');
 const csvUploadRouter = require('../@custom/api/csv-upload');
 const ogImageRouter = require('../@custom/api/og-image');
+const timeTrackingRouter = require('../@custom/api/time-tracking');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -42,6 +43,7 @@ app.use('/api/user', userRouter);
 app.use('/api/workspace', workspaceRouter);
 app.use('/api/csv-upload', csvUploadRouter);
 app.use('/api/og-image', ogImageRouter);
+app.use('/api/time', timeTrackingRouter);
 
 // Health check
 app.get('/api/health', (req, res) => {

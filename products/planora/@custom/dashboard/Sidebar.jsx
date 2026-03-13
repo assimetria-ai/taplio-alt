@@ -60,6 +60,16 @@ export default function Sidebar({ user, projects, currentProject, onSelectProjec
             </svg>
             Team
           </Link>
+
+          <Link
+            to={currentProject ? `/projects/${currentProject.id}/time` : '/time'}
+            className="flex items-center px-3 py-2 text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-700 rounded-md"
+          >
+            <svg className="w-5 h-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            Time Tracking
+          </Link>
         </div>
 
         {/* Projects Section */}

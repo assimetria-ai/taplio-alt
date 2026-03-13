@@ -27,6 +27,7 @@ model User {
   comments               Comment[]
   activityLogs           ActivityLog[]
   savedFilters           SavedFilter[]
+  timeEntries            TimeEntry[]              @relation("TimeEntries")
   notificationSettings   NotificationSettings?
   workspaceSettings      WorkspaceSettings[]
 
@@ -79,6 +80,7 @@ model Project {
   // Relations
   members      ProjectMember[]
   tasks        Task[]
+  timeEntries  TimeEntry[]
   activityLogs ActivityLog[]
 
   @@map("projects")
@@ -122,6 +124,7 @@ model Task {
   // Relations
   comments     Comment[]
   attachments  Attachment[]
+  timeEntries  TimeEntry[]
   activityLogs ActivityLog[]
 
   @@map("tasks")
@@ -205,6 +208,28 @@ model NotificationSettings {
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("notification_settings")
+}
+
+model TimeEntry {
+  id          String    @id @default(cuid())
+  description String?
+  startTime   DateTime
+  endTime     DateTime?
+  duration    Int?      // duration in seconds (computed on stop)
+  billable    Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  taskId String
+  task   Task   @relation(fields: [taskId], references: [id], onDelete: Cascade)
+
+  userId String
+  user   User   @relation("TimeEntries", fields: [userId], references: [id], onDelete: Cascade)
+
+  projectId String
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@map("time_entries")
 }
 
 model WorkspaceSettings {

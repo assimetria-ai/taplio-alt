@@ -1,8 +1,10 @@
 // products/planora/@custom/dashboard/TaskList.jsx
 import { useState } from 'react';
+import TimeTracker from './TimeTracker';
 
 export default function TaskList({ tasks, onUpdate, onDelete }) {
   const [editingTask, setEditingTask] = useState(null);
+  const [expandedTimeTask, setExpandedTimeTask] = useState(null);
 
   const statusColors = {
     todo: 'bg-slate-600',
@@ -118,6 +120,15 @@ export default function TaskList({ tasks, onUpdate, onDelete }) {
             {/* Actions */}
             <div className="col-span-1 flex items-center justify-end space-x-2">
               <button
+                onClick={() => setExpandedTimeTask(expandedTimeTask === task.id ? null : task.id)}
+                className={`${expandedTimeTask === task.id ? 'text-indigo-400' : 'text-slate-400'} hover:text-indigo-300`}
+                title="Time tracking"
+              >
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </button>
+              <button
                 onClick={() => setEditingTask(task)}
                 className="text-slate-400 hover:text-white"
                 title="Edit task"
@@ -136,6 +147,17 @@ export default function TaskList({ tasks, onUpdate, onDelete }) {
                 </svg>
               </button>
             </div>
+
+            {/* Expanded Time Tracker */}
+            {expandedTimeTask === task.id && (
+              <div className="col-span-12 mt-2">
+                <TimeTracker
+                  taskId={task.id}
+                  taskTitle={task.title}
+                  projectId={task.projectId}
+                />
+              </div>
+            )}
           </div>
         ))
       )}

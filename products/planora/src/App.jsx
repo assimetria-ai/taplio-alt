@@ -5,6 +5,7 @@ import DashboardHome from '../@custom/dashboard/DashboardHome';
 import Dashboard from '../@custom/dashboard';
 import TeamManagement from '../@custom/team';
 import Settings from '../@custom/dashboard/Settings';
+import TimeReport from '../@custom/dashboard/TimeReport';
 import Sidebar from '../@custom/dashboard/Sidebar';
 
 function App() {
@@ -73,6 +74,10 @@ function App() {
           {/* Team Management */}
           <Route path="/team" element={<TeamManagement />} />
           <Route path="/projects/:projectId/team" element={<TeamManagement />} />
+          
+          {/* Time Tracking */}
+          <Route path="/time" element={<TimeReport />} />
+          <Route path="/projects/:projectId/time" element={<TimeReport />} />
           
           {/* Settings */}
           <Route path="/settings" element={<Settings />} />
