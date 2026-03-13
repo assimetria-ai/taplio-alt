@@ -224,8 +224,8 @@ export function BrixDashboardPage() {
       setLoading(true)
       try {
         const [statsRes, pagesRes] = await Promise.all([
-          api.get<{ stats: BrixStats }>('/brix/stats'),
-          api.get<{ pages: BrixPage[] }>('/brix/pages'),
+          api.get('/brix/stats') as Promise<{ stats: BrixStats }>,
+          api.get('/brix/pages') as Promise<{ pages: BrixPage[] }>,
         ])
         if (!cancelled) {
           setStats(statsRes.stats)

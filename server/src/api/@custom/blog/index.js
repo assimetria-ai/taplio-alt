@@ -2,6 +2,7 @@
 // Public: GET /api/blog, GET /api/blog/:slug
 // Admin:  POST, PATCH, DELETE, publish, unpublish
 const express = require('express')
+const sanitizeHtml = require('sanitize-html')
 const router = express.Router()
 const { authenticate, requireAdmin } = require('../../../lib/@system/Helpers/auth')
 const BlogPostRepo = require('../../../db/repos/@custom/BlogPostRepo')
@@ -13,6 +14,38 @@ const {
   BlogPostSlugParams,
   ListBlogPostsQuery,
 } = require('../../../lib/@custom/Validation/schemas/blog')
+
+// ── Sanitization ──────────────────────────────────────────────────────────────
+
+// Whitelist of safe HTML tags and attributes for blog content.
+// Strips <script>, inline event handlers (onclick, onerror, etc.), and all
+// javascript: hrefs to prevent stored XSS.
+const SANITIZE_OPTIONS = {
+  allowedTags: ['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'strong', 'em', 'ul', 'ol', 'li', 'a', 'img', 'br', 'blockquote', 'code', 'pre'],
+  allowedAttributes: {
+    a:   ['href', 'title', 'target', 'rel'],
+    img: ['src', 'alt', 'width', 'height'],
+  },
+  allowedSchemes:      ['https', 'http', 'mailto'],
+  allowedSchemesByTag: {
+    a:   ['https', 'http', 'mailto'],
+    img: ['https', 'http'],
+  },
+  transformTags: {
+    a: (tagName, attribs) => ({
+      tagName,
+      attribs: { ...attribs, rel: 'noopener noreferrer' },
+    }),
+  },
+}
+
+function sanitizeContent(raw) {
+  return sanitizeHtml(raw, SANITIZE_OPTIONS)
+}
+
+function sanitizeExcerpt(raw) {
+  return sanitizeHtml(raw, { allowedTags: [], allowedAttributes: {} })
+}
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -95,8 +128,8 @@ router.post('/blog', authenticate, requireAdmin, validate({ body: CreateBlogPost
     const post = await BlogPostRepo.create({
       slug,
       title: title.trim(),
-      excerpt: excerpt ?? null,
-      content: content ?? '',
+      excerpt: excerpt ? sanitizeExcerpt(excerpt) : null,
+      content: sanitizeContent(content ?? ''),
       category: category ?? 'Company',
       author: author ?? req.user.name ?? 'The Team',
       tags: Array.isArray(tags) ? tags : (tags ? [tags] : null),
@@ -129,8 +162,8 @@ router.patch('/blog/:id', authenticate, requireAdmin, validate({ params: BlogPos
 
     const updated = await BlogPostRepo.update(post.id, {
       title: title ?? null,
-      excerpt: excerpt ?? null,
-      content: content ?? null,
+      excerpt: excerpt !== undefined ? sanitizeExcerpt(excerpt) : null,
+      content: content !== undefined ? sanitizeContent(content) : null,
       category: category ?? null,
       author: author ?? null,
       tags: Array.isArray(tags) ? tags : (tags !== undefined ? (tags ? [tags] : null) : null),

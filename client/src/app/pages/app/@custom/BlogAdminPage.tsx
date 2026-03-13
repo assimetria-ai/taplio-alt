@@ -340,7 +340,7 @@ export function BlogAdminPage() {
     setLoading(true)
     setError('')
     try {
-      const data = await api.get<{ posts: BlogPost[]; total: number }>('/blog/admin')
+      const data = await api.get('/blog/admin') as { posts: BlogPost[]; total: number }
       setPosts(data.posts)
       setTotal(data.total)
     } catch (err) {

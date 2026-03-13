@@ -1,8 +1,9 @@
 // @custom — Storage API (presigned S3 uploads)
 //
-// POST  /api/storage/presign         — request a presigned PUT URL for S3 upload
-// PATCH /api/storage/:fileId/confirm — confirm a file was successfully uploaded
-// GET   /api/storage/:fileId         — get file record by ID
+// GET    /api/storage                — list current user's uploaded files
+// POST   /api/storage/presign        — request a presigned PUT URL for S3 upload
+// PATCH  /api/storage/:fileId/confirm — confirm a file was successfully uploaded
+// GET    /api/storage/:fileId        — get file record by ID
 // DELETE /api/storage/:fileId        — delete file record (and S3 object)
 
 'use strict'
@@ -38,6 +39,22 @@ const ALLOWED_MIME_TYPES = new Set([
 ])
 
 const MAX_SIZE_BYTES = 100 * 1024 * 1024 // 100 MB
+
+// ── GET /api/storage — list current user's files ─────────────────────────────
+
+router.get('/storage', authenticate, async (req, res, next) => {
+  try {
+    const { status, limit = '50', offset = '0' } = req.query
+    const files = await FileUploadRepo.findByUserId(req.user.id, {
+      status: status || undefined,
+      limit: parseInt(limit, 10),
+      offset: parseInt(offset, 10),
+    })
+    return res.json({ files })
+  } catch (err) {
+    next(err)
+  }
+})
 
 // ── POST /api/storage/presign ─────────────────────────────────────────────────
 

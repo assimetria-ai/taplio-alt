@@ -6,7 +6,7 @@ const cookieParser = require('cookie-parser')
 const pinoHttp = require('pino-http')
 
 const logger = require('./lib/@system/Logger')
-const { cors, securityHeaders, csrfProtection, attachDatabase } = require('./lib/@system/Middleware')
+const { cors, csrf, securityHeaders } = require('./lib/@system/Middleware')
 const { apiLimiter } = require('./lib/@system/RateLimit')
 const systemRoutes = require('./routes/@system')
 const customRoutes = require('./routes/@custom')
@@ -27,6 +27,7 @@ app.get('/healthz', (_req, res) => res.status(200).json({ status: 'ok' }))
 
 app.use(securityHeaders)
 app.use(cors)
+app.use(csrf)
 app.use(compression())
 app.use(express.json({ limit: '10mb' }))
 app.use(cookieParser())
@@ -37,14 +38,6 @@ if (process.env.NODE_ENV !== 'test') {
 
 // General rate limiting for all API routes (baseline DoS protection)
 app.use('/api', apiLimiter)
-
-// CSRF protection for state-changing requests
-// Automatically validates CSRF tokens on POST/PUT/PATCH/DELETE requests
-// Clients must first GET /api/csrf-token and include the token in X-CSRF-Token header
-app.use('/api', csrfProtection)
-
-// Attach database repositories to req.db
-app.use('/api', attachDatabase)
 
 // Routes
 app.use('/api', systemRoutes)
