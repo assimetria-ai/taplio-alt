@@ -1,4 +1,7 @@
 // server/utils/analytics.js - Analytics capture utilities
+// Task #11203 - GDPR: IP addresses anonymized before storage
+
+const { truncateIP } = require('./ipAnonymizer');
 
 /**
  * Capture click event to database
@@ -20,7 +23,7 @@ async function captureClick(prisma, data) {
         linkId: data.linkId,
         userAgent: data.userAgent,
         referer: data.referer,
-        ipAddress: data.ipAddress,
+        ipAddress: truncateIP(data.ipAddress),
         country: data.country || null,
         city: data.city || null,
         createdAt: data.timestamp
@@ -98,7 +101,7 @@ async function trackConversion(prisma, linkId, conversionType, metadata = {}) {
         linkId,
         userAgent: metadata.userAgent || 'conversion-tracker',
         referer: metadata.referer || null,
-        ipAddress: metadata.ipAddress || null,
+        ipAddress: truncateIP(metadata.ipAddress) || null,
         country: metadata.country || null,
         city: metadata.city || null,
         isConversion: true,

@@ -11,6 +11,7 @@ const redirectRouter = require('./routes/redirect');
 const apiRouter = require('./routes/api');
 const conversionsRouter = require('./routes/conversions');
 const domainsRouter = require('../@custom/api/domains');
+const { cleanupExpiredData } = require('./utils/dataRetention');
 
 // Custom domain middleware
 const { customDomainMiddleware, warmUpCache } = require('../@custom/middleware/customDomain');
@@ -60,6 +61,20 @@ app.use((err, req, res, next) => {
   });
 });
 
+// GDPR data retention: run cleanup daily
+// Task #11203 - Automatic data retention policy
+const DATA_RETENTION_INTERVAL_MS = 24 * 60 * 60 * 1000; // 24 hours
+let retentionTimer = null;
+
+async function runDataRetention() {
+  try {
+    const result = await cleanupExpiredData(prisma);
+    console.log(`🗑️ Data retention cleanup: ${result.clickEventsDeleted} click events, ${result.passwordAttemptsDeleted} password attempts deleted`);
+  } catch (error) {
+    console.error('Data retention cleanup failed:', error);
+  }
+}
+
 // Start server
 async function startServer() {
   try {
@@ -71,7 +86,13 @@ async function startServer() {
       console.log(`🔗 LinkForge server running on http://localhost:${PORT}`);
       console.log(`   Custom domains: enabled`);
       console.log(`   Primary domain: ${process.env.PRIMARY_DOMAIN || 'localhost'}`);
+      console.log(`   GDPR: IP anonymization enabled, data retention 90d/30d`);
     });
+
+    // Schedule data retention cleanup
+    retentionTimer = setInterval(runDataRetention, DATA_RETENTION_INTERVAL_MS);
+    // Run initial cleanup on startup (after 1 minute delay)
+    setTimeout(runDataRetention, 60 * 1000);
   } catch (error) {
     console.error('Failed to start server:', error);
     process.exit(1);
@@ -83,12 +104,14 @@ startServer();
 // Graceful shutdown
 process.on('SIGTERM', async () => {
   console.log('SIGTERM received, closing server...');
+  if (retentionTimer) clearInterval(retentionTimer);
   await prisma.$disconnect();
   process.exit(0);
 });
 
 process.on('SIGINT', async () => {
   console.log('SIGINT received, closing server...');
+  if (retentionTimer) clearInterval(retentionTimer);
   await prisma.$disconnect();
   process.exit(0);
 });

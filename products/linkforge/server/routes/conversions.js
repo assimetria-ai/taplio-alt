@@ -4,6 +4,7 @@ const express = require('express');
 const router = express.Router();
 const { trackConversion } = require('../utils/analytics');
 const { getGeoFromIP } = require('../utils/geo');
+const { truncateIP } = require('../utils/ipAnonymizer');
 
 /**
  * POST /api/conversions
@@ -39,9 +40,10 @@ router.post('/conversions', async (req, res) => {
       });
     }
 
-    // Extract request data
-    const ipAddress = req.ip || req.connection.remoteAddress;
-    const geoData = await getGeoFromIP(ipAddress);
+    // Extract request data — truncate IP for GDPR before geo lookup
+    const rawIP = req.ip || req.connection.remoteAddress;
+    const geoData = await getGeoFromIP(rawIP); // geo lookup uses raw IP (not stored)
+    const ipAddress = truncateIP(rawIP); // only truncated IP is stored
 
     // Track conversion
     const conversion = await trackConversion(prisma, linkId, conversionType, {
