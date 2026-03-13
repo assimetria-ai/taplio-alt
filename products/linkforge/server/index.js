@@ -24,8 +24,9 @@ app.use(cors());
 app.use(express.json());
 app.use(cookieParser());
 
-// Trust proxy for accurate IP addresses behind reverse proxies
-app.set('trust proxy', true);
+// Trust proxy for accurate IP addresses behind Railway reverse proxy
+// Use 1 (single hop) instead of true to prevent X-Forwarded-For spoofing
+app.set('trust proxy', 1);
 
 // Custom domain detection and routing
 app.use(customDomainMiddleware());
