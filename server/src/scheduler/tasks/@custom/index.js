@@ -6,5 +6,6 @@
 //   module.exports = { MyTask }
 
 const TestTask = require('./TestTask')
+const PostSchedulerTask = require('./PostSchedulerTask')
 
-module.exports = { TestTask }
+module.exports = { TestTask, PostSchedulerTask }
