@@ -158,6 +158,76 @@ router.delete('/api/posts/:id', async (req, res) => {
   }
 })
 
+// POST /api/posts/:id/publish — immediately publish a post (skip schedule)
+router.post('/api/posts/:id/publish', async (req, res) => {
+  try {
+    const db = req.app.get('db')
+    const post = await db.oneOrNone(
+      'SELECT * FROM posts WHERE id = $1 AND user_id = $2',
+      [req.params.id, req.user.id]
+    )
+    if (!post) return res.status(404).json({ error: 'Post not found' })
+    if (post.status === 'published') return res.status(400).json({ error: 'Post already published' })
+
+    // Set scheduled_for to now so the scheduler picks it up immediately
+    const updated = await db.one(
+      `UPDATE posts SET status = 'scheduled', scheduled_for = now(), updated_at = now()
+       WHERE id = $1 AND user_id = $2 RETURNING *`,
+      [req.params.id, req.user.id]
+    )
+    res.json({ post: updated, message: 'Post queued for immediate publishing' })
+  } catch (err) {
+    console.error('[posts] POST /api/posts/:id/publish error:', err.message)
+    res.status(500).json({ error: 'Failed to queue post for publishing' })
+  }
+})
+
+// GET /api/posts/queue/stats — queue monitoring stats
+router.get('/api/posts/queue/stats', async (req, res) => {
+  try {
+    const db = req.app.get('db')
+    const stats = await db.one(`
+      SELECT
+        COUNT(*) FILTER (WHERE status = 'scheduled') AS scheduled_count,
+        COUNT(*) FILTER (WHERE status = 'publishing') AS publishing_count,
+        COUNT(*) FILTER (WHERE status = 'published') AS published_count,
+        COUNT(*) FILTER (WHERE status = 'failed' AND retry_count < COALESCE(max_retries, 3)) AS retryable_count,
+        COUNT(*) FILTER (WHERE status = 'failed' AND retry_count >= COALESCE(max_retries, 3)) AS permanently_failed_count,
+        MIN(scheduled_for) FILTER (WHERE status = 'scheduled') AS next_scheduled
+      FROM posts
+      WHERE user_id = $1
+    `, [req.user.id])
+    res.json({ stats })
+  } catch (err) {
+    console.error('[posts] GET /api/posts/queue/stats error:', err.message)
+    res.status(500).json({ error: 'Failed to fetch queue stats' })
+  }
+})
+
+// POST /api/posts/:id/retry — manually retry a failed post
+router.post('/api/posts/:id/retry', async (req, res) => {
+  try {
+    const db = req.app.get('db')
+    const post = await db.oneOrNone(
+      'SELECT * FROM posts WHERE id = $1 AND user_id = $2',
+      [req.params.id, req.user.id]
+    )
+    if (!post) return res.status(404).json({ error: 'Post not found' })
+    if (post.status !== 'failed') return res.status(400).json({ error: 'Only failed posts can be retried' })
+
+    const updated = await db.one(
+      `UPDATE posts SET status = 'scheduled', retry_count = 0, last_error = NULL, 
+       scheduled_for = now(), updated_at = now()
+       WHERE id = $1 AND user_id = $2 RETURNING *`,
+      [req.params.id, req.user.id]
+    )
+    res.json({ post: updated, message: 'Post queued for retry' })
+  } catch (err) {
+    console.error('[posts] POST /api/posts/:id/retry error:', err.message)
+    res.status(500).json({ error: 'Failed to retry post' })
+  }
+})
+
 // PATCH /api/posts/:id/reschedule — drag-and-drop reschedule
 router.patch('/api/posts/:id/reschedule', async (req, res) => {
   try {
