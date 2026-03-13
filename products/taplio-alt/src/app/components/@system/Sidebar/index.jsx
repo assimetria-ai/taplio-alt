@@ -1,13 +1,18 @@
 import { useRef, useEffect } from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
 import * as Dialog from '@radix-ui/react-dialog'
-import { LayoutDashboard, Settings, Users, HardDrive, ScrollText, Mail, ClipboardList, X } from 'lucide-react'
+import { LayoutDashboard, Settings, Users, HardDrive, ScrollText, Mail, ClipboardList, X, FileText, CalendarDays, BarChart3, TrendingUp, BookOpen } from 'lucide-react'
 import { cn } from '@/app/lib/@system/utils'
 import { useAuth } from '@/app/store/@system/auth'
 
 // @custom: add your product's navigation items here
 const NAV_ITEMS = [
   { to: '/dashboard', label: 'Dashboard', Icon: LayoutDashboard },
+  { to: '/posts',     label: 'Posts',     Icon: FileText },
+  { to: '/calendar',  label: 'Calendar',  Icon: CalendarDays },
+  { to: '/content-templates', label: 'Templates', Icon: BookOpen },
+  { to: '/analytics', label: 'Analytics', Icon: BarChart3 },
+  { to: '/engagement-analytics', label: 'Engagement', Icon: TrendingUp },
   { to: '/teams',     label: 'Teams',     Icon: Users },
   { to: '/files',     label: 'Files',     Icon: HardDrive },
   { to: '/email',     label: 'Email',     Icon: Mail },

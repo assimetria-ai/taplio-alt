@@ -15,6 +15,12 @@ import Files from '@/app/pages/app/@system/Files'
 import Logs from '@/app/pages/app/@system/Logs'
 import Email from '@/app/pages/app/@system/Email'
 import AuditLog from '@/app/pages/app/@custom/AuditLog'
+import ContentTemplates from '@/app/pages/app/@custom/ContentTemplates'
+import EngagementAnalytics from '@/app/pages/app/@custom/EngagementAnalytics'
+import AnalyticsDashboard from '@/app/pages/app/@custom/AnalyticsDashboard'
+import PostsList from '@/app/pages/app/@custom/PostsList'
+import PostScheduler from '@/app/pages/app/@custom/PostScheduler'
+import ContentCalendar from '@/app/pages/app/@custom/ContentCalendar'
 
 export default function App() {
   return (
@@ -43,7 +49,14 @@ export default function App() {
             <Route path="/files" element={<Files />} />
             <Route path="/logs" element={<Logs />} />
             <Route path="/email" element={<Email />} />
+            <Route path="/posts" element={<PostsList />} />
+            <Route path="/posts/new" element={<PostScheduler />} />
+            <Route path="/posts/:id/edit" element={<PostScheduler />} />
+            <Route path="/calendar" element={<ContentCalendar />} />
             <Route path="/activity" element={<AuditLog />} />
+            <Route path="/content-templates" element={<ContentTemplates />} />
+            <Route path="/engagement-analytics" element={<EngagementAnalytics />} />
+            <Route path="/analytics" element={<AnalyticsDashboard />} />
           </Route>
 
           <Route path="*" element={<Navigate to="/dashboard" replace />} />
