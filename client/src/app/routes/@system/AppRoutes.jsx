@@ -96,6 +96,9 @@ const UXPatternsPage = lazy(() =>
 const MobileResponsiveDemo = lazy(() =>
   import('../../pages/app/@system/MobileResponsiveDemo').then((m) => ({ default: m.MobileResponsiveDemo }))
 )
+const ContentCalendarPage = lazy(() =>
+  import('../../pages/app/@custom/ContentCalendarPage').then((m) => ({ default: m.ContentCalendarPage }))
+)
 
 // Teams pages
 const TeamsPage = lazy(() =>
@@ -258,6 +261,16 @@ export function AppRoutes() {
           element={
             <ProtectedRoute>
               <MobileResponsiveDemo />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Content Calendar */}
+        <Route
+          path="/app/calendar"
+          element={
+            <ProtectedRoute>
+              <ContentCalendarPage />
             </ProtectedRoute>
           }
         />
