@@ -99,6 +99,9 @@ const MobileResponsiveDemo = lazy(() =>
 const ContentCalendarPage = lazy(() =>
   import('../../pages/app/@custom/ContentCalendarPage').then((m) => ({ default: m.ContentCalendarPage }))
 )
+const HashtagResearchPage = lazy(() =>
+  import('../../pages/app/@custom/HashtagResearchPage').then((m) => ({ default: m.HashtagResearchPage }))
+)
 
 // Teams pages
 const TeamsPage = lazy(() =>
@@ -271,6 +274,16 @@ export function AppRoutes() {
           element={
             <ProtectedRoute>
               <ContentCalendarPage />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Hashtag Research */}
+        <Route
+          path="/app/hashtags"
+          element={
+            <ProtectedRoute>
+              <HashtagResearchPage />
             </ProtectedRoute>
           }
         />
