@@ -1,4 +1,5 @@
 // products/planora/@custom/api/search.js - Global Search API
+// SECURITY: All queries scoped through workspace membership (IDOR protection)
 const express = require('express');
 const { prisma } = require('../db/client');
 const { requireAuth } = require('./auth');
@@ -8,7 +9,30 @@ const router = express.Router();
 // All routes require authentication
 router.use(requireAuth);
 
-// Global search endpoint
+/**
+ * Helper: Get project IDs the user can access via workspace + project membership.
+ */
+async function getAccessibleProjectIds(userId) {
+  const workspaceMemberships = await prisma.workspaceMember.findMany({
+    where: { userId },
+    select: { workspaceId: true }
+  });
+  const workspaceIds = workspaceMemberships.map(m => m.workspaceId);
+
+  const projectMemberships = await prisma.projectMember.findMany({
+    where: {
+      userId,
+      project: {
+        workspaceId: { in: workspaceIds }
+      }
+    },
+    select: { projectId: true }
+  });
+
+  return projectMemberships.map(m => m.projectId);
+}
+
+// Global search endpoint — scoped to workspace-accessible projects
 router.get('/search', async (req, res) => {
   try {
     const { q, type } = req.query;
@@ -24,15 +48,9 @@ router.get('/search', async (req, res) => {
       members: []
     };
 
-    // Get user's accessible projects
-    const userProjects = await prisma.projectMember.findMany({
-      where: { userId: req.userId },
-      select: { projectId: true }
-    });
+    const projectIds = await getAccessibleProjectIds(req.userId);
 
-    const projectIds = userProjects.map(p => p.projectId);
-
-    // Search tasks (if no type filter or type is 'tasks')
+    // Search tasks
     if (!type || type === 'tasks') {
       results.tasks = await prisma.task.findMany({
         where: {
@@ -55,7 +73,7 @@ router.get('/search', async (req, res) => {
       });
     }
 
-    // Search projects (if no type filter or type is 'projects')
+    // Search projects
     if (!type || type === 'projects') {
       results.projects = await prisma.project.findMany({
         where: {
@@ -75,9 +93,8 @@ router.get('/search', async (req, res) => {
       });
     }
 
-    // Search team members (if no type filter or type is 'members')
+    // Search team members (within accessible projects)
     if (!type || type === 'members') {
-      // Get members from user's projects
       const members = await prisma.projectMember.findMany({
         where: {
           projectId: { in: projectIds },
@@ -135,6 +152,14 @@ router.post('/filters', async (req, res) => {
 
     if (!name || !filterData) {
       return res.status(400).json({ error: 'Name and filter data required' });
+    }
+
+    // If projectId given, verify access via workspace + project membership
+    if (projectId) {
+      const projectIds = await getAccessibleProjectIds(req.userId);
+      if (!projectIds.includes(projectId)) {
+        return res.status(403).json({ error: 'Not authorized for this project' });
+      }
     }
 
     const filter = await prisma.savedFilter.create({

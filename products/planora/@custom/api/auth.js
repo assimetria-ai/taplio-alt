@@ -30,14 +30,37 @@ router.post('/signup', async (req, res) => {
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Create user
-    const user = await prisma.user.create({
-      data: {
-        name,
-        email,
-        password: hashedPassword,
-        emailVerified: false
-      }
+    // Create user with a default workspace (atomic transaction)
+    const user = await prisma.$transaction(async (tx) => {
+      const newUser = await tx.user.create({
+        data: {
+          name,
+          email,
+          password: hashedPassword,
+          emailVerified: false
+        }
+      });
+
+      // Auto-create a default workspace for the new user
+      const slug = name.trim().toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-|-$/g, '')
+        + '-' + Date.now().toString(36);
+
+      await tx.workspace.create({
+        data: {
+          name: `${name}'s Workspace`,
+          slug,
+          members: {
+            create: {
+              userId: newUser.id,
+              role: 'owner'
+            }
+          }
+        }
+      });
+
+      return newUser;
     });
 
     // Generate JWT

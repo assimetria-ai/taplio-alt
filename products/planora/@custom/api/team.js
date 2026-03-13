@@ -1,15 +1,17 @@
 // products/planora/@custom/api/team.js - Team & Workspace API
+// SECURITY: All routes verify workspace membership (IDOR protection)
 const express = require('express');
 const { prisma } = require('../db/client');
 const { requireAuth } = require('./auth');
+const { requireWorkspaceMember } = require('./middleware/workspaceAuth');
 
 const router = express.Router();
 
 // All routes require authentication
 router.use(requireAuth);
 
-// Get team members for a project
-router.get('/projects/:projectId/members', async (req, res) => {
+// Get team members for a project — verify workspace + project membership
+router.get('/projects/:projectId/members', requireWorkspaceMember, async (req, res) => {
   try {
     // Verify user has access to project
     const membership = await prisma.projectMember.findFirst({
@@ -45,8 +47,8 @@ router.get('/projects/:projectId/members', async (req, res) => {
   }
 });
 
-// Invite member to project
-router.post('/projects/:projectId/members', async (req, res) => {
+// Invite member to project — verify workspace + admin role
+router.post('/projects/:projectId/members', requireWorkspaceMember, async (req, res) => {
   try {
     const { email, role } = req.body;
 
@@ -126,8 +128,8 @@ router.post('/projects/:projectId/members', async (req, res) => {
   }
 });
 
-// Update member role
-router.put('/projects/:projectId/members/:memberId', async (req, res) => {
+// Update member role — verify workspace membership
+router.put('/projects/:projectId/members/:memberId', requireWorkspaceMember, async (req, res) => {
   try {
     const { role } = req.body;
 
@@ -196,8 +198,8 @@ router.put('/projects/:projectId/members/:memberId', async (req, res) => {
   }
 });
 
-// Remove member from project
-router.delete('/projects/:projectId/members/:memberId', async (req, res) => {
+// Remove member from project — verify workspace membership
+router.delete('/projects/:projectId/members/:memberId', requireWorkspaceMember, async (req, res) => {
   try {
     // Verify user has admin access
     const membership = await prisma.projectMember.findFirst({
@@ -262,8 +264,8 @@ router.delete('/projects/:projectId/members/:memberId', async (req, res) => {
   }
 });
 
-// Get project/workspace settings
-router.get('/projects/:projectId/settings', async (req, res) => {
+// Get project/workspace settings — verify workspace membership
+router.get('/projects/:projectId/settings', requireWorkspaceMember, async (req, res) => {
   try {
     // Verify user has access
     const membership = await prisma.projectMember.findFirst({
@@ -299,8 +301,8 @@ router.get('/projects/:projectId/settings', async (req, res) => {
   }
 });
 
-// Update workspace settings
-router.put('/projects/:projectId/settings', async (req, res) => {
+// Update workspace settings — verify workspace membership
+router.put('/projects/:projectId/settings', requireWorkspaceMember, async (req, res) => {
   try {
     const { name, description, color } = req.body;
 

@@ -1,4 +1,5 @@
 // products/planora/@custom/api/dashboard.js - Dashboard API
+// SECURITY: All queries scoped through workspace membership (IDOR protection)
 const express = require('express');
 const { prisma } = require('../db/client');
 const { requireAuth } = require('./auth');
@@ -8,16 +9,37 @@ const router = express.Router();
 // All routes require authentication
 router.use(requireAuth);
 
+/**
+ * Helper: Get project IDs the user can access via workspace membership.
+ * Two-layer check: workspace_members → projects within those workspaces
+ * that the user is also a project member of.
+ */
+async function getAccessibleProjectIds(userId) {
+  // Get workspaces the user belongs to
+  const workspaceMemberships = await prisma.workspaceMember.findMany({
+    where: { userId },
+    select: { workspaceId: true }
+  });
+  const workspaceIds = workspaceMemberships.map(m => m.workspaceId);
+
+  // Get projects within those workspaces where user is a project member
+  const projectMemberships = await prisma.projectMember.findMany({
+    where: {
+      userId,
+      project: {
+        workspaceId: { in: workspaceIds }
+      }
+    },
+    select: { projectId: true }
+  });
+
+  return projectMemberships.map(m => m.projectId);
+}
+
 // Get dashboard statistics
 router.get('/dashboard/stats', async (req, res) => {
   try {
-    // Get all projects user has access to
-    const projectMemberships = await prisma.projectMember.findMany({
-      where: { userId: req.userId },
-      select: { projectId: true }
-    });
-
-    const projectIds = projectMemberships.map(m => m.projectId);
+    const projectIds = await getAccessibleProjectIds(req.userId);
 
     // Count total projects
     const totalProjects = projectIds.length;
@@ -61,13 +83,16 @@ router.get('/dashboard/stats', async (req, res) => {
   }
 });
 
-// Get tasks assigned to current user
+// Get tasks assigned to current user — scoped to accessible projects only
 router.get('/dashboard/my-tasks', async (req, res) => {
   try {
+    const projectIds = await getAccessibleProjectIds(req.userId);
+
     const tasks = await prisma.task.findMany({
       where: {
         assigneeId: req.userId,
-        status: { not: 'done' } // Only show active tasks
+        projectId: { in: projectIds }, // IDOR fix: scope to accessible projects
+        status: { not: 'done' }
       },
       include: {
         project: {
@@ -81,7 +106,7 @@ router.get('/dashboard/my-tasks', async (req, res) => {
         { dueDate: 'asc' },
         { createdAt: 'desc' }
       ],
-      take: 10 // Limit to 10 most relevant tasks
+      take: 10
     });
 
     res.json({
@@ -96,16 +121,10 @@ router.get('/dashboard/my-tasks', async (req, res) => {
   }
 });
 
-// Get activity feed
+// Get activity feed — scoped to accessible projects only
 router.get('/dashboard/activity', async (req, res) => {
   try {
-    // Get all projects user has access to
-    const projectMemberships = await prisma.projectMember.findMany({
-      where: { userId: req.userId },
-      select: { projectId: true }
-    });
-
-    const projectIds = projectMemberships.map(m => m.projectId);
+    const projectIds = await getAccessibleProjectIds(req.userId);
 
     // Fetch recent tasks (created/updated)
     const recentTasks = await prisma.task.findMany({
@@ -146,7 +165,6 @@ router.get('/dashboard/activity', async (req, res) => {
     // Combine and sort activities
     const activities = [];
 
-    // Add task activities
     recentTasks.forEach(task => {
       const action = task.status === 'done' ? 'completed' : 'created';
       activities.push({
@@ -159,7 +177,6 @@ router.get('/dashboard/activity', async (req, res) => {
       });
     });
 
-    // Add comment activities
     recentComments.forEach(comment => {
       activities.push({
         type: 'comment_added',
@@ -171,7 +188,6 @@ router.get('/dashboard/activity', async (req, res) => {
       });
     });
 
-    // Sort by timestamp and limit
     activities.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
     const limitedActivities = activities.slice(0, 10);
 
