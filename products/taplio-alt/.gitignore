@@ -14,6 +14,7 @@ build/
 # Logs
 *.log
 logs/
+!server/src/api/@system/logs/
 
 # Editor
 .DS_Store
