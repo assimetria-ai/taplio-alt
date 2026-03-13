@@ -12,26 +12,43 @@ generator client {
 }
 
 model Link {
-  id         String   @id @default(cuid())
-  slug       String   @unique
-  targetUrl  String   @map("target_url")
-  title      String?  // Link title/description
-  tags       String[] @default([]) // Tags for organization
-  userId     String?  @map("user_id")
-  domainId   String?  @map("domain_id") // Link to custom domain
-  clicks     Int      @default(0)
-  createdAt  DateTime @default(now()) @map("created_at")
-  updatedAt  DateTime @updatedAt @map("updated_at")
+  id            String   @id @default(cuid())
+  slug          String   @unique
+  targetUrl     String   @map("target_url")
+  title         String?  // Link title/description
+  tags          String[] @default([]) // Tags for organization
+  userId        String?  @map("user_id")
+  domainId      String?  @map("domain_id") // Link to custom domain
+  clicks        Int      @default(0)
+  passwordHash  String?  @map("password_hash") // bcrypt hash for password-protected links
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
 
   // Relations
-  user         User?         @relation(fields: [userId], references: [id], onDelete: SetNull)
-  customDomain CustomDomain? @relation(fields: [domainId], references: [id], onDelete: SetNull)
-  clickEvents  ClickEvent[]
+  user                User?                @relation(fields: [userId], references: [id], onDelete: SetNull)
+  customDomain        CustomDomain?        @relation(fields: [domainId], references: [id], onDelete: SetNull)
+  clickEvents         ClickEvent[]
+  passwordAttempts    PasswordAttempt[]
 
   @@index([slug])
   @@index([userId])
   @@index([domainId])
   @@map("links")
+}
+
+model PasswordAttempt {
+  id        String   @id @default(cuid())
+  linkId    String   @map("link_id")
+  ipAddress String   @map("ip_address")
+  success   Boolean  @default(false)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  // Relations
+  link      Link     @relation(fields: [linkId], references: [id], onDelete: Cascade)
+
+  @@index([linkId])
+  @@index([ipAddress, createdAt])
+  @@map("password_attempts")
 }
 
 model User {
