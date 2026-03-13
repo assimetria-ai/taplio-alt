@@ -9,6 +9,7 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import Dashboard from './pages/Dashboard';
 import Login from './pages/Login';
 import Import from './pages/Import';
+import BioPages from './pages/BioPages';
 import './App.css';
 
 function App() {
@@ -18,6 +19,7 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/import" element={<Import />} />
+        <Route path="/bio" element={<BioPages />} />
         <Route path="/" element={<Navigate to="/dashboard" replace />} />
       </Routes>
     </div>

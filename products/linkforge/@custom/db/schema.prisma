@@ -45,6 +45,7 @@ model User {
   // Relations
   links         Link[]
   customDomains CustomDomain[]
+  bioPages      BioPage[]
 
   @@map("users")
 }
@@ -82,6 +83,50 @@ model CustomDomain {
   @@index([status])
   @@index([domain])
   @@map("custom_domains")
+}
+
+model BioPage {
+  id          String    @id @default(cuid())
+  username    String    @unique // URL slug: /bio/username
+  title       String    // Display name
+  description String?   // Bio description
+  avatarUrl   String?   @map("avatar_url")
+  theme       String    @default("default") // Theme name
+  bgColor     String    @default("#ffffff") @map("bg_color")
+  textColor   String    @default("#000000") @map("text_color")
+  buttonStyle String    @default("rounded") @map("button_style") // rounded, pill, square
+  userId      String    @map("user_id")
+  isPublished Boolean   @default(true) @map("is_published")
+  views       Int       @default(0)
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  // Relations
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  bioLinks  BioLink[]
+
+  @@index([userId])
+  @@index([username])
+  @@map("bio_pages")
+}
+
+model BioLink {
+  id        String   @id @default(cuid())
+  bioPageId String   @map("bio_page_id")
+  label     String   // Button text
+  url       String   // Target URL
+  icon      String?  // Icon name (optional)
+  position  Int      @default(0) // Sort order
+  isActive  Boolean  @default(true) @map("is_active")
+  clicks    Int      @default(0)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  bioPage   BioPage  @relation(fields: [bioPageId], references: [id], onDelete: Cascade)
+
+  @@index([bioPageId])
+  @@map("bio_links")
 }
 
 model ClickEvent {
