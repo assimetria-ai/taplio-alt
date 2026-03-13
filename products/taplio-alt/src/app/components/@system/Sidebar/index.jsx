@@ -1,7 +1,7 @@
 import { useRef, useEffect } from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
 import * as Dialog from '@radix-ui/react-dialog'
-import { LayoutDashboard, Settings, Users, HardDrive, ScrollText, Mail, X } from 'lucide-react'
+import { LayoutDashboard, Settings, Users, HardDrive, ScrollText, Mail, ClipboardList, X } from 'lucide-react'
 import { cn } from '@/app/lib/@system/utils'
 import { useAuth } from '@/app/store/@system/auth'
 
@@ -11,6 +11,7 @@ const NAV_ITEMS = [
   { to: '/teams',     label: 'Teams',     Icon: Users },
   { to: '/files',     label: 'Files',     Icon: HardDrive },
   { to: '/email',     label: 'Email',     Icon: Mail },
+  { to: '/activity',  label: 'Activity',  Icon: ClipboardList },
   { to: '/logs',      label: 'Logs',      Icon: ScrollText },
   { to: '/settings',  label: 'Settings',  Icon: Settings },
 ]

@@ -18,6 +18,7 @@ const db       = require('../../../lib/@system/PostgreSQL')
 const logger   = require('../../../lib/@system/Logger')
 const { authenticate, recordPasswordFailure, isPasswordLocked, resetPasswordLock } = require('../../../lib/@system/Helpers/auth')
 const { loginLimiter, createLimiter } = require('../../../lib/@system/RateLimit')
+const auditLog = require('../../../lib/@system/AuditLog')
 
 // ── TOTP library ───────────────────────────────────────────────────────────────
 // otplib is the recommended library; fall back gracefully if not installed.
@@ -186,6 +187,7 @@ router.post('/sessions', loginLimiter, async (req, res, next) => {
     if (!user || !passwordMatch) {
       if (user) recordPasswordFailure(user.id)
       logger.warn({ email }, 'login failed — invalid credentials')
+      auditLog.log({ userId: user?.id, action: 'user.login_failed', meta: { email }, ip: req.ip })
       return res.status(401).json({ message: 'Invalid email or password' })
     }
 
@@ -220,6 +222,7 @@ router.post('/sessions', loginLimiter, async (req, res, next) => {
     )
 
     logger.info({ userId: user.id }, 'login successful')
+    auditLog.log({ userId: user.id, action: 'user.login', resourceType: 'session', ip: req.ip })
     return res.json({
       token: sessionToken,
       user:  { id: user.id, email: user.email, name: user.name, role: user.role },
@@ -317,6 +320,7 @@ router.post('/sessions/totp/verify', totpRateLimiter, async (req, res, next) => 
       )
 
       logger.info({ userId: challenge.user_id }, 'TOTP verify successful — session created')
+      auditLog.log({ userId: challenge.user_id, action: 'user.login', resourceType: 'session', meta: { mfa: true }, ip: req.ip })
       return res.json({
         token: sessionToken,
         user:  {
@@ -347,6 +351,7 @@ router.delete('/sessions', authenticate, async (req, res, next) => {
     }
 
     logger.info({ userId: req.user.id }, 'logout')
+    auditLog.log({ userId: req.user.id, action: 'user.logout', resourceType: 'session', ip: req.ip })
     res.json({ message: 'Logged out successfully' })
   } catch (err) {
     next(err)

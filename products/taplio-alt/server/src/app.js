@@ -195,6 +195,7 @@ const storageRouter  = require('./api/@custom/storage');
 const blogRouter     = require('./api/@custom/blog');
 const itemsRouter    = require('./api/@custom/items');
 const postsRouter    = require('../../@custom/routes/posts');
+const auditRouter    = require('../../@custom/routes/audit');
 
 app.use('/api', sessionsRouter);
 app.use('/api', userRouter);
@@ -207,6 +208,7 @@ app.use('/api', storageRouter);
 app.use('/api', blogRouter);
 app.use('/api', itemsRouter);
 app.use('/api', postsRouter);
+app.use('/api', auditRouter);
 
 // ─── Health check ─────────────────────────────────────────────────────────────
 // Exempt from CORS (see cors.js DEFAULT_HEALTH_CHECK_PATHS) so monitoring probes

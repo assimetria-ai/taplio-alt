@@ -14,6 +14,7 @@ import AcceptInvite from '@/app/pages/app/@system/AcceptInvite'
 import Files from '@/app/pages/app/@system/Files'
 import Logs from '@/app/pages/app/@system/Logs'
 import Email from '@/app/pages/app/@system/Email'
+import AuditLog from '@/app/pages/app/@custom/AuditLog'
 
 export default function App() {
   return (
@@ -42,7 +43,7 @@ export default function App() {
             <Route path="/files" element={<Files />} />
             <Route path="/logs" element={<Logs />} />
             <Route path="/email" element={<Email />} />
-            {/* @custom: add your own routes here */}
+            <Route path="/activity" element={<AuditLog />} />
           </Route>
 
           <Route path="*" element={<Navigate to="/dashboard" replace />} />

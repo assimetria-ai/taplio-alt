@@ -15,6 +15,7 @@ const express  = require('express')
 const router   = express.Router()
 const db       = require('../../server/src/lib/@system/PostgreSQL')
 const logger   = require('../../server/src/lib/@system/Logger')
+const auditLog = require('../../server/src/lib/@system/AuditLog')
 const { validateBody } = require('../../server/src/lib/@system/Middleware/validate')
 const {
   asyncHandler,
@@ -120,6 +121,7 @@ router.post('/posts', authenticate, validateBody(CREATE_RULES), asyncHandler(asy
   })
 
   logger.info({ postId: post.id, userId: req.user.id }, 'post created')
+  auditLog.log({ userId: req.user.id, action: 'post.create', resourceType: 'post', resourceId: String(post.id), meta: { status }, ip: req.ip })
   res.status(201).json({ data: post })
 }))
 
@@ -157,6 +159,7 @@ router.patch(
     const post = await update(db, TABLE, req.params.id, updates)
 
     logger.info({ postId: post.id, userId: req.user.id }, 'post updated')
+    auditLog.log({ userId: req.user.id, action: 'post.update', resourceType: 'post', resourceId: String(post.id), meta: { fields: Object.keys(updates) }, ip: req.ip })
     res.json({ data: post })
   })
 )
@@ -171,6 +174,7 @@ router.delete(
   asyncHandler(async (req, res) => {
     await remove(db, TABLE, req.params.id)
     logger.info({ postId: req.params.id, userId: req.user.id }, 'post deleted')
+    auditLog.log({ userId: req.user.id, action: 'post.delete', resourceType: 'post', resourceId: String(req.params.id), ip: req.ip })
     res.status(204).end()
   })
 )
@@ -200,6 +204,7 @@ router.post(
     })
 
     logger.info({ postId: post.id, userId: req.user.id }, 'post published')
+    auditLog.log({ userId: req.user.id, action: 'post.publish', resourceType: 'post', resourceId: String(post.id), ip: req.ip })
     res.json({ data: post })
   })
 )
