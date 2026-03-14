@@ -100,7 +100,7 @@ function generateEngagementBreakdown() {
 }
 
 // ─── Component ────────────────────────────────────────────────────
-export default function EngagementAnalyticsPage() {
+export function EngagementAnalyticsPage() {
   const [period, setPeriod] = useState('30d')
   const [chartData, setChartData] = useState([])
   const [bestPosts, setBestPosts] = useState([])
@@ -405,3 +405,5 @@ function MetricCard({ icon: Icon, label, value, change, isPercent, isAbsolute })
     </div>
   )
 }
+
+export default EngagementAnalyticsPage

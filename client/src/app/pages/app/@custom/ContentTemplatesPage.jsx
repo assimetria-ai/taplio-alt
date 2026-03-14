@@ -170,7 +170,7 @@ const BUILTIN_TEMPLATES = [
 ]
 
 // ─── Component ────────────────────────────────────────────────────
-export default function ContentTemplatesPage() {
+export function ContentTemplatesPage() {
   const [templates, setTemplates] = useState([])
   const [search, setSearch] = useState('')
   const [activeCategory, setActiveCategory] = useState('all')
@@ -711,3 +711,5 @@ function CreateTemplateModal({ onClose, onCreate }) {
     </div>
   )
 }
+
+export default ContentTemplatesPage

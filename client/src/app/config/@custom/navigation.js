@@ -1,16 +1,20 @@
-// @custom — Planora sidebar navigation items (project management tool)
+// @custom — Taplio Alt sidebar navigation items (LinkedIn content & scheduling)
 import {
   LayoutDashboard,
-  Kanban,
-  CheckSquare,
+  PenTool,
+  Clock,
+  Calendar,
+  FileText,
+  BarChart3,
   Users,
-  Search,
 } from 'lucide-react'
 
-export const PLANORA_NAV_ITEMS = [
+export const TAPLIO_NAV_ITEMS = [
   { icon: LayoutDashboard, label: 'Dashboard',  to: '/app/dashboard' },
-  { icon: Kanban,          label: 'Projects',   to: '/app/projects' },
-  { icon: CheckSquare,     label: 'Tasks',      to: '/app/tasks' },
-  { icon: Users,           label: 'Teams',      to: '/app/teams' },
-  { icon: Search,          label: 'Search',     to: '/app/search' },
+  { icon: PenTool,         label: 'AI Writer',  to: '/app/ai-writer' },
+  { icon: Clock,           label: 'Scheduler',  to: '/app/scheduler' },
+  { icon: Calendar,        label: 'Calendar',   to: '/app/calendar' },
+  { icon: FileText,        label: 'Templates',  to: '/app/templates' },
+  { icon: BarChart3,       label: 'Analytics',  to: '/app/analytics' },
+  { icon: Users,           label: 'Leads',      to: '/app/leads' },
 ]
