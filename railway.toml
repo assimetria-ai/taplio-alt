@@ -67,7 +67,7 @@ builder = "NIXPACKS"
 buildCommand = "npm ci && npm run build && cd server && npm ci"
 
 [services.taplio-alt.deploy]
-startCommand = "cd server && node src/index.js"
+startCommand = "npm start"
 healthcheckPath = "/api/health"
 healthcheckTimeout = 30
 restartPolicyType = "ON_FAILURE"
