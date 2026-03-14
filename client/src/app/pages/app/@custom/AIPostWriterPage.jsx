@@ -3,6 +3,7 @@ import { useState, useCallback } from 'react'
 import { Sparkles, Copy, RefreshCw, Send, ChevronDown, Hash, Wand2, FileText, Zap } from 'lucide-react'
 import { DashboardLayout } from '../../../components/@system/Dashboard'
 import { Button } from '../../../components/@system/ui/button'
+import { TAPLIO_NAV_ITEMS } from '../../../config/@custom/navigation'
 
 const TONES = ['Professional', 'Casual', 'Bold', 'Inspirational', 'Educational', 'Humorous']
 const LENGTHS = ['Short (~100 words)', 'Medium (~200 words)', 'Long (~300+ words)']
@@ -164,7 +165,7 @@ export function AIPostWriterPage() {
   }, [])
 
   return (
-    <DashboardLayout>
+    <DashboardLayout navItems={TAPLIO_NAV_ITEMS}>
       <div className="max-w-4xl mx-auto space-y-8 p-6">
         {/* Header */}
         <div>

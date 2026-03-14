@@ -28,6 +28,7 @@ import {
 } from 'lucide-react'
 import { DashboardLayout } from '../../../components/@system/Dashboard/DashboardLayout'
 import { cn } from '../../../lib/@system/utils'
+import { TAPLIO_NAV_ITEMS } from '../../../config/@custom/navigation'
 
 // ─── Brand Tokens ─────────────────────────────────────────────────
 const BRAND = {
@@ -419,7 +420,7 @@ export function PostsList() {
 
   // ─── Render ───────────────────────────────────────────────────
   return (
-    <DashboardLayout>
+    <DashboardLayout navItems={TAPLIO_NAV_ITEMS}>
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">

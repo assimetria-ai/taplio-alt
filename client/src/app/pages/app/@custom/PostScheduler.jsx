@@ -21,6 +21,7 @@ import {
 } from 'lucide-react'
 import { DashboardLayout } from '../../../components/@system/Dashboard/DashboardLayout'
 import { cn } from '../../../lib/@system/utils'
+import { TAPLIO_NAV_ITEMS } from '../../../config/@custom/navigation'
 
 // ─── Constants ────────────────────────────────────────────────────
 const MAX_CONTENT_LENGTH = 3000
@@ -201,7 +202,7 @@ export function PostScheduler() {
 
   if (loading) {
     return (
-      <DashboardLayout>
+      <DashboardLayout navItems={TAPLIO_NAV_ITEMS}>
         <DashboardLayout.Content>
           <div className="flex items-center justify-center h-64">
             <div className="animate-spin w-8 h-8 border-2 border-[#0891B2] border-t-transparent rounded-full" />
@@ -212,7 +213,7 @@ export function PostScheduler() {
   }
 
   return (
-    <DashboardLayout>
+    <DashboardLayout navItems={TAPLIO_NAV_ITEMS}>
       <DashboardLayout.Header
         title={editId ? 'Edit Post' : 'Create Post'}
         description="Write and schedule your LinkedIn post"

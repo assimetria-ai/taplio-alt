@@ -32,6 +32,7 @@ import {
 } from 'lucide-react'
 import { DashboardLayout } from '../../../components/@system/Dashboard/DashboardLayout'
 import { cn } from '../../../lib/@system/utils'
+import { TAPLIO_NAV_ITEMS } from '../../../config/@custom/navigation'
 
 // ─── Constants ────────────────────────────────────────────────────
 const CATEGORIES = [
@@ -251,7 +252,7 @@ export default function ContentTemplatesPage() {
   }, [templates, search, activeCategory, activeType])
 
   return (
-    <DashboardLayout>
+    <DashboardLayout navItems={TAPLIO_NAV_ITEMS}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 space-y-6">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">

@@ -22,6 +22,7 @@ import {
 } from 'lucide-react'
 import { DashboardLayout } from '../../../components/@system/Dashboard/DashboardLayout'
 import { cn } from '../../../lib/@system/utils'
+import { TAPLIO_NAV_ITEMS } from '../../../config/@custom/navigation'
 
 // ─── Constants ────────────────────────────────────────────────────
 const VIEWS = ['month', 'week', 'day']
@@ -507,7 +508,7 @@ export function ContentCalendarPage() {
   }
 
   return (
-    <DashboardLayout>
+    <DashboardLayout navItems={TAPLIO_NAV_ITEMS}>
       <div className="flex flex-col h-full">
         {/* Toolbar */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 border-b bg-white">

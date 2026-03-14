@@ -28,6 +28,7 @@ import {
 } from 'lucide-react'
 import { DashboardLayout } from '../../../components/@system/Dashboard/DashboardLayout'
 import { cn } from '../../../lib/@system/utils'
+import { TAPLIO_NAV_ITEMS } from '../../../config/@custom/navigation'
 
 // ─── Formatting helpers ───────────────────────────────────────────
 function formatNumber(n) {
@@ -358,7 +359,7 @@ export function HashtagResearchPage() {
 
   // ─── Render ───────────────────────────────────────────────────
   return (
-    <DashboardLayout>
+    <DashboardLayout navItems={TAPLIO_NAV_ITEMS}>
       <DashboardLayout.Header
         title="Hashtag Research"
         description="Analyze top performing LinkedIn hashtags by industry and topic"

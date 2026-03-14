@@ -3,6 +3,7 @@ import { useState, useMemo } from 'react'
 import { Users, Download, Search, Filter, UserPlus, Building2, Briefcase, MessageSquare, Heart, Share2, Star, ChevronDown, ExternalLink, StickyNote } from 'lucide-react'
 import { DashboardLayout } from '../../../components/@system/Dashboard'
 import { Button } from '../../../components/@system/ui/button'
+import { TAPLIO_NAV_ITEMS } from '../../../config/@custom/navigation'
 
 const MOCK_LEADS = [
   { id: 1, name: 'Sarah Chen', title: 'VP of Marketing', company: 'TechCorp Inc.', industry: 'Technology', engagementScore: 95, likes: 12, comments: 5, shares: 3, lastEngaged: '2h ago', avatar: null, notes: '' },
@@ -150,7 +151,7 @@ export function LeadGenerationPage() {
   }), [leads])
 
   return (
-    <DashboardLayout>
+    <DashboardLayout navItems={TAPLIO_NAV_ITEMS}>
       <div className="flex-1 overflow-auto p-6">
         <div className="max-w-7xl mx-auto space-y-6">
           {/* Header */}

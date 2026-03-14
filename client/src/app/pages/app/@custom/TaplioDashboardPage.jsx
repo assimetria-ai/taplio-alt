@@ -22,6 +22,7 @@ import { useAuthContext } from '../../../store/@system/auth'
 import { DashboardLayout, StatCard, StatCardGrid } from '../../../components/@system/Dashboard'
 import { Button } from '../../../components/@system/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '../../../components/@system/Card/Card'
+import { TAPLIO_NAV_ITEMS } from '../../../config/@custom/navigation'
 
 // ─── Mock Data (replace with real API calls) ──────────────────────────────────
 
@@ -250,7 +251,7 @@ export function TaplioDashboardPage() {
   const firstName = user?.name?.split(' ')[0] || user?.email?.split('@')[0] || 'there'
 
   return (
-    <DashboardLayout>
+    <DashboardLayout navItems={TAPLIO_NAV_ITEMS}>
       <DashboardLayout.Header
         title={`Welcome back, ${firstName}`}
         description="Here's how your LinkedIn content is performing"

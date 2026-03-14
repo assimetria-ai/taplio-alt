@@ -35,6 +35,7 @@ import {
 } from 'recharts'
 import { DashboardLayout } from '../../../components/@system/Dashboard/DashboardLayout'
 import { cn } from '../../../lib/@system/utils'
+import { TAPLIO_NAV_ITEMS } from '../../../config/@custom/navigation'
 
 // ─── Constants ────────────────────────────────────────────────────
 const BRAND = {
@@ -172,7 +173,7 @@ export default function AnalyticsDashboardPage() {
   }
 
   return (
-    <DashboardLayout>
+    <DashboardLayout navItems={TAPLIO_NAV_ITEMS}>
       <div className="space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
