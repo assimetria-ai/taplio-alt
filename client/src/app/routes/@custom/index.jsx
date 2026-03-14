@@ -8,6 +8,9 @@ import { EmailPreviewPage } from '../../pages/app/@custom/EmailPreviewPage'
 import { ClipLibraryPage } from '../../pages/app/@custom/ClipLibraryPage'
 import { TeamsPage } from '../../pages/app/@custom/TeamsPage'
 import { TeamDetailPage } from '../../pages/app/@custom/TeamDetailPage'
+import { PostsList } from '../../pages/app/@custom/PostsList'
+import { PostScheduler } from '../../pages/app/@custom/PostScheduler'
+import { ContentCalendarPage } from '../../pages/app/@custom/ContentCalendarPage'
 import { PrivateRoute } from '@/app/components/@system/PrivateRoute/PrivateRoute'
 
 // @custom — add your product-specific routes here.
@@ -91,6 +94,42 @@ export const customRoutes = [
     element={
       <PrivateRoute>
         <TeamDetailPage />
+      </PrivateRoute>
+    }
+  />,
+  <Route
+    key="posts-list"
+    path="/app/posts"
+    element={
+      <PrivateRoute>
+        <PostsList />
+      </PrivateRoute>
+    }
+  />,
+  <Route
+    key="post-new"
+    path="/app/posts/new"
+    element={
+      <PrivateRoute>
+        <PostScheduler />
+      </PrivateRoute>
+    }
+  />,
+  <Route
+    key="post-edit"
+    path="/app/posts/:id/edit"
+    element={
+      <PrivateRoute>
+        <PostScheduler />
+      </PrivateRoute>
+    }
+  />,
+  <Route
+    key="content-calendar"
+    path="/app/calendar"
+    element={
+      <PrivateRoute>
+        <ContentCalendarPage />
       </PrivateRoute>
     }
   />,
