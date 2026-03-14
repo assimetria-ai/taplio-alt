@@ -57,7 +57,10 @@ const allowedOrigins = buildAllowedOrigins({
   productionOrigins: APPROVED_PRODUCTION_ORIGINS,
 });
 
-app.use(createCorsMiddleware({
+// CORS only for /api/* routes — static files and SPA routes don't need CORS
+// and must be served without an Origin header (browsers don't send one for
+// same-origin page navigations).
+app.use('/api', createCorsMiddleware({
   allowedOrigins,
   credentials: true, // Allow cookies and auth headers
 }));
