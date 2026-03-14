@@ -1,3 +1,7 @@
+# Force Node.js provider — prevents Nixpacks from auto-detecting as a static
+# Vite site and generating a Caddy file server.
+providers = ["node"]
+
 [phases.setup]
 nixPkgs = ["nodejs_20"]
 
