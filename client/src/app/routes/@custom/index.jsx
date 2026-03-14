@@ -2,98 +2,120 @@ import { Route } from 'react-router-dom'
 import { lazy } from 'react'
 import { ProtectedRoute } from '../../components/@system/ProtectedRoute/ProtectedRoute'
 
-// @custom — Planora product routes (AI-powered project management)
+// @custom — Taplio Alt product routes (LinkedIn content creation & scheduling)
 
-const PlanoraDashboardPage = lazy(() =>
-  import('../../pages/app/@custom/PlanoraDashboardPage').then(m => ({ default: m.PlanoraDashboardPage }))
+const TaplioDashboardPage = lazy(() =>
+  import('../../pages/app/@custom/TaplioDashboardPage').then(m => ({ default: m.TaplioDashboardPage }))
 )
-const ProjectBoardPage = lazy(() =>
-  import('../../pages/app/@custom/ProjectBoardPage').then(m => ({ default: m.ProjectBoardPage }))
+const AIPostWriterPage = lazy(() =>
+  import('../../pages/app/@custom/AIPostWriterPage').then(m => ({ default: m.AIPostWriterPage }))
 )
-const TaskManagementPage = lazy(() =>
-  import('../../pages/app/@custom/TaskManagementPage').then(m => ({ default: m.TaskManagementPage }))
+const PostsListPage = lazy(() =>
+  import('../../pages/app/@custom/PostsListPage').then(m => ({ default: m.PostsListPage }))
 )
-const TeamsPage = lazy(() =>
-  import('../../pages/app/@custom/TeamsPage').then(m => ({ default: m.TeamsPage }))
+const PostSchedulerPage = lazy(() =>
+  import('../../pages/app/@custom/PostSchedulerPage').then(m => ({ default: m.PostSchedulerPage }))
 )
-const TeamDetailPage = lazy(() =>
-  import('../../pages/app/@custom/TeamDetailPage').then(m => ({ default: m.TeamDetailPage }))
+const ContentCalendarPage = lazy(() =>
+  import('../../pages/app/@custom/ContentCalendarPage').then(m => ({ default: m.ContentCalendarPage }))
+)
+const ContentTemplatesPage = lazy(() =>
+  import('../../pages/app/@custom/ContentTemplatesPage').then(m => ({ default: m.ContentTemplatesPage }))
+)
+const EngagementAnalyticsPage = lazy(() =>
+  import('../../pages/app/@custom/EngagementAnalyticsPage').then(m => ({ default: m.EngagementAnalyticsPage }))
+)
+const LeadGenerationPage = lazy(() =>
+  import('../../pages/app/@custom/LeadGenerationPage').then(m => ({ default: m.LeadGenerationPage }))
 )
 
 export const customRoutes = [
   // Dashboard — main app home
   <Route
-    key="planora-dashboard"
+    key="taplio-dashboard"
     path="/app/dashboard"
     element={
       <ProtectedRoute>
-        <PlanoraDashboardPage />
+        <TaplioDashboardPage />
       </ProtectedRoute>
     }
   />,
-  // Project Board
+  // AI Post Writer
   <Route
-    key="projects"
-    path="/app/projects"
+    key="ai-writer"
+    path="/app/writer"
     element={
       <ProtectedRoute>
-        <ProjectBoardPage />
+        <AIPostWriterPage />
       </ProtectedRoute>
     }
   />,
+  // Posts list
   <Route
-    key="project-detail"
-    path="/app/projects/:id"
+    key="posts"
+    path="/app/posts"
     element={
       <ProtectedRoute>
-        <ProjectBoardPage />
+        <PostsListPage />
       </ProtectedRoute>
     }
   />,
-  // Task Management
+  // Post scheduler (create/edit)
   <Route
-    key="tasks"
-    path="/app/tasks"
+    key="post-new"
+    path="/app/posts/new"
     element={
       <ProtectedRoute>
-        <TaskManagementPage />
-      </ProtectedRoute>
-    }
-  />,
-  <Route
-    key="task-new"
-    path="/app/tasks/new"
-    element={
-      <ProtectedRoute>
-        <TaskManagementPage />
+        <PostSchedulerPage />
       </ProtectedRoute>
     }
   />,
   <Route
-    key="task-detail"
-    path="/app/tasks/:id"
+    key="post-edit"
+    path="/app/posts/:id/edit"
     element={
       <ProtectedRoute>
-        <TaskManagementPage />
+        <PostSchedulerPage />
       </ProtectedRoute>
     }
   />,
-  // Teams
+  // Content Calendar
   <Route
-    key="teams"
-    path="/app/teams"
+    key="calendar"
+    path="/app/calendar"
     element={
       <ProtectedRoute>
-        <TeamsPage />
+        <ContentCalendarPage />
       </ProtectedRoute>
     }
   />,
+  // Content Templates
   <Route
-    key="team-detail"
-    path="/app/teams/:id"
+    key="templates"
+    path="/app/templates"
     element={
       <ProtectedRoute>
-        <TeamDetailPage />
+        <ContentTemplatesPage />
+      </ProtectedRoute>
+    }
+  />,
+  // Engagement Analytics
+  <Route
+    key="analytics"
+    path="/app/analytics"
+    element={
+      <ProtectedRoute>
+        <EngagementAnalyticsPage />
+      </ProtectedRoute>
+    }
+  />,
+  // Lead Generation
+  <Route
+    key="leads"
+    path="/app/leads"
+    element={
+      <ProtectedRoute>
+        <LeadGenerationPage />
       </ProtectedRoute>
     }
   />,
