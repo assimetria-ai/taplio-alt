@@ -2,6 +2,7 @@
 // Task #10311 - Custom domain configuration support
 
 require('dotenv').config();
+const path = require('path');
 const express = require('express');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
@@ -48,6 +49,21 @@ app.get('/health', (req, res) => {
 app.use('/api', apiRouter);
 app.use('/api', conversionsRouter);
 app.use('/api/domains', domainsRouter);
+
+// Serve dashboard static files from dist/
+const distPath = path.join(__dirname, '..', 'dist');
+app.use(express.static(distPath, { index: false }));
+
+// Dashboard SPA routes — serve index.html for known dashboard paths
+const dashboardRoutes = ['/', '/dashboard', '/login', '/import', '/bio', '/settings', '/links', '/analytics', '/domains', '/team', '/api-keys', '/utm'];
+app.get(dashboardRoutes, (req, res) => {
+  res.sendFile(path.join(distPath, 'index.html'));
+});
+
+// Catch-all for SPA: if request accepts HTML and path starts with /dashboard, serve SPA
+app.get('/dashboard/*', (req, res) => {
+  res.sendFile(path.join(distPath, 'index.html'));
+});
 
 // Redirect handler - MUST be last to catch all slugs
 // Works with both primary domain and custom domains
