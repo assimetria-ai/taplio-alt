@@ -3,7 +3,6 @@ import { lazy, Suspense } from 'react'
 import { useAuthContext } from '../../store/@system/auth'
 import { Spinner } from '../../components/@system/Loading/Spinner'
 import { ProtectedRoute } from '../../components/@system/ProtectedRoute/ProtectedRoute'
-import { customRoutes } from '../@custom/index'
 
 // @custom — to add custom routes, create @custom/AppRoutes.jsx that wraps or extends this component
 
@@ -291,9 +290,6 @@ export function AppRoutes() {
             </ProtectedRoute>
           }
         />
-
-        {/* @custom product routes */}
-        {customRoutes}
 
         {/* 404 */}
         <Route path="*" element={<NotFoundPage />} />
