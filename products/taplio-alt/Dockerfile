@@ -44,6 +44,8 @@ COPY --from=frontend-builder /app/dist ./dist
 EXPOSE 4000
 
 ENV NODE_ENV=production
+# Make server node_modules available to @custom code that requires('express') etc.
+ENV NODE_PATH=/app/server/node_modules
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
