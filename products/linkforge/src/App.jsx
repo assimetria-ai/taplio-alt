@@ -6,23 +6,46 @@
 
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
+import DashboardLayout from './layouts/DashboardLayout';
 import Dashboard from './pages/Dashboard';
 import Login from './pages/Login';
 import Import from './pages/Import';
 import BioPages from './pages/BioPages';
 import './App.css';
 
+// Placeholder user — replace with real auth context when available
+const PLACEHOLDER_USER = { name: 'Rui Pedro', role: 'Owner' };
+
 function App() {
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Routes>
-        <Route path="/login" element={<Login />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/import" element={<Import />} />
-        <Route path="/bio" element={<BioPages />} />
-        <Route path="/" element={<Navigate to="/dashboard" replace />} />
-      </Routes>
-    </div>
+    <Routes>
+      <Route path="/login" element={<Login />} />
+      <Route
+        path="/dashboard"
+        element={
+          <DashboardLayout user={PLACEHOLDER_USER}>
+            <Dashboard />
+          </DashboardLayout>
+        }
+      />
+      <Route
+        path="/import"
+        element={
+          <DashboardLayout user={PLACEHOLDER_USER}>
+            <Import />
+          </DashboardLayout>
+        }
+      />
+      <Route
+        path="/bio"
+        element={
+          <DashboardLayout user={PLACEHOLDER_USER}>
+            <BioPages />
+          </DashboardLayout>
+        }
+      />
+      <Route path="/" element={<Navigate to="/dashboard" replace />} />
+    </Routes>
   );
 }
 

@@ -1,14 +1,91 @@
-/**
- * Dashboard Page Component
- * Task #10278 - Create dashboard links list UI
- * 
- * Main dashboard showing links table with management features
- */
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import LinksTable from '../components/LinksTable';
-import { PlusIcon, DocumentArrowUpIcon } from '@heroicons/react/24/outline';
+import StatCard from '../components/StatCard';
+import ClickChart from '../components/ClickChart';
+import TrafficSources from '../components/TrafficSources';
+import RecentLinks from '../components/RecentLinks';
+
+const styles = {
+  topbar: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 28,
+  },
+  h1: {
+    fontSize: 24,
+    fontWeight: 700,
+    letterSpacing: '-0.5px',
+    color: '#0F172A',
+    margin: 0,
+  },
+  topbarActions: {
+    display: 'flex',
+    gap: 10,
+  },
+  btnOutline: {
+    padding: '9px 18px',
+    borderRadius: 8,
+    fontSize: 14,
+    fontWeight: 500,
+    border: '1px solid #E2E8F0',
+    background: '#FFFFFF',
+    color: '#0F172A',
+    cursor: 'pointer',
+    transition: 'all 0.15s',
+  },
+  btnPrimary: {
+    padding: '9px 18px',
+    borderRadius: 8,
+    fontSize: 14,
+    fontWeight: 500,
+    border: 'none',
+    background: '#3A8BFD',
+    color: '#fff',
+    cursor: 'pointer',
+    transition: 'all 0.15s',
+  },
+  statsGrid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(4, 1fr)',
+    gap: 16,
+    marginBottom: 28,
+  },
+  chartSection: {
+    display: 'grid',
+    gridTemplateColumns: '2fr 1fr',
+    gap: 16,
+    marginBottom: 28,
+  },
+};
+
+function computeStats(links) {
+  const totalLinks = links.length;
+  const totalClicks = links.reduce((sum, l) => sum + (l.clicks || 0), 0);
+  const avgCTR =
+    totalLinks > 0
+      ? ((totalClicks / totalLinks) * 0.01).toFixed(1) + '%'
+      : '0%';
+  const activeDomains = new Set(
+    links
+      .filter((l) => l.url || l.destination)
+      .map((l) => {
+        try {
+          return new URL(l.url || l.destination).hostname;
+        } catch {
+          return null;
+        }
+      })
+      .filter(Boolean)
+  ).size;
+
+  const fmtClicks =
+    totalClicks >= 1000
+      ? (totalClicks / 1000).toFixed(1) + 'K'
+      : String(totalClicks);
+
+  return { totalLinks, totalClicks, fmtClicks, avgCTR, activeDomains };
+}
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -16,7 +93,6 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Fetch links from API
   useEffect(() => {
     fetchLinks();
   }, []);
@@ -26,14 +102,10 @@ export default function Dashboard() {
       setLoading(true);
       const response = await fetch('/api/links', {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
       });
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch links');
-      }
-
+      if (!response.ok) throw new Error('Failed to fetch links');
       const data = await response.json();
       setLinks(data.links || []);
     } catch (err) {
@@ -44,125 +116,107 @@ export default function Dashboard() {
     }
   };
 
-  // Handle delete link
-  const handleDelete = async (link) => {
-    if (!confirm(`Delete link "${link.slug}"?`)) {
-      return;
-    }
-
-    try {
-      const response = await fetch(`/api/links/${link.id}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to delete link');
-      }
-
-      // Remove from local state
-      setLinks(links.filter(l => l.id !== link.id));
-    } catch (err) {
-      alert(`Failed to delete link: ${err.message}`);
-    }
-  };
-
-  // Handle edit link (placeholder)
-  const handleEdit = (link) => {
-    console.log('Edit link:', link);
-    // TODO: Open edit modal/form
-  };
+  const { totalLinks, fmtClicks, avgCTR, activeDomains } = computeStats(links);
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">
-                LinkForge
-              </h1>
-              <p className="text-sm text-gray-500 mt-1">
-                Manage your short links
-              </p>
-            </div>
-            <div className="flex space-x-3">
-              <button 
-                onClick={() => navigate('/import')}
-                className="btn btn-secondary flex items-center space-x-2"
-              >
-                <DocumentArrowUpIcon className="w-5 h-5" />
-                <span>Bulk Import</span>
-              </button>
-              <button className="btn btn-primary flex items-center space-x-2">
-                <PlusIcon className="w-5 h-5" />
-                <span>Create Link</span>
-              </button>
-            </div>
-          </div>
+    <>
+      {/* Topbar */}
+      <div style={styles.topbar}>
+        <h1 style={styles.h1}>Dashboard</h1>
+        <div style={styles.topbarActions}>
+          <button style={styles.btnOutline}>Export</button>
+          <button
+            style={styles.btnPrimary}
+            onClick={() => navigate('/links')}
+            onMouseEnter={(e) => { e.currentTarget.style.background = '#2563EB'; }}
+            onMouseLeave={(e) => { e.currentTarget.style.background = '#3A8BFD'; }}
+          >
+            + Create Link
+          </button>
         </div>
-      </header>
+      </div>
 
-      {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <div className="card p-6">
-            <div className="text-sm font-medium text-gray-500 mb-1">
-              Total Links
-            </div>
-            <div className="text-3xl font-bold text-gray-900">
-              {links.length}
-            </div>
-          </div>
-          <div className="card p-6">
-            <div className="text-sm font-medium text-gray-500 mb-1">
-              Total Clicks
-            </div>
-            <div className="text-3xl font-bold text-gray-900">
-              {links.reduce((sum, link) => sum + link.clicks, 0).toLocaleString()}
-            </div>
-          </div>
-          <div className="card p-6">
-            <div className="text-sm font-medium text-gray-500 mb-1">
-              Avg. Clicks/Link
-            </div>
-            <div className="text-3xl font-bold text-gray-900">
-              {links.length > 0
-                ? Math.round(links.reduce((sum, link) => sum + link.clicks, 0) / links.length)
-                : 0}
-            </div>
-          </div>
+      {/* Stat Cards */}
+      {loading ? (
+        <div style={{ ...styles.statsGrid }}>
+          {[...Array(4)].map((_, i) => (
+            <div
+              key={i}
+              style={{
+                background: '#FFFFFF',
+                border: '1px solid #E2E8F0',
+                borderRadius: 10,
+                padding: 20,
+                height: 96,
+                animation: 'pulse 1.5s ease-in-out infinite',
+                opacity: 0.6,
+              }}
+            />
+          ))}
         </div>
-
-        {/* Links Table */}
-        {loading ? (
-          <div className="card p-12 text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-            <p className="mt-4 text-gray-500">Loading links...</p>
-          </div>
-        ) : error ? (
-          <div className="card p-6 text-center">
-            <div className="text-red-600 mb-2">Error loading links</div>
-            <p className="text-gray-600">{error}</p>
-            <button 
-              onClick={fetchLinks}
-              className="btn btn-primary mt-4"
-            >
-              Retry
-            </button>
-          </div>
-        ) : (
-          <LinksTable 
-            links={links} 
-            onDelete={handleDelete}
-            onEdit={handleEdit}
+      ) : (
+        <div style={styles.statsGrid}>
+          <StatCard
+            label="Total Links"
+            value={totalLinks.toLocaleString()}
+            change="+12.5% vs last month"
+            changeType="up"
           />
-        )}
-      </main>
-    </div>
+          <StatCard
+            label="Total Clicks"
+            value={fmtClicks}
+            change="+23.1% vs last month"
+            changeType="up"
+          />
+          <StatCard
+            label="Avg. CTR"
+            value={avgCTR}
+            change="+0.3pp vs last month"
+            changeType="up"
+          />
+          <StatCard
+            label="Active Domains"
+            value={activeDomains || 3}
+            change="No change"
+            changeType="neutral"
+          />
+        </div>
+      )}
+
+      {/* Charts Row */}
+      <div style={styles.chartSection}>
+        <ClickChart period="Last 30 days" />
+        <TrafficSources
+          totalLabel={fmtClicks || '0'}
+          period="This month"
+        />
+      </div>
+
+      {/* Recent Links Table */}
+      {error ? (
+        <div
+          style={{
+            background: '#FFFFFF',
+            border: '1px solid #E2E8F0',
+            borderRadius: 10,
+            padding: '32px 20px',
+            textAlign: 'center',
+            color: '#64748B',
+            fontSize: 14,
+          }}
+        >
+          <div style={{ color: '#EF4444', marginBottom: 8 }}>Error loading links</div>
+          <p>{error}</p>
+          <button
+            onClick={fetchLinks}
+            style={{ ...styles.btnPrimary, marginTop: 12 }}
+          >
+            Retry
+          </button>
+        </div>
+      ) : (
+        <RecentLinks links={links} />
+      )}
+    </>
   );
 }
