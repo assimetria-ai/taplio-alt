@@ -9,7 +9,7 @@ WORKDIR /app
 COPY package*.json ./
 
 # Install all dependencies (including dev deps for build)
-RUN npm ci
+RUN npm install
 
 # Copy frontend source
 COPY src/ ./src/
@@ -28,13 +28,19 @@ WORKDIR /app
 
 # Copy server package files and install production deps
 COPY server/package*.json ./server/
-RUN cd server && npm ci --only=production
+RUN cd server && npm install --omit=dev
 
 # Copy server source
 COPY server/src/ ./server/src/
 
 # Copy custom server-side code (@custom routes, db, etc.)
 COPY @custom/ ./@custom/
+
+# Ensure @custom routes can resolve modules from server/node_modules
+ENV NODE_PATH=/app/server/node_modules
+
+# Symlink server node_modules to root so @custom can resolve packages
+RUN ln -s /app/server/node_modules /app/node_modules
 
 # Copy built frontend from builder stage
 # Server expects dist at ../../dist relative to server/src/app.js → /app/dist
