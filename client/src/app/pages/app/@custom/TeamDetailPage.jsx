@@ -568,3 +568,5 @@ export function TeamDetailPage() {
     </div>
   )
 }
+
+export default TeamDetailPage
