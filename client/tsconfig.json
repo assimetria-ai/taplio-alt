@@ -1,0 +1,1 @@
+{"compilerOptions":{"jsx":"react-jsx","module":"esnext","moduleResolution":"bundler","target":"es2020","baseUrl":"./src","paths":{"@/*":["*"]},"esModuleInterop":true,"allowJs":true,"skipLibCheck":true,"strict":false},"include":["src"],"exclude":["node_modules"]}
