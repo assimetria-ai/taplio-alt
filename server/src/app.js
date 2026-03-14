@@ -46,7 +46,7 @@ app.use('/api', customRoutes)
 // Serve React SPA in production
 const publicDir = path.join(__dirname, '..', 'public')
 if (process.env.NODE_ENV === 'production' && fs.existsSync(publicDir)) {
-  app.use(express.static(publicDir))
+  app.use(express.static(publicDir, { index: false }))
   // Landing page: serve landing.html at root instead of SPA shell (task #12051)
 if (process.env.NODE_ENV === 'production' && fs.existsSync(publicDir)) {
   const landingFile = path.join(publicDir, 'landing.html')
