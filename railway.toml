@@ -64,6 +64,7 @@ source = "products/taplio-alt"
 
 [services.taplio-alt.build]
 builder = "NIXPACKS"
+buildCommand = "npm ci && cd server && npm ci && cd .. && npm run build"
 
 [services.taplio-alt.deploy]
 startCommand = "cd server && node src/index.js"

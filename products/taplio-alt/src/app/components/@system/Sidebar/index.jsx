@@ -65,7 +65,7 @@ function SidebarInner({ onClose }) {
       {/* Brand */}
       <div className="flex h-16 shrink-0 items-center justify-between border-b border-border px-4">
         {/* @custom: replace with your product name or logo */}
-        <span className="font-semibold text-foreground">MyApp</span>
+        <span className="font-semibold text-foreground">Taplio Alt</span>
         {onClose && (
           <button
             onClick={onClose}
