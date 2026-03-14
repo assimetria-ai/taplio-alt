@@ -9,11 +9,13 @@ import {
   PenTool,
   Users,
   Settings,
+  Lightbulb,
 } from 'lucide-react'
 
 export const TAPLIO_NAV_ITEMS = [
   { icon: LayoutDashboard, label: 'Dashboard', to: '/app/dashboard' },
   { icon: PenTool, label: 'AI Post Writer', to: '/app/writer' },
+  { icon: Lightbulb, label: 'Content Suggestions', to: '/app/content-suggestions' },
   { icon: Calendar, label: 'Post Scheduler', to: '/app/scheduler' },
   { icon: CalendarDays, label: 'Content Calendar', to: '/app/calendar' },
   { icon: FileText, label: 'Content Templates', to: '/app/templates' },
