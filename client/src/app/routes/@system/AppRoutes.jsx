@@ -102,6 +102,15 @@ const ContentCalendarPage = lazy(() =>
 const HashtagResearchPage = lazy(() =>
   import('../../pages/app/@custom/HashtagResearchPage').then((m) => ({ default: m.HashtagResearchPage }))
 )
+const ContentTemplatesPage = lazy(() =>
+  import('../../pages/app/@custom/ContentTemplatesPage')
+)
+const EngagementAnalyticsPage = lazy(() =>
+  import('../../pages/app/@custom/EngagementAnalyticsPage')
+)
+const AnalyticsDashboardPage = lazy(() =>
+  import('../../pages/app/@custom/AnalyticsDashboardPage').then((m) => ({ default: m.AnalyticsDashboardPage }))
+)
 
 // Teams pages
 const TeamsPage = lazy(() =>
@@ -284,6 +293,34 @@ export function AppRoutes() {
           element={
             <ProtectedRoute>
               <HashtagResearchPage />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Content Templates */}
+        <Route
+          path="/app/templates"
+          element={
+            <ProtectedRoute>
+              <ContentTemplatesPage />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Engagement Analytics */}
+        <Route
+          path="/app/analytics"
+          element={
+            <ProtectedRoute>
+              <AnalyticsDashboardPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/app/analytics/engagement"
+          element={
+            <ProtectedRoute>
+              <EngagementAnalyticsPage />
             </ProtectedRoute>
           }
         />
