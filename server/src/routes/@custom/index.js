@@ -18,5 +18,6 @@ router.use(require('../../api/@custom/teams'))
 router.use(require('../../api/@custom/posts'))
 router.use(require('../../api/@custom/linkedin-oauth'))
 router.use(require('../../api/@custom/hashtags'))
+router.use(require('../../api/@custom/analytics'))
 
 module.exports = router
