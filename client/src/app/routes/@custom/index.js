@@ -22,6 +22,12 @@ const AnalyticsDashboardPage = lazy(() =>
 const ContentCalendarPage = lazy(() =>
   import('../../pages/app/@custom/ContentCalendarPage').then(m => ({ default: m.ContentCalendarPage }))
 )
+const AIPostWriterPage = lazy(() =>
+  import('../../pages/app/@custom/AIPostWriterPage').then(m => ({ default: m.AIPostWriterPage }))
+)
+const LeadGenerationPage = lazy(() =>
+  import('../../pages/app/@custom/LeadGenerationPage').then(m => ({ default: m.LeadGenerationPage }))
+)
 
 export const customRoutes = [
   // Dashboard — main app home
@@ -81,6 +87,26 @@ export const customRoutes = [
     element={
       <ProtectedRoute>
         <ContentCalendarPage />
+      </ProtectedRoute>
+    }
+  />,
+  // AI Post Writer
+  <Route
+    key="ai-writer"
+    path="/app/writer"
+    element={
+      <ProtectedRoute>
+        <AIPostWriterPage />
+      </ProtectedRoute>
+    }
+  />,
+  // Lead Generation
+  <Route
+    key="lead-generation"
+    path="/app/leads"
+    element={
+      <ProtectedRoute>
+        <LeadGenerationPage />
       </ProtectedRoute>
     }
   />,
