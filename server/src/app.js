@@ -47,7 +47,17 @@ app.use('/api', customRoutes)
 const publicDir = path.join(__dirname, '..', 'public')
 if (process.env.NODE_ENV === 'production' && fs.existsSync(publicDir)) {
   app.use(express.static(publicDir))
-  app.get('*', (req, res) => {
+  // Landing page: serve landing.html at root instead of SPA shell (task #12051)
+if (process.env.NODE_ENV === 'production' && fs.existsSync(publicDir)) {
+  const landingFile = path.join(publicDir, 'landing.html')
+  if (fs.existsSync(landingFile)) {
+    app.get('/', (_req, res) => {
+      res.sendFile(landingFile)
+    })
+  }
+}
+
+app.get('*', (req, res) => {
     res.sendFile(path.join(publicDir, 'index.html'))
   })
 } else {
