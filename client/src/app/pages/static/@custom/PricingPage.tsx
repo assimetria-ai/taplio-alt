@@ -63,7 +63,7 @@ const SEED_PLANS: PricingPlan[] = [
 
 // ─── Plan Card ────────────────────────────────────────────────────────────────
 
-function PlanCard({ plan, billing }: { plan: PricingPlan; billing: BillingCycle }) {
+function PlanCard({ plan, billing, ...rest }: { plan: PricingPlan; billing: BillingCycle; [key: string]: any }) {
   const price = billing === 'monthly' ? plan.price_monthly : plan.price_yearly
   const isFree = price === 0
   const savings = billing === 'yearly' ? yearlySavings(plan) : 0
