@@ -1,0 +1,41 @@
+.device-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.device-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.device-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text);
+  min-width: 60px;
+  flex-shrink: 0;
+}
+
+.device-bar-bg {
+  flex: 1;
+  height: 8px;
+  border-radius: 4px;
+  background: var(--bg);
+  overflow: hidden;
+}
+
+.device-bar-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+.device-pct {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  min-width: 36px;
+  text-align: right;
+}

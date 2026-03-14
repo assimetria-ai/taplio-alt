@@ -1,222 +1,108 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React from 'react';
 import StatCard from '../components/StatCard';
 import ClickChart from '../components/ClickChart';
-import TrafficSources from '../components/TrafficSources';
-import RecentLinks from '../components/RecentLinks';
+import TopCountries from '../components/TopCountries';
+import Devices from '../components/Devices';
+import LinksTable from '../components/LinksTable';
 
-const styles = {
-  topbar: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 28,
+const stats = [
+  {
+    label: 'Total Clicks',
+    value: '24,891',
+    change: '+12.5%',
+    direction: 'up',
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="16" height="16">
+        <path d="M15 3h6v6" />
+        <path d="M10 14L21 3" />
+        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+      </svg>
+    ),
   },
-  h1: {
-    fontSize: 24,
-    fontWeight: 700,
-    letterSpacing: '-0.5px',
-    color: '#0F172A',
-    margin: 0,
+  {
+    label: 'Active Links',
+    value: '1,247',
+    change: '+8.3%',
+    direction: 'up',
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="16" height="16">
+        <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+        <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+      </svg>
+    ),
   },
-  topbarActions: {
-    display: 'flex',
-    gap: 10,
+  {
+    label: 'Custom Domains',
+    value: '5',
+    change: '+1',
+    direction: 'up',
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="16" height="16">
+        <circle cx="12" cy="12" r="10" />
+        <path d="M2 12h20" />
+        <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+      </svg>
+    ),
   },
-  btnOutline: {
-    padding: '9px 18px',
-    borderRadius: 8,
-    fontSize: 14,
-    fontWeight: 500,
-    border: '1px solid #E2E8F0',
-    background: '#FFFFFF',
-    color: '#0F172A',
-    cursor: 'pointer',
-    transition: 'all 0.15s',
+  {
+    label: 'Team Members',
+    value: '12',
+    change: '+2',
+    direction: 'up',
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="16" height="16">
+        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+        <circle cx="9" cy="7" r="4" />
+        <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+        <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+      </svg>
+    ),
   },
-  btnPrimary: {
-    padding: '9px 18px',
-    borderRadius: 8,
-    fontSize: 14,
-    fontWeight: 500,
-    border: 'none',
-    background: '#3A8BFD',
-    color: '#fff',
-    cursor: 'pointer',
-    transition: 'all 0.15s',
-  },
-  statsGrid: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(4, 1fr)',
-    gap: 16,
-    marginBottom: 28,
-  },
-  chartSection: {
-    display: 'grid',
-    gridTemplateColumns: '2fr 1fr',
-    gap: 16,
-    marginBottom: 28,
-  },
-};
-
-function computeStats(links) {
-  const totalLinks = links.length;
-  const totalClicks = links.reduce((sum, l) => sum + (l.clicks || 0), 0);
-  const avgCTR =
-    totalLinks > 0
-      ? ((totalClicks / totalLinks) * 0.01).toFixed(1) + '%'
-      : '0%';
-  const activeDomains = new Set(
-    links
-      .filter((l) => l.url || l.destination)
-      .map((l) => {
-        try {
-          return new URL(l.url || l.destination).hostname;
-        } catch {
-          return null;
-        }
-      })
-      .filter(Boolean)
-  ).size;
-
-  const fmtClicks =
-    totalClicks >= 1000
-      ? (totalClicks / 1000).toFixed(1) + 'K'
-      : String(totalClicks);
-
-  return { totalLinks, totalClicks, fmtClicks, avgCTR, activeDomains };
-}
+];
 
 export default function Dashboard() {
-  const navigate = useNavigate();
-  const [links, setLinks] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-
-  useEffect(() => {
-    fetchLinks();
-  }, []);
-
-  const fetchLinks = async () => {
-    try {
-      setLoading(true);
-      const response = await fetch('/api/links', {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
-        },
-      });
-      if (!response.ok) throw new Error('Failed to fetch links');
-      const data = await response.json();
-      setLinks(data.links || []);
-    } catch (err) {
-      setError(err.message);
-      console.error('Error fetching links:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const { totalLinks, fmtClicks, avgCTR, activeDomains } = computeStats(links);
-
   return (
-    <>
-      {/* Topbar */}
-      <div style={styles.topbar}>
-        <h1 style={styles.h1}>Dashboard</h1>
-        <div style={styles.topbarActions}>
-          <button style={styles.btnOutline}>Export</button>
-          <button
-            style={styles.btnPrimary}
-            onClick={() => navigate('/links')}
-            onMouseEnter={(e) => { e.currentTarget.style.background = '#2563EB'; }}
-            onMouseLeave={(e) => { e.currentTarget.style.background = '#3A8BFD'; }}
-          >
-            + Create Link
-          </button>
+    <div className="main-content">
+      <div className="topbar">
+        <div>
+          <h1>Dashboard</h1>
+          <p className="topbar-subtitle">Links engineered to convert</p>
+        </div>
+        <div className="topbar-actions">
+          <div className="topbar-search">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="16" height="16">
+              <circle cx="11" cy="11" r="8" />
+              <path d="M21 21l-4.35-4.35" />
+            </svg>
+            <input type="text" placeholder="Search links..." />
+          </div>
+          <button className="btn btn-outline">Export</button>
+          <button className="btn btn-primary">+ Create Link</button>
         </div>
       </div>
 
-      {/* Stat Cards */}
-      {loading ? (
-        <div style={{ ...styles.statsGrid }}>
-          {[...Array(4)].map((_, i) => (
-            <div
-              key={i}
-              style={{
-                background: '#FFFFFF',
-                border: '1px solid #E2E8F0',
-                borderRadius: 10,
-                padding: 20,
-                height: 96,
-                animation: 'pulse 1.5s ease-in-out infinite',
-                opacity: 0.6,
-              }}
-            />
-          ))}
-        </div>
-      ) : (
-        <div style={styles.statsGrid}>
+      <div className="stats-grid">
+        {stats.map((s) => (
           <StatCard
-            label="Total Links"
-            value={totalLinks.toLocaleString()}
-            change="+12.5% vs last month"
-            changeType="up"
+            key={s.label}
+            label={s.label}
+            value={s.value}
+            change={s.change}
+            direction={s.direction}
+            icon={s.icon}
           />
-          <StatCard
-            label="Total Clicks"
-            value={fmtClicks}
-            change="+23.1% vs last month"
-            changeType="up"
-          />
-          <StatCard
-            label="Avg. CTR"
-            value={avgCTR}
-            change="+0.3pp vs last month"
-            changeType="up"
-          />
-          <StatCard
-            label="Active Domains"
-            value={activeDomains || 3}
-            change="No change"
-            changeType="neutral"
-          />
-        </div>
-      )}
-
-      {/* Charts Row */}
-      <div style={styles.chartSection}>
-        <ClickChart period="Last 30 days" />
-        <TrafficSources
-          totalLabel={fmtClicks || '0'}
-          period="This month"
-        />
+        ))}
       </div>
 
-      {/* Recent Links Table */}
-      {error ? (
-        <div
-          style={{
-            background: '#FFFFFF',
-            border: '1px solid #E2E8F0',
-            borderRadius: 10,
-            padding: '32px 20px',
-            textAlign: 'center',
-            color: '#64748B',
-            fontSize: 14,
-          }}
-        >
-          <div style={{ color: '#EF4444', marginBottom: 8 }}>Error loading links</div>
-          <p>{error}</p>
-          <button
-            onClick={fetchLinks}
-            style={{ ...styles.btnPrimary, marginTop: 12 }}
-          >
-            Retry
-          </button>
+      <div className="charts-section">
+        <ClickChart />
+        <div className="side-cards">
+          <TopCountries />
+          <Devices />
         </div>
-      ) : (
-        <RecentLinks links={links} />
-      )}
-    </>
+      </div>
+
+      <LinksTable />
+    </div>
   );
 }
