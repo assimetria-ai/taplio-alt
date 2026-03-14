@@ -117,6 +117,12 @@ const EngagementAnalyticsPage = lazy(() =>
 const AnalyticsDashboardPage = lazy(() =>
   import('../../pages/app/@custom/AnalyticsDashboardPage').then((m) => ({ default: m.AnalyticsDashboardPage }))
 )
+const AIPostWriterPage = lazy(() =>
+  import('../../pages/app/@custom/AIPostWriterPage').then((m) => ({ default: m.AIPostWriterPage }))
+)
+const LeadGenerationPage = lazy(() =>
+  import('../../pages/app/@custom/LeadGenerationPage').then((m) => ({ default: m.LeadGenerationPage }))
+)
 
 // Teams pages
 const TeamsPage = lazy(() =>
@@ -345,6 +351,26 @@ export function AppRoutes() {
           element={
             <ProtectedRoute>
               <EngagementAnalyticsPage />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* AI Post Writer */}
+        <Route
+          path="/app/writer"
+          element={
+            <ProtectedRoute>
+              <AIPostWriterPage />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Lead Generation */}
+        <Route
+          path="/app/leads"
+          element={
+            <ProtectedRoute>
+              <LeadGenerationPage />
             </ProtectedRoute>
           }
         />
