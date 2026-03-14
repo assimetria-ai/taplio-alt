@@ -3,7 +3,7 @@
  * Brand: #0891B2 primary, #6366F1 accent, Inter + Space Grotesk fonts
  */
 import { useState, useEffect, useCallback } from 'react'
-import { useNavigate, useSearchParams } from 'react-router-dom'
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import {
   Calendar as CalendarIcon,
   Clock,
@@ -118,8 +118,9 @@ function MiniCalendar({ selected, onSelect }) {
 // ─── Main Component ───────────────────────────────────────────────
 export function PostScheduler() {
   const navigate = useNavigate()
+  const params = useParams()
   const [searchParams] = useSearchParams()
-  const editId = searchParams.get('id')
+  const editId = params.id || searchParams.get('id')
 
   const [content, setContent] = useState('')
   const [status, setStatus] = useState('draft')
