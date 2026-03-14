@@ -216,6 +216,19 @@ app.use('/api', analyticsRouter);
 // Exempt from CORS (see cors.js DEFAULT_HEALTH_CHECK_PATHS) so monitoring probes
 // that send no Origin header continue to work.
 app.get('/health', (req, res) => res.json({ status: 'ok' }));
+app.get('/api/health', (req, res) => res.json({ status: 'ok' }));
+
+// ─── Static SPA serving ──────────────────────────────────────────────────────
+// Serve the Vite-built frontend from the dist/ directory.
+// The SPA catch-all must come AFTER all API routes so /api/* is handled by Express.
+const path = require('path');
+const distPath = path.resolve(__dirname, '../../dist');
+app.use(express.static(distPath));
+app.get('*', (req, res, next) => {
+  // Only serve index.html for non-API routes (API 404s should return JSON)
+  if (req.path.startsWith('/api/')) return next();
+  res.sendFile(path.join(distPath, 'index.html'));
+});
 
 // ─── Error handler ────────────────────────────────────────────────────────────
 // In production, return a generic message for unexpected errors so internal
