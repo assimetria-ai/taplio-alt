@@ -154,18 +154,23 @@ function createCorsMiddleware({
 } = {}) {
   const strictCors = cors({
     origin: (origin, callback) => {
-      // SECURITY: Require an Origin header on all non-health-check routes.
-      // No-origin requests (curl, server-to-server probes) are blocked here;
-      // the outer middleware already short-circuits for health-check paths.
+      // No Origin header → same-origin request, curl, or server-to-server call.
+      // Allow the request through without CORS headers.  The browser's
+      // same-origin policy already protects these; blocking them only breaks
+      // legitimate server-to-server probes and monitoring tools.
       if (!origin) {
-        return callback(new Error('CORS: Origin header required'));
+        return callback(null, false);
       }
 
       if (allowedOrigins.includes(origin)) {
         return callback(null, true);
       }
 
-      callback(new Error(`CORS: Origin ${origin} not allowed`));
+      // Unknown cross-origin request → reject.  Return a proper Error so the
+      // Express error handler can surface a 403 instead of a generic 500.
+      const err = new Error(`CORS: Origin ${origin} not allowed`);
+      err.status = 403;
+      callback(err);
     },
     credentials,
   });
