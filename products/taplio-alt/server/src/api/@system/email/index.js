@@ -4,10 +4,10 @@
 
 const express = require('express')
 const router  = express.Router()
-const { authenticate } = require('../../lib/@system/Helpers/auth')
-const { createLimiter } = require('../../lib/@system/RateLimit')
-const logger  = require('../../lib/@system/Logger')
-const email   = require('../../lib/@system/Email')
+const { authenticate } = require('../../../lib/@system/Helpers/auth')
+const { createLimiter } = require('../../../lib/@system/RateLimit')
+const logger  = require('../../../lib/@system/Logger')
+const email   = require('../../../lib/@system/Email')
 
 // Rate-limit test sends: 5 per 10 minutes per IP to prevent abuse
 const emailTestLimiter = createLimiter({
