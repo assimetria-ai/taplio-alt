@@ -1,19 +1,20 @@
-// @custom — Planora sidebar navigation items (AI-powered project management)
+// @custom — Taplio Alt sidebar navigation items (LinkedIn growth tool)
 import {
   LayoutDashboard,
-  FolderKanban,
-  CheckSquare,
-  Users,
+  Calendar,
+  FileText,
+  BarChart3,
+  TrendingUp,
+  CalendarDays,
   Settings,
 } from 'lucide-react'
 
-export const PLANORA_NAV_ITEMS = [
+export const TAPLIO_NAV_ITEMS = [
   { icon: LayoutDashboard, label: 'Dashboard', to: '/app/dashboard' },
-  { icon: FolderKanban, label: 'Projects', to: '/app/projects' },
-  { icon: CheckSquare, label: 'Tasks', to: '/app/tasks' },
-  { icon: Users, label: 'Teams', to: '/app/teams' },
+  { icon: Calendar, label: 'Post Scheduler', to: '/app/scheduler' },
+  { icon: FileText, label: 'Content Templates', to: '/app/templates' },
+  { icon: TrendingUp, label: 'Engagement', to: '/app/engagement' },
+  { icon: BarChart3, label: 'Analytics', to: '/app/analytics' },
+  { icon: CalendarDays, label: 'Content Calendar', to: '/app/calendar' },
   { icon: Settings, label: 'Settings', to: '/app/settings' },
 ]
-
-// Keep backward-compatible export name used by @system sidebar
-export const TAPLIO_NAV_ITEMS = PLANORA_NAV_ITEMS
