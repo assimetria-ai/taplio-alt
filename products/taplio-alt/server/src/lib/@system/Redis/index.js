@@ -1,55 +1,40 @@
-// @system — ioredis client with graceful degradation
-// Rate limiters and other consumers check isReady() before using the client.
-// If Redis is unavailable the app continues with in-memory fallbacks.
-//
-// Usage:
-//   const { client, isReady } = require('../lib/@system/Redis')
-//   if (isReady()) { await client.get('key') }
-
-const Redis = require('ioredis')
 const logger = require('../Logger')
 
+const REDIS_URL = process.env.REDIS_URL
+
 let client = null
-let _ready = false
 
-const url = process.env.REDIS_URL || 'redis://localhost:6379'
-
-try {
-  client = new Redis(url, {
-    // Don't queue commands when disconnected — callers should check isReady() first.
-    enableOfflineQueue: false,
-    // Disable auto-retry so a missing Redis doesn't stall startup or flood logs.
-    retryStrategy: () => null,
+if (REDIS_URL) {
+  const Redis = require('ioredis')
+  client = new Redis(REDIS_URL, {
+    maxRetriesPerRequest: 3,
+    enableReadyCheck: true,
     lazyConnect: true,
   })
 
-  client.on('ready', () => {
-    _ready = true
-    logger.info({ url }, 'Redis connected')
-  })
-
-  client.on('error', (err) => {
-    // Only log once when transitioning from ready → error to avoid log spam.
-    if (_ready) logger.warn({ err }, 'Redis error — rate limiting will use in-memory store')
-    _ready = false
-  })
-
-  client.on('end', () => {
-    _ready = false
-  })
-
-  // Initiate connection; swallow errors here — the 'error' handler logs them.
-  client.connect().catch((err) => {
-    logger.warn({ err }, 'Redis unavailable — rate limiting will use in-memory fallback')
-  })
-} catch (err) {
-  logger.warn({ err }, 'Redis client init failed — rate limiting will use in-memory fallback')
-  client = null
+  client.on('connect', () => logger.info('Redis connected'))
+  client.on('error', (err) => logger.error({ err }, 'Redis error'))
+  client.on('close', () => logger.warn('Redis connection closed'))
+} else {
+  logger.info('REDIS_URL not set — running without Redis')
 }
 
-/** Returns true only when the client is fully connected and ready for commands. */
+/**
+ * Connect eagerly. Called from index.js at startup.
+ * No-op when REDIS_URL is not configured.
+ */
+async function connect() {
+  if (!client) return
+  try {
+    await client.connect()
+  } catch (err) {
+    logger.warn({ err }, 'Redis unavailable — running without Redis cache')
+  }
+}
+
+/** True once the client has successfully connected at least once */
 function isReady() {
-  return _ready && client !== null
+  return client != null && client.status === 'ready'
 }
 
-module.exports = { client, isReady }
+module.exports = { client, connect, isReady }

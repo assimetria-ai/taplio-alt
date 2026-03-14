@@ -18,10 +18,9 @@ const { validatePassword } = require('../../../lib/@system/Helpers/password-vali
 const UserRepo = require('../../../db/repos/@system/UserRepo')
 const db = require('../../../lib/@system/PostgreSQL')
 const logger = require('../../../lib/@system/Logger')
-const { registerLimiter, passwordResetLimiter, emailVerifyRequestLimiter, emailVerifyLimiter } = require('../../../lib/@system/RateLimit')
+const { registerLimiter, passwordResetLimiter } = require('../../../lib/@system/RateLimit')
 const emailService = require('../../../lib/@system/Email')
 const { validate } = require('../../../lib/@system/Validation')
-const auditLog = require('../../../lib/@system/AuditLog')
 const {
   RegisterBody,
   UpdateProfileBody,
@@ -74,7 +73,6 @@ router.post('/users', registerLimiter, validate({ body: RegisterBody }), async (
       }
     })
 
-    auditLog.log({ userId: user.id, action: 'user.register', resourceType: 'user', resourceId: String(user.id), ip: req.ip })
     res.status(201).json({ user: { id: user.id, email: user.email, name: user.name } })
   } catch (err) {
     next(err)
@@ -93,7 +91,6 @@ router.patch('/users/me', authenticate, validate({ body: UpdateProfileBody }), a
   try {
     const { name } = req.body
     const updated = await UserRepo.update(req.user.id, { name: name?.trim() })
-    auditLog.log({ userId: req.user.id, action: 'settings.profile_update', resourceType: 'user', resourceId: String(req.user.id), meta: { name: name?.trim() }, ip: req.ip })
     res.json({ user: updated })
   } catch (err) {
     next(err)
@@ -113,7 +110,6 @@ router.post('/users/me/password', authenticate, validate({ body: ChangePasswordB
 
     const password_hash = await bcrypt.hash(newPassword, 12)
     await db.none('UPDATE users SET password_hash = $2, updated_at = now() WHERE id = $1', [req.user.id, password_hash])
-    auditLog.log({ userId: req.user.id, action: 'settings.password_change', resourceType: 'user', resourceId: String(req.user.id), ip: req.ip })
     res.json({ message: 'Password updated' })
   } catch (err) {
     next(err)
@@ -123,7 +119,7 @@ router.post('/users/me/password', authenticate, validate({ body: ChangePasswordB
 // ── Email Verification ────────────────────────────────────────────────────
 
 // POST /api/users/email/verify/request — resend a verification email
-router.post('/users/email/verify/request', authenticate, emailVerifyRequestLimiter, async (req, res, next) => {
+router.post('/users/email/verify/request', authenticate, async (req, res, next) => {
   try {
     // Already verified?
     if (req.user.emailVerified) {
@@ -141,7 +137,7 @@ router.post('/users/email/verify/request', authenticate, emailVerifyRequestLimit
 })
 
 // POST /api/users/email/verify — verify email using the token from the email link
-router.post('/users/email/verify', emailVerifyLimiter, validate({ body: VerifyEmailBody }), async (req, res, next) => {
+router.post('/users/email/verify', validate({ body: VerifyEmailBody }), async (req, res, next) => {
   try {
     const { token } = req.body
 
@@ -179,7 +175,7 @@ router.post('/users/email/verify', emailVerifyLimiter, validate({ body: VerifyEm
 
 // ── Password Reset ────────────────────────────────────────────────────────
 
-// POST /api/users/password/request — generate a reset token and send a password reset email
+// POST /api/users/password/request — generate a reset token and (conceptually) send an email
 router.post('/users/password/request', passwordResetLimiter, validate({ body: PasswordResetRequestBody }), async (req, res, next) => {
   try {
     const { email } = req.body
@@ -281,7 +277,6 @@ router.patch('/users/me/notifications', authenticate, async (req, res, next) => 
       [req.user.id, JSON.stringify(updated)]
     )
 
-    auditLog.log({ userId: req.user.id, action: 'settings.notifications_update', resourceType: 'user', resourceId: String(req.user.id), meta: { changes: incoming }, ip: req.ip })
     res.json({ notifications: updated })
   } catch (err) {
     next(err)

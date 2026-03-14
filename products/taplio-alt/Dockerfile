@@ -1,61 +1,75 @@
-# Multi-stage build for Taplio Alt (Vite frontend + Express backend)
+# ─────────────────────────────────────────────────────────────────────────────
+#  Assimetria Product Template — Root Dockerfile  (multi-stage, production-ready)
+#
+#  Produces a single image that:
+#    1. Builds the React/Vite frontend (dist/)
+#    2. Bundles the Node.js/Express backend
+#    3. Serves static assets from the backend (or a separate nginx is preferred)
+#
+#  Typical usage
+#    docker build -t product-template .
+#    docker run -p 4000:4000 --env-file .env product-template
+#
+#  Build targets
+#    --target server-deps   → only production server deps (CI cache layer)
+#    --target client-build  → only Vite build (CI cache layer)
+#    --target runner        → final production image (default)
+# ─────────────────────────────────────────────────────────────────────────────
 
-# Stage 1: Build the frontend
-FROM node:20-alpine AS frontend-builder
+# ── Shared base ───────────────────────────────────────────────────────────────
+FROM node:20-alpine AS base
+ARG CACHEBUST=1
+RUN apk add --no-cache tini postgresql-client
 
-WORKDIR /app
+# ── Stage 1: server production dependencies ───────────────────────────────────
+FROM base AS server-deps
+WORKDIR /app/server
+COPY server/package*.json ./
+RUN npm ci --omit=dev --ignore-scripts
 
-# Copy root package files for the Vite frontend
-COPY package*.json ./
+# ── Stage 2: client build ─────────────────────────────────────────────────────
+FROM node:20-alpine AS client-build
+WORKDIR /app/client
 
-# Install all dependencies (including dev deps for build)
-RUN npm install
+# Manifests first → better layer caching
+COPY client/package*.json ./
+RUN npm ci --ignore-scripts
 
-# Copy frontend source
-COPY src/ ./src/
-COPY index.html ./
-COPY vite.config.js ./
-COPY tailwind.config.js ./
-COPY postcss.config.js ./
+COPY client/ ./
 
-# Build the frontend
+# Accept API URL at build time; defaults to relative path (same host)
+ARG VITE_API_URL=/api
+ENV VITE_API_URL=${VITE_API_URL}
+
 RUN npm run build
 
-# Stage 2: Production runtime
-FROM node:20-alpine
+# ── Stage 3: final runner ─────────────────────────────────────────────────────
+FROM base AS runner
 
 WORKDIR /app
 
-# Copy server package files and install production deps
-COPY server/package*.json ./server/
-RUN cd server && npm install --omit=dev
+# Non-root user
+RUN addgroup -S appgroup && adduser -S appuser -G appgroup
 
-# Copy server source
+# Server production deps
+COPY --from=server-deps /app/server/node_modules ./server/node_modules
+
+# Server source
 COPY server/src/ ./server/src/
+COPY server/package*.json ./server/
 
-# Copy custom server-side code (@custom routes, db, etc.)
-COPY @custom/ ./@custom/
+# Built frontend assets (served by Express as static files or a CDN)
+# Server looks for static files at server/src/../public = server/public
+COPY --from=client-build /app/client/dist ./server/public
 
-# Ensure @custom routes can resolve modules from server/node_modules
-ENV NODE_PATH=/app/server/node_modules
+RUN chown -R appuser:appgroup /app
+USER appuser
 
-# Symlink server node_modules to root so @custom can resolve packages
-RUN ln -s /app/server/node_modules /app/node_modules
+ENV NODE_ENV=production \
+    PORT=4000 \
+    STATIC_DIR=/app/public
 
-# Copy built frontend from builder stage
-# Server expects dist at ../../dist relative to server/src/app.js → /app/dist
-COPY --from=frontend-builder /app/dist ./dist
-
-# Expose port (Railway sets PORT env var)
 EXPOSE 4000
 
-ENV NODE_ENV=production
-# Make server node_modules available to @custom code that requires('express') etc.
-ENV NODE_PATH=/app/server/node_modules
-
-# Health check
-HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
-  CMD node -e "const http=require('http');http.get('http://localhost:'+(process.env.PORT||4000)+'/health',(r)=>process.exit(r.statusCode===200?0:1)).on('error',()=>process.exit(1))"
-
-# Start the server
-CMD ["node", "server/src/index.js"]
+ENTRYPOINT ["/sbin/tini", "--"]
+CMD ["node", "server/src/db/migrations/@system/start.js"]

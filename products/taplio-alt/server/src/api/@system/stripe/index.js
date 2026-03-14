@@ -3,7 +3,9 @@ const express = require('express')
 const router = express.Router()
 const stripe = require('../../../lib/@system/Stripe')
 const { authenticate } = require('../../../lib/@system/Helpers/auth')
+const SubscriptionRepo = require('../../../db/repos/@system/SubscriptionRepo')
 const logger = require('../../../lib/@system/Logger')
+const { handleWebhookEvent } = require('./webhook-handler')
 
 // ─── Checkout ────────────────────────────────────────────────────────────────
 
@@ -108,8 +110,30 @@ router.post('/stripe/uncancel-subscription', authenticate, async (req, res, next
 })
 
 // ─── Webhook ─────────────────────────────────────────────────────────────────
-// NOTE: The webhook route is mounted directly in app.js BEFORE body parsing middleware
-// to preserve the raw body required for signature verification. See app.js for implementation.
-// The webhook handler logic is in ./webhook-handler.js
+
+// POST /api/stripe/webhook
+// Note: must be mounted BEFORE express.json() parses the body — uses raw body
+router.post('/stripe/webhook', express.raw({ type: 'application/json' }), async (req, res) => {
+  const sig = req.headers['stripe-signature']
+
+  let event
+  try {
+    event = stripe.webhooks.constructEvent(req.body, sig, process.env.STRIPE_WEBHOOK_SECRET)
+  } catch (err) {
+    logger.warn({ err }, 'stripe webhook signature verification failed')
+    return res.status(400).json({ message: err.message })
+  }
+
+  logger.info({ eventType: event.type }, 'stripe webhook received')
+
+  try {
+    await handleWebhookEvent(event)
+    res.json({ received: true })
+  } catch (err) {
+    logger.error({ err, eventType: event.type }, 'stripe webhook handler error')
+    // Return 200 so Stripe doesn't retry — log the error instead
+    res.json({ received: true, warning: err.message })
+  }
+})
 
 module.exports = router
