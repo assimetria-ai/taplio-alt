@@ -11,11 +11,99 @@ import { TeamDetailPage } from '../../pages/app/@custom/TeamDetailPage'
 import { PostsList as PostsListPage } from '../../pages/app/@custom/PostsList'
 import { PostScheduler as PostSchedulerPage } from '../../pages/app/@custom/PostScheduler'
 import { ContentCalendarPage } from '../../pages/app/@custom/ContentCalendarPage'
+import ContentTemplatesPage from '../../pages/app/@custom/ContentTemplatesPage'
+import EngagementAnalyticsPage from '../../pages/app/@custom/EngagementAnalyticsPage'
+import { HashtagResearchPage } from '../../pages/app/@custom/HashtagResearchPage'
+import { LeadGenerationPage } from '../../pages/app/@custom/LeadGenerationPage'
+import { AIPostWriterPage } from '../../pages/app/@custom/AIPostWriterPage'
 import { PrivateRoute } from '@/app/components/@system/PrivateRoute/PrivateRoute'
 
 // @custom — add your product-specific routes here.
 // Wrap with <PrivateRoute> for authenticated pages.
 export const customRoutes = [
+  // Core LinkedIn features
+  <Route
+    key="ai-writer"
+    path="/app/writer"
+    element={
+      <PrivateRoute>
+        <AIPostWriterPage />
+      </PrivateRoute>
+    }
+  />,
+  <Route
+    key="posts-list"
+    path="/app/posts"
+    element={
+      <PrivateRoute>
+        <PostsListPage />
+      </PrivateRoute>
+    }
+  />,
+  <Route
+    key="post-new"
+    path="/app/posts/new"
+    element={
+      <PrivateRoute>
+        <PostSchedulerPage />
+      </PrivateRoute>
+    }
+  />,
+  <Route
+    key="post-edit"
+    path="/app/posts/:id/edit"
+    element={
+      <PrivateRoute>
+        <PostSchedulerPage />
+      </PrivateRoute>
+    }
+  />,
+  <Route
+    key="content-calendar"
+    path="/app/calendar"
+    element={
+      <PrivateRoute>
+        <ContentCalendarPage />
+      </PrivateRoute>
+    }
+  />,
+  <Route
+    key="content-templates"
+    path="/app/templates"
+    element={
+      <PrivateRoute>
+        <ContentTemplatesPage />
+      </PrivateRoute>
+    }
+  />,
+  <Route
+    key="hashtag-research"
+    path="/app/hashtags"
+    element={
+      <PrivateRoute>
+        <HashtagResearchPage />
+      </PrivateRoute>
+    }
+  />,
+  <Route
+    key="engagement-analytics"
+    path="/app/analytics"
+    element={
+      <PrivateRoute>
+        <EngagementAnalyticsPage />
+      </PrivateRoute>
+    }
+  />,
+  <Route
+    key="lead-generation"
+    path="/app/leads"
+    element={
+      <PrivateRoute>
+        <LeadGenerationPage />
+      </PrivateRoute>
+    }
+  />,
+  // Utility features
   <Route
     key="error-tracking"
     path="/app/errors"
@@ -94,42 +182,6 @@ export const customRoutes = [
     element={
       <PrivateRoute>
         <TeamDetailPage />
-      </PrivateRoute>
-    }
-  />,
-  <Route
-    key="posts-list"
-    path="/app/posts"
-    element={
-      <PrivateRoute>
-        <PostsListPage />
-      </PrivateRoute>
-    }
-  />,
-  <Route
-    key="post-new"
-    path="/app/posts/new"
-    element={
-      <PrivateRoute>
-        <PostSchedulerPage />
-      </PrivateRoute>
-    }
-  />,
-  <Route
-    key="post-edit"
-    path="/app/posts/:id/edit"
-    element={
-      <PrivateRoute>
-        <PostSchedulerPage />
-      </PrivateRoute>
-    }
-  />,
-  <Route
-    key="content-calendar"
-    path="/app/calendar"
-    element={
-      <PrivateRoute>
-        <ContentCalendarPage />
       </PrivateRoute>
     }
   />,
