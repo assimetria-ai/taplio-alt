@@ -1,5 +1,5 @@
-# Force Node.js provider — prevents Nixpacks from auto-detecting as a static
-# Vite site and generating a Caddy file server.
+# Force Node.js provider — prevents Nixpacks from auto-detecting Vite output
+# as a static site and deploying with Caddy instead of the Express server.
 providers = ["node"]
 
 [phases.setup]
