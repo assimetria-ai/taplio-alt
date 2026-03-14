@@ -22,6 +22,9 @@ import AnalyticsDashboard from '@/app/pages/app/@custom/AnalyticsDashboard'
 import PostsList from '@/app/pages/app/@custom/PostsList'
 import PostScheduler from '@/app/pages/app/@custom/PostScheduler'
 import ContentCalendar from '@/app/pages/app/@custom/ContentCalendar'
+import AIPostWriter from '@/app/pages/app/@custom/AIPostWriter'
+import LeadGeneration from '@/app/pages/app/@custom/LeadGeneration'
+import HashtagResearch from '@/app/pages/app/@custom/HashtagResearch'
 
 export default function App() {
   return (
@@ -60,6 +63,9 @@ export default function App() {
             <Route path="/content-templates" element={<ContentTemplates />} />
             <Route path="/engagement-analytics" element={<EngagementAnalytics />} />
             <Route path="/analytics" element={<AnalyticsDashboard />} />
+            <Route path="/writer" element={<AIPostWriter />} />
+            <Route path="/leads" element={<LeadGeneration />} />
+            <Route path="/hashtags" element={<HashtagResearch />} />
           </Route>
 
           <Route path="*" element={<Navigate to="/" replace />} />
