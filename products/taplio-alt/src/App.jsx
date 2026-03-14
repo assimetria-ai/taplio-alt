@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider } from '@/app/store/@system/auth'
 import ProtectedRoute from '@/app/components/@system/ProtectedRoute'
+import Landing from '@/app/pages/static/@custom/Landing'
 import Login from '@/app/pages/static/@system/Login'
 import Register from '@/app/pages/static/@system/Register'
 import ForgotPassword from '@/app/pages/static/@system/ForgotPassword'
@@ -27,7 +28,10 @@ export default function App() {
     <AuthProvider>
       <BrowserRouter>
         <Routes>
-          {/* Public */}
+          {/* Public — Landing page */}
+          <Route path="/" element={<Landing />} />
+
+          {/* Public — Auth */}
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
@@ -41,7 +45,6 @@ export default function App() {
 
           {/* Protected — wrapped in Layout */}
           <Route element={<ProtectedRoute />}>
-            <Route path="/" element={<Navigate to="/dashboard" replace />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/settings" element={<Settings />} />
             <Route path="/teams" element={<Teams />} />
@@ -59,7 +62,7 @@ export default function App() {
             <Route path="/analytics" element={<AnalyticsDashboard />} />
           </Route>
 
-          <Route path="*" element={<Navigate to="/dashboard" replace />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </BrowserRouter>
     </AuthProvider>
