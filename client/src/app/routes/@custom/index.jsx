@@ -2,72 +2,124 @@ import { Route } from 'react-router-dom'
 import { lazy } from 'react'
 import { ProtectedRoute } from '../../components/@system/ProtectedRoute/ProtectedRoute'
 
-// @custom — Planora product routes (AI-powered project management)
+// @custom — Taplio Alt product routes (LinkedIn growth tool)
 
-const PlanoraDashboardPage = lazy(() =>
-  import('../../pages/app/@custom/PlanoraDashboardPage').then(m => ({ default: m.PlanoraDashboardPage }))
+const TaplioDashboardPage = lazy(() =>
+  import('../../pages/app/@custom/TaplioDashboardPage').then(m => ({ default: m.TaplioDashboardPage }))
 )
-const ProjectBoardPage = lazy(() =>
-  import('../../pages/app/@custom/ProjectBoardPage').then(m => ({ default: m.ProjectBoardPage }))
+const AIPostWriterPage = lazy(() =>
+  import('../../pages/app/@custom/AIPostWriterPage').then(m => ({ default: m.AIPostWriterPage }))
 )
-const TaskManagementPage = lazy(() =>
-  import('../../pages/app/@custom/TaskManagementPage').then(m => ({ default: m.TaskManagementPage }))
+const PostSchedulerPage = lazy(() =>
+  import('../../pages/app/@custom/PostSchedulerPage').then(m => ({ default: m.PostSchedulerPage }))
 )
-const TeamsPage = lazy(() =>
-  import('../../pages/app/@custom/TeamsPage').then(m => ({ default: m.TeamsPage }))
+const ContentCalendarPage = lazy(() =>
+  import('../../pages/app/@custom/ContentCalendarPage').then(m => ({ default: m.ContentCalendarPage }))
 )
-const TeamDetailPage = lazy(() =>
-  import('../../pages/app/@custom/TeamDetailPage').then(m => ({ default: m.TeamDetailPage }))
+const ContentTemplatesPage = lazy(() =>
+  import('../../pages/app/@custom/ContentTemplatesPage')
+)
+const EngagementAnalyticsPage = lazy(() =>
+  import('../../pages/app/@custom/EngagementAnalyticsPage')
+)
+const LeadGenerationPage = lazy(() =>
+  import('../../pages/app/@custom/LeadGenerationPage').then(m => ({ default: m.LeadGenerationPage }))
+)
+const AnalyticsDashboardPage = lazy(() =>
+  import('../../pages/app/@custom/AnalyticsDashboardPage').then(m => ({ default: m.AnalyticsDashboardPage }))
+)
+const ContentSuggestionsPage = lazy(() =>
+  import('../../pages/app/content-suggestions').then(m => ({ default: m.ContentSuggestionsPage }))
 )
 
 export const customRoutes = [
-  // Dashboard — main app home
+  // Dashboard — main app home (LinkedIn content overview)
   <Route
-    key="planora-dashboard"
+    key="taplio-dashboard"
     path="/app/dashboard"
     element={
       <ProtectedRoute>
-        <PlanoraDashboardPage />
+        <TaplioDashboardPage />
       </ProtectedRoute>
     }
   />,
-  // Project Board — Monday.com-style board
+  // AI Post Writer — generate LinkedIn posts with AI
   <Route
-    key="projects"
-    path="/app/projects"
+    key="ai-writer"
+    path="/app/writer"
     element={
       <ProtectedRoute>
-        <ProjectBoardPage />
+        <AIPostWriterPage />
       </ProtectedRoute>
     }
   />,
-  // Task Management
+  // Content Suggestions — AI-powered LinkedIn content ideas
   <Route
-    key="tasks"
-    path="/app/tasks"
+    key="content-suggestions"
+    path="/app/content-suggestions"
     element={
       <ProtectedRoute>
-        <TaskManagementPage />
+        <ContentSuggestionsPage />
       </ProtectedRoute>
     }
   />,
-  // Teams
+  // Post Scheduler — schedule LinkedIn posts
   <Route
-    key="teams"
-    path="/app/teams"
+    key="scheduler"
+    path="/app/scheduler"
     element={
       <ProtectedRoute>
-        <TeamsPage />
+        <PostSchedulerPage />
       </ProtectedRoute>
     }
   />,
-  // Team detail
+  // Content Calendar — visual calendar of posts
   <Route
-    key="team-detail"
-    path="/app/teams/:id"
+    key="calendar"
+    path="/app/calendar"
     element={
       <ProtectedRoute>
-        <TeamDetailPage />
+        <ContentCalendarPage />
+      </ProtectedRoute>
+    }
+  />,
+  // Content Templates — pre-built LinkedIn post templates
+  <Route
+    key="templates"
+    path="/app/templates"
+    element={
+      <ProtectedRoute>
+        <ContentTemplatesPage />
+      </ProtectedRoute>
+    }
+  />,
+  // Engagement Analytics — track post performance
+  <Route
+    key="engagement"
+    path="/app/engagement"
+    element={
+      <ProtectedRoute>
+        <EngagementAnalyticsPage />
+      </ProtectedRoute>
+    }
+  />,
+  // Analytics Dashboard — detailed analytics view
+  <Route
+    key="analytics"
+    path="/app/analytics"
+    element={
+      <ProtectedRoute>
+        <AnalyticsDashboardPage />
+      </ProtectedRoute>
+    }
+  />,
+  // Lead Generation — identify leads from post engagement
+  <Route
+    key="leads"
+    path="/app/leads"
+    element={
+      <ProtectedRoute>
+        <LeadGenerationPage />
       </ProtectedRoute>
     }
   />,
