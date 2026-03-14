@@ -64,9 +64,12 @@ router.post('/', async (req, res) => {
       return res.status(400).json({ error: 'targetUrl is required' });
     }
 
-    // Validate URL format
+    // Validate URL format and protocol
     try {
-      new URL(targetUrl);
+      const parsed = new URL(targetUrl);
+      if (!['http:', 'https:'].includes(parsed.protocol)) {
+        return res.status(400).json({ error: 'Only http and https URLs are allowed' });
+      }
     } catch {
       return res.status(400).json({ error: 'Invalid target URL' });
     }
@@ -208,7 +211,10 @@ router.put('/:id', async (req, res) => {
     // Validate target URL if provided
     if (targetUrl) {
       try {
-        new URL(targetUrl);
+        const parsed = new URL(targetUrl);
+        if (!['http:', 'https:'].includes(parsed.protocol)) {
+          return res.status(400).json({ error: 'Only http and https URLs are allowed' });
+        }
       } catch {
         return res.status(400).json({ error: 'Invalid target URL' });
       }

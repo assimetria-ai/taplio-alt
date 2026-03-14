@@ -159,10 +159,14 @@ async function validateRow(row, rowNum, prisma) {
     throw new Error('Missing target URL');
   }
 
-  // Validate URL format
+  // Validate URL format and protocol
   try {
-    new URL(targetUrl);
-  } catch {
+    const parsed = new URL(targetUrl);
+    if (!['http:', 'https:'].includes(parsed.protocol)) {
+      throw new Error(`Only http and https URLs are allowed: ${targetUrl}`);
+    }
+  } catch (e) {
+    if (e.message.includes('Only http')) throw e;
     throw new Error(`Invalid URL format: ${targetUrl}`);
   }
 
