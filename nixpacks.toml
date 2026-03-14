@@ -1,0 +1,11 @@
+[phases.setup]
+nixPkgs = ["nodejs_20", "npm-9_x"]
+
+[phases.install]
+cmds = ["cd client && npm ci && cd ../server && npm ci"]
+
+[phases.build]
+cmds = ["cd client && npm run build && cp -r dist ../server/public"]
+
+[start]
+cmd = "node server/src/db/migrations/@system/start.js"

@@ -1,5 +1,5 @@
-/// <reference types="vite/client" />
-const BASE_URL = import.meta.env.VITE_API_URL ?? '/api'
+declare const __webpack_public_path__: string
+const BASE_URL = (typeof process !== 'undefined' && process.env?.REACT_APP_API_URL) || '/api'
 
 export interface SearchHit {
   id: string | number
