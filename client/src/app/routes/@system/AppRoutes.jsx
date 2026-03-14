@@ -102,6 +102,12 @@ const ContentCalendarPage = lazy(() =>
 const HashtagResearchPage = lazy(() =>
   import('../../pages/app/@custom/HashtagResearchPage').then((m) => ({ default: m.HashtagResearchPage }))
 )
+const PostsList = lazy(() =>
+  import('../../pages/app/@custom/PostsList').then((m) => ({ default: m.PostsList }))
+)
+const PostScheduler = lazy(() =>
+  import('../../pages/app/@custom/PostScheduler').then((m) => ({ default: m.PostScheduler }))
+)
 const ContentTemplatesPage = lazy(() =>
   import('../../pages/app/@custom/ContentTemplatesPage')
 )
@@ -283,6 +289,24 @@ export function AppRoutes() {
           element={
             <ProtectedRoute>
               <ContentCalendarPage />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Posts */}
+        <Route
+          path="/app/posts"
+          element={
+            <ProtectedRoute>
+              <PostsList />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/app/posts/new"
+          element={
+            <ProtectedRoute>
+              <PostScheduler />
             </ProtectedRoute>
           }
         />

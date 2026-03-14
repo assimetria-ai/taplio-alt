@@ -27,6 +27,7 @@ import { cn } from '@/app/lib/@system/utils'
 
 const DEFAULT_NAV_ITEMS = [
   { icon: LayoutDashboard, label: 'Dashboard', to: '/app' },
+  { icon: FileText, label: 'Posts', to: '/app/posts' },
   { icon: Calendar, label: 'Calendar', to: '/app/calendar' },
   { icon: Hash, label: 'Hashtags', to: '/app/hashtags' },
   { icon: FileText, label: 'Templates', to: '/app/templates' },
