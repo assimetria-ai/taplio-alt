@@ -1,188 +1,100 @@
 import { Route } from 'react-router-dom'
-import { ErrorTrackingPage } from '../../pages/app/@custom/ErrorTrackingPage'
-import { CollaboratorsPage } from '../../pages/app/@custom/CollaboratorsPage'
-import { BrandSettingsPage } from '../../pages/app/@custom/BrandSettingsPage'
-import { ChatbasePage } from '../../pages/app/@custom/ChatbasePage'
-import { EmailTrackingPage } from '../../pages/app/@custom/EmailTrackingPage'
-import { EmailPreviewPage } from '../../pages/app/@custom/EmailPreviewPage'
-import { ClipLibraryPage } from '../../pages/app/@custom/ClipLibraryPage'
-import { TeamsPage } from '../../pages/app/@custom/TeamsPage'
-import { TeamDetailPage } from '../../pages/app/@custom/TeamDetailPage'
-import { PostsList as PostsListPage } from '../../pages/app/@custom/PostsList'
-import { PostScheduler as PostSchedulerPage } from '../../pages/app/@custom/PostScheduler'
-import { ContentCalendarPage } from '../../pages/app/@custom/ContentCalendarPage'
-import ContentTemplatesPage from '../../pages/app/@custom/ContentTemplatesPage'
-import EngagementAnalyticsPage from '../../pages/app/@custom/EngagementAnalyticsPage'
-import { HashtagResearchPage } from '../../pages/app/@custom/HashtagResearchPage'
-import { LeadGenerationPage } from '../../pages/app/@custom/LeadGenerationPage'
-import { AIPostWriterPage } from '../../pages/app/@custom/AIPostWriterPage'
-import { PrivateRoute } from '@/app/components/@system/PrivateRoute/PrivateRoute'
+import { lazy } from 'react'
+import { ProtectedRoute } from '../../components/@system/ProtectedRoute/ProtectedRoute'
 
-// @custom — add your product-specific routes here.
-// Wrap with <PrivateRoute> for authenticated pages.
+// @custom — Planora product routes (AI-powered project management)
+
+const PlanoraDashboardPage = lazy(() =>
+  import('../../pages/app/@custom/PlanoraDashboardPage').then(m => ({ default: m.PlanoraDashboardPage }))
+)
+const ProjectBoardPage = lazy(() =>
+  import('../../pages/app/@custom/ProjectBoardPage').then(m => ({ default: m.ProjectBoardPage }))
+)
+const TaskManagementPage = lazy(() =>
+  import('../../pages/app/@custom/TaskManagementPage').then(m => ({ default: m.TaskManagementPage }))
+)
+const TeamsPage = lazy(() =>
+  import('../../pages/app/@custom/TeamsPage').then(m => ({ default: m.TeamsPage }))
+)
+const TeamDetailPage = lazy(() =>
+  import('../../pages/app/@custom/TeamDetailPage').then(m => ({ default: m.TeamDetailPage }))
+)
+
 export const customRoutes = [
-  // Core LinkedIn features
+  // Dashboard — main app home
   <Route
-    key="ai-writer"
-    path="/app/writer"
+    key="planora-dashboard"
+    path="/app/dashboard"
     element={
-      <PrivateRoute>
-        <AIPostWriterPage />
-      </PrivateRoute>
+      <ProtectedRoute>
+        <PlanoraDashboardPage />
+      </ProtectedRoute>
+    }
+  />,
+  // Project Board
+  <Route
+    key="projects"
+    path="/app/projects"
+    element={
+      <ProtectedRoute>
+        <ProjectBoardPage />
+      </ProtectedRoute>
     }
   />,
   <Route
-    key="posts-list"
-    path="/app/posts"
+    key="project-detail"
+    path="/app/projects/:id"
     element={
-      <PrivateRoute>
-        <PostsListPage />
-      </PrivateRoute>
+      <ProtectedRoute>
+        <ProjectBoardPage />
+      </ProtectedRoute>
+    }
+  />,
+  // Task Management
+  <Route
+    key="tasks"
+    path="/app/tasks"
+    element={
+      <ProtectedRoute>
+        <TaskManagementPage />
+      </ProtectedRoute>
     }
   />,
   <Route
-    key="post-new"
-    path="/app/posts/new"
+    key="task-new"
+    path="/app/tasks/new"
     element={
-      <PrivateRoute>
-        <PostSchedulerPage />
-      </PrivateRoute>
+      <ProtectedRoute>
+        <TaskManagementPage />
+      </ProtectedRoute>
     }
   />,
   <Route
-    key="post-edit"
-    path="/app/posts/:id/edit"
+    key="task-detail"
+    path="/app/tasks/:id"
     element={
-      <PrivateRoute>
-        <PostSchedulerPage />
-      </PrivateRoute>
+      <ProtectedRoute>
+        <TaskManagementPage />
+      </ProtectedRoute>
     }
   />,
-  <Route
-    key="content-calendar"
-    path="/app/calendar"
-    element={
-      <PrivateRoute>
-        <ContentCalendarPage />
-      </PrivateRoute>
-    }
-  />,
-  <Route
-    key="content-templates"
-    path="/app/templates"
-    element={
-      <PrivateRoute>
-        <ContentTemplatesPage />
-      </PrivateRoute>
-    }
-  />,
-  <Route
-    key="hashtag-research"
-    path="/app/hashtags"
-    element={
-      <PrivateRoute>
-        <HashtagResearchPage />
-      </PrivateRoute>
-    }
-  />,
-  <Route
-    key="engagement-analytics"
-    path="/app/analytics"
-    element={
-      <PrivateRoute>
-        <EngagementAnalyticsPage />
-      </PrivateRoute>
-    }
-  />,
-  <Route
-    key="lead-generation"
-    path="/app/leads"
-    element={
-      <PrivateRoute>
-        <LeadGenerationPage />
-      </PrivateRoute>
-    }
-  />,
-  // Utility features
-  <Route
-    key="error-tracking"
-    path="/app/errors"
-    element={
-      <PrivateRoute>
-        <ErrorTrackingPage />
-      </PrivateRoute>
-    }
-  />,
-  <Route
-    key="collaborators"
-    path="/app/collaborators"
-    element={
-      <PrivateRoute>
-        <CollaboratorsPage />
-      </PrivateRoute>
-    }
-  />,
-  <Route
-    key="brand-settings"
-    path="/app/brand"
-    element={
-      <PrivateRoute>
-        <BrandSettingsPage />
-      </PrivateRoute>
-    }
-  />,
-  <Route
-    key="chatbase"
-    path="/app/chatbase"
-    element={
-      <PrivateRoute>
-        <ChatbasePage />
-      </PrivateRoute>
-    }
-  />,
-  <Route
-    key="email-tracking"
-    path="/app/emails"
-    element={
-      <PrivateRoute role="admin">
-        <EmailTrackingPage />
-      </PrivateRoute>
-    }
-  />,
-  <Route
-    key="email-preview"
-    path="/app/emails/preview"
-    element={
-      <PrivateRoute role="admin">
-        <EmailPreviewPage />
-      </PrivateRoute>
-    }
-  />,
-  <Route
-    key="clip-library"
-    path="/app/library"
-    element={
-      <PrivateRoute>
-        <ClipLibraryPage />
-      </PrivateRoute>
-    }
-  />,
+  // Teams
   <Route
     key="teams"
     path="/app/teams"
     element={
-      <PrivateRoute>
+      <ProtectedRoute>
         <TeamsPage />
-      </PrivateRoute>
+      </ProtectedRoute>
     }
   />,
   <Route
     key="team-detail"
     path="/app/teams/:id"
     element={
-      <PrivateRoute>
+      <ProtectedRoute>
         <TeamDetailPage />
-      </PrivateRoute>
+      </ProtectedRoute>
     }
   />,
 ]
