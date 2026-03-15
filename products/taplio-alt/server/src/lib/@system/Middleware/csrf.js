@@ -69,12 +69,47 @@ const generateCsrfToken = (req, res) => {
 }
 
 /**
+ * Middleware that sets the CSRF nonce cookie and attaches req.csrfToken()
+ * on every request. Must run before csrfProtectMiddleware.
+ *
+ * For safe methods (GET/HEAD/OPTIONS) this is the only CSRF layer that runs;
+ * the protect middleware skips them.  For mutating methods both layers apply:
+ * this one ensures the cookie exists and the protect middleware validates the
+ * header value against it.
+ */
+const csrfCookieMiddleware = (req, res, next) => {
+  if (process.env.NODE_ENV === 'test' || process.env.SKIP_CSRF === 'true') {
+    req.csrfToken = () => 'test-csrf-token'
+    return next()
+  }
+
+  try {
+    const token = _generateCsrfToken(req, res)
+    req.csrfToken = () => token
+  } catch {
+    // If token generation fails (e.g. missing secret), attach a no-op so
+    // downstream code calling req.csrfToken() doesn't throw.
+    req.csrfToken = () => ''
+  }
+  next()
+}
+
+/**
+ * Middleware that validates the X-CSRF-Token header on state-changing requests
+ * (POST, PUT, PATCH, DELETE).  Safe methods are ignored.
+ * Must run AFTER csrfCookieMiddleware.
+ */
+const csrfProtectMiddleware = csrfProtection
+
+/**
  * Export generateToken as an alias for compatibility
  */
 const generateToken = _generateCsrfToken
 
 module.exports = {
   csrfProtection,
+  csrfCookieMiddleware,
+  csrfProtectMiddleware,
   generateCsrfToken,
   generateToken,
 }

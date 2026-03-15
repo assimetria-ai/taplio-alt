@@ -1,5 +1,5 @@
 const { pagination, formatPaginatedResponse } = require('./pagination')
-const { csrfProtection, generateCsrfToken } = require('./csrf')
+const { csrfProtection, csrfCookieMiddleware, csrfProtectMiddleware, generateCsrfToken } = require('./csrf')
 const { sorting, multiSort, formatSortClause } = require('./sorting')
 const { filtering, advancedFiltering, parseBoolean, parseNumber, parseArray, parseDate } = require('./filtering')
 const attachDatabase = require('./database')
@@ -29,6 +29,8 @@ module.exports = {
   
   // CSRF
   csrfProtection,
+  csrfCookieMiddleware,
+  csrfProtectMiddleware,
   generateCsrfToken,
   
   // Database
