@@ -30,14 +30,19 @@ async function runMigrations() {
   log('Migrations complete.')
 }
 
-async function usersTableExists() {
+async function tableExists(tableName) {
   const { exists } = await db.one(
     `SELECT EXISTS (
       SELECT 1 FROM information_schema.tables
-      WHERE table_schema = 'public' AND table_name = 'users'
-    ) AS exists`
+      WHERE table_schema = 'public' AND table_name = $1
+    ) AS exists`,
+    [tableName],
   )
   return exists
+}
+
+async function usersTableExists() {
+  return tableExists('users')
 }
 
 async function dropSchemaMigrations() {
@@ -74,7 +79,25 @@ async function main() {
       process.exit(1)
     }
 
-    log('✅ users table verified — starting server')
+    log('✅ users table verified')
+
+    // Step 3: Verify blog_posts table exists (ghost migration detection)
+    let blogExists = await tableExists('blog_posts')
+
+    if (!blogExists) {
+      log('Ghost migration detected: schema_migrations recorded but blog_posts table missing!')
+      await dropSchemaMigrations()
+      await runMigrations()
+      blogExists = await tableExists('blog_posts')
+    }
+
+    if (!blogExists) {
+      log('WARNING: blog_posts table still missing after re-run. Continuing without blog.')
+    } else {
+      log('✅ blog_posts table verified')
+    }
+
+    log('✅ All critical tables verified — starting server')
     db.pgp.end()
 
   } catch (err) {
