@@ -11,6 +11,21 @@ const { apiLimiter } = require('./lib/@system/RateLimit')
 const systemRoutes = require('./routes/@system')
 const customRoutes = require('./routes/@custom')
 
+// MIME type lookup for pre-compressed asset serving
+function getMimeType(filePath) {
+  const ext = path.extname(filePath).toLowerCase()
+  const mimeTypes = {
+    '.js': 'application/javascript',
+    '.css': 'text/css',
+    '.html': 'text/html',
+    '.json': 'application/json',
+    '.svg': 'image/svg+xml',
+    '.map': 'application/json',
+    '.ico': 'image/x-icon',
+  }
+  return mimeTypes[ext] || 'application/octet-stream'
+}
+
 const app = express()
 
 // Health check endpoints registered before all middleware (including CORS) so that
@@ -64,8 +79,44 @@ if (process.env.NODE_ENV === 'production' && fs.existsSync(publicDir)) {
       res.sendFile(landingFile)
     })
   }
-  app.use(express.static(publicDir))
+  // Serve pre-compressed brotli/gzip assets when available
+  app.use((req, res, next) => {
+    // Only for GET requests to static-looking paths (with file extensions)
+    if (req.method !== 'GET' || !path.extname(req.path)) return next()
+    const filePath = path.join(publicDir, req.path)
+    const acceptEncoding = req.headers['accept-encoding'] || ''
+
+    // Try brotli first, then gzip
+    if (acceptEncoding.includes('br') && fs.existsSync(filePath + '.br')) {
+      req.url = req.url + '.br'
+      res.set('Content-Encoding', 'br')
+      res.set('Content-Type', getMimeType(filePath))
+    } else if (acceptEncoding.includes('gzip') && fs.existsSync(filePath + '.gz')) {
+      req.url = req.url + '.gz'
+      res.set('Content-Encoding', 'gzip')
+      res.set('Content-Type', getMimeType(filePath))
+    }
+    next()
+  })
+
+  // Hashed assets (contain contenthash) → immutable, 1 year cache
+  // Non-hashed assets (index.html, landing.html) → no-cache (always revalidate)
+  app.use(express.static(publicDir, {
+    setHeaders(res, filePath) {
+      // Files with content hash in name (e.g. main.a1b2c3d4.js) are immutable
+      if (/\.[a-f0-9]{8}\.(js|css|chunk\.js|chunk\.css|gz|br)$/i.test(filePath)) {
+        res.setHeader('Cache-Control', 'public, max-age=31536000, immutable')
+      } else if (/\.(png|jpg|jpeg|gif|webp|avif|svg|woff|woff2|eot|ttf|otf|ico)$/i.test(filePath)) {
+        // Static assets without hash — cache 1 day with revalidation
+        res.setHeader('Cache-Control', 'public, max-age=86400, must-revalidate')
+      } else {
+        // HTML and other files — always revalidate
+        res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate')
+      }
+    },
+  }))
   app.get('*', (req, res) => {
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate')
     res.sendFile(path.join(publicDir, 'index.html'))
   })
 } else {
