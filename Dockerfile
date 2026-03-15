@@ -69,6 +69,8 @@ COPY client/public/favicon* ./server/public/
 # directory by sync-landing-pages.sh. The template ships a default fallback
 # that redirects to /app (the SPA). (task #12051)
 COPY landing.html ./server/public/landing.html
+# Logo files for landing page
+COPY client/public/logo*.png ./server/public/
 
 RUN chown -R appuser:appgroup /app
 USER appuser
