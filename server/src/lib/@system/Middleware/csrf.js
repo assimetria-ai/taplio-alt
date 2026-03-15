@@ -86,6 +86,14 @@ function csrfCookieMiddleware(req, res, next) {
 function csrfProtectMiddleware(req, res, next) {
   if (!STATE_METHODS.has(req.method)) return next()
 
+  // Exempt auth endpoints from CSRF — these are entry points where no session
+  // (and therefore no CSRF token) exists yet. They are protected by rate limiting.
+  const exemptPaths = ['/auth/login', '/auth/register', '/sessions']
+  const pathWithoutPrefix = req.path
+  if (exemptPaths.some(p => pathWithoutPrefix === p || pathWithoutPrefix.startsWith(p + '/'))) {
+    return next()
+  }
+
   const nonce       = req.cookies[NONCE_COOKIE]
   const headerToken = req.headers[CSRF_HEADER]
 
