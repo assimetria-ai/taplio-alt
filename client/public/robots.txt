@@ -1,0 +1,9 @@
+# Taplio Alt - LinkedIn Content Tool
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /dashboard
+Disallow: /settings
+Disallow: /auth/
+
+Sitemap: https://taplio-web-production.up.railway.app/sitemap.xml
