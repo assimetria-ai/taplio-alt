@@ -44,10 +44,10 @@ app.use('/api', systemRoutes)
 app.use('/api', customRoutes)
 
 // Serve React SPA in production
+// Landing page support: if server/public/landing.html exists, serve it at root (/)
+// so Railway deploys show the marketing landing page instead of the SPA shell.
+// The SPA (dashboard) is still available at /app and all other routes.
 const publicDir = path.join(__dirname, '..', 'public')
-if (process.env.NODE_ENV === 'production' && fs.existsSync(publicDir)) {
-  app.use(express.static(publicDir, { index: false }))
-  // Landing page: serve landing.html at root instead of SPA shell (task #12051)
 if (process.env.NODE_ENV === 'production' && fs.existsSync(publicDir)) {
   const landingFile = path.join(publicDir, 'landing.html')
   if (fs.existsSync(landingFile)) {
@@ -55,9 +55,8 @@ if (process.env.NODE_ENV === 'production' && fs.existsSync(publicDir)) {
       res.sendFile(landingFile)
     })
   }
-}
-
-app.get('*', (req, res) => {
+  app.use(express.static(publicDir))
+  app.get('*', (req, res) => {
     res.sendFile(path.join(publicDir, 'index.html'))
   })
 } else {
