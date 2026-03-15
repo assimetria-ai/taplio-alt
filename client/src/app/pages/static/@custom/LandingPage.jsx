@@ -1,6 +1,6 @@
 // @custom — Taplio Alt landing page with product-specific features, no fake social proof
 import { Link } from 'react-router-dom'
-import { ArrowRight, Check, PenLine, Calendar, BarChart3, Users, Clock, Lightbulb } from 'lucide-react'
+import { ArrowRight, Check, PenLine, Calendar, BarChart3, Users, Clock, FileText, Lock } from 'lucide-react'
 import { Button } from '../../../components/@system/ui/button'
 import { Header } from '../../../components/@system/Header/Header'
 import { Footer } from '../../../components/@system/Footer/Footer'
@@ -11,34 +11,39 @@ import { info } from '@/config'
 
 const TAPLIO_FEATURES = [
   {
+    icon: Lock,
+    title: 'Authentication',
+    description: 'Secure email/password signup with one-click LinkedIn OAuth. Connect your LinkedIn account in seconds to unlock scheduling, analytics, and lead tools. Includes forgot-password recovery and session management — so you\'re always in control.',
+  },
+  {
     icon: PenLine,
     title: 'AI Post Writer',
-    description: 'Generate high-performing LinkedIn posts with AI. Get topic suggestions, optimize for engagement, and maintain your authentic voice.',
+    description: 'Create scroll-stopping LinkedIn posts in seconds with AI. Choose your topic, tone (professional, casual, or bold), and format (text, listicle, or story) — get a publish-ready post with hashtag suggestions. Rewrite, remix, and generate variations until it\'s perfect.',
+  },
+  {
+    icon: Clock,
+    title: 'Post Scheduler',
+    description: 'Schedule LinkedIn posts at the perfect time, every time. Pick a date and time or let smart suggestions find your audience\'s peak hours. Drag-and-drop queue management, timezone support, draft-to-scheduled workflow, and bulk scheduling for content batches.',
   },
   {
     icon: Calendar,
     title: 'Content Calendar',
-    description: 'Plan and schedule posts with a visual calendar. Set optimal posting times and maintain a consistent publishing cadence.',
+    description: 'See your entire content strategy at a glance. Week and month calendar views show scheduled, published, and draft posts color-coded by status. Drag-and-drop to reschedule instantly. Gap detection flags empty days so you never miss a beat.',
+  },
+  {
+    icon: FileText,
+    title: 'Content Templates',
+    description: 'Never start from a blank page again. Browse proven LinkedIn post templates — listicles, hot takes, storytelling, how-tos, carousel outlines, and engagement hooks. Each template comes with structure, examples, and fill-in prompts. Save your own winning formats.',
   },
   {
     icon: BarChart3,
-    title: 'Analytics',
-    description: 'Track impressions, engagement, and follower growth. Understand what content resonates and drives real pipeline.',
+    title: 'Engagement Analytics',
+    description: 'Know exactly what\'s working. Track impressions, likes, comments, shares, and click-through rates for every post. Watch your follower growth over time. See your best-performing content ranked and discover your optimal posting times with data-backed analysis.',
   },
   {
     icon: Users,
     title: 'Lead Generation',
-    description: 'Identify and engage with high-value prospects directly from LinkedIn. Turn content engagement into real business leads.',
-  },
-  {
-    icon: Clock,
-    title: 'Smart Scheduling',
-    description: 'Schedule posts for optimal engagement times based on your audience. Automate your posting workflow effortlessly.',
-  },
-  {
-    icon: Lightbulb,
-    title: 'Content Intelligence',
-    description: 'Know not just what was published, but what drove real results. Data-driven insights to continuously improve your strategy.',
+    description: 'Turn engagement into pipeline. Automatically identify potential leads from everyone who likes, comments, and shares your posts. See enriched profiles with job title, company, and industry. Filter by engagement level, company size, or role to find ideal prospects.',
   },
 ]
 
