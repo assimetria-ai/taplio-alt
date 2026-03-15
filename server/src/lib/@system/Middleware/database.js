@@ -4,7 +4,6 @@
  */
 
 const db = require('../PostgreSQL')
-const TeamRepo = require('../../../db/repos/@system/TeamRepo')
 const UserRepo = require('../../../db/repos/@system/UserRepo')
 
 function tryRequire(path) {
@@ -20,7 +19,7 @@ const TeamMembersRepository = tryRequire('../../../db/repos/@system/team-members
 const TeamInvitationsRepository = tryRequire('../../../db/repos/@system/team-invitations')
 const TeamActivityLogRepository = tryRequire('../../../db/repos/@system/team-activity-log')
 
-const teams = TeamsRepository ? new TeamsRepository(db) : TeamRepo
+const teams = TeamsRepository ? new TeamsRepository(db) : null
 const teamMembers = TeamMembersRepository ? new TeamMembersRepository(db) : null
 const teamInvitations = TeamInvitationsRepository ? new TeamInvitationsRepository(db) : null
 const teamActivityLog = TeamActivityLogRepository ? new TeamActivityLogRepository(db) : null
@@ -34,9 +33,10 @@ const teamActivityLog = TeamActivityLogRepository ? new TeamActivityLogRepositor
 function attachDatabase(req, res, next) {
   const repos = {
     db,
-    teams,
     users: UserRepo,
   }
+
+  if (teams) repos.teams = teams
 
   if (teamMembers) repos.teamMembers = teamMembers
   if (teamInvitations) repos.teamInvitations = teamInvitations

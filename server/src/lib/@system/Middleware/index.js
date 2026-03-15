@@ -5,9 +5,20 @@ const { filtering, advancedFiltering, parseBoolean, parseNumber, parseArray, par
 const attachDatabase = require('./database')
 const { authenticate, requireAdmin } = require('../Helpers/auth')
 
+const csrfModule = require('./csrf')
+
 module.exports = {
   cors: require('./cors'),
-  csrf: require('./csrf').csrfProtection,
+  csrf: {
+    csrfCookieMiddleware: csrfModule.generateCsrfToken ? (req, res, next) => {
+      // Set a CSRF nonce cookie on every request for client consumption
+      const crypto = require('crypto')
+      const nonce = crypto.randomBytes(32).toString('hex')
+      res.cookie('csrf-nonce', nonce, { path: '/', secure: process.env.NODE_ENV === 'production', sameSite: 'Strict' })
+      next()
+    } : (req, res, next) => next(),
+    csrfProtectMiddleware: csrfModule.csrfProtection,
+  },
   securityHeaders: require('./security'),
   validate: require('../Validation').validate,
   
