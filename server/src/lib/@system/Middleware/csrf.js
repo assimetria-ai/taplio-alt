@@ -88,9 +88,9 @@ function csrfProtectMiddleware(req, res, next) {
 
   // Exempt auth endpoints from CSRF — these are entry points where no session
   // (and therefore no CSRF token) exists yet. They are protected by rate limiting.
-  const exemptPaths = ['/auth/login', '/auth/register', '/sessions']
+  const exemptPaths = new Set(['/sessions', '/sessions/refresh', '/users', '/users/password/request', '/users/password/reset', '/users/email/verify', '/users/email/verify/request', '/auth/login', '/auth/register'])
   const pathWithoutPrefix = req.path
-  if (exemptPaths.some(p => pathWithoutPrefix === p || pathWithoutPrefix.startsWith(p + '/'))) {
+  if (exemptPaths.has(pathWithoutPrefix) || pathWithoutPrefix.startsWith('/oauth/')) {
     return next()
   }
 
