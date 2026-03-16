@@ -186,34 +186,11 @@ app.get('/api/csrf-token', (req, res) => {
 });
 
 // ─── API routes ───────────────────────────────────────────────────────────────
-// All routes below are protected by csrfProtectMiddleware.
-const sessionsRouter = require('./api/@system/sessions');
-const userRouter     = require('./api/@system/user');
-const oauthRouter    = require('./api/@system/oauth');
-const stripeRouter   = require('./api/@system/stripe');
-const teamsRouter    = require('./api/@system/teams');
-const logsRouter     = require('./api/@system/logs');
-const emailRouter    = require('./api/@system/email');
-const storageRouter  = require('./api/@custom/storage');
-const blogRouter     = require('./api/@custom/blog');
-const itemsRouter    = require('./api/@custom/items');
-const postsRouter     = require('../../@custom/routes/posts');
-const auditRouter     = require('../../@custom/routes/audit');
-const analyticsRouter = require('../../@custom/routes/analytics');
+const systemRoutes = require('./routes/@system')
+const customRoutes = require('./routes/@custom')
 
-app.use('/api', sessionsRouter);
-app.use('/api', userRouter);
-app.use('/api', oauthRouter);
-app.use('/api', stripeRouter);
-app.use('/api', teamsRouter);
-app.use('/api', logsRouter);
-app.use('/api', emailRouter);
-app.use('/api', storageRouter);
-app.use('/api', blogRouter);
-app.use('/api', itemsRouter);
-app.use('/api', postsRouter);
-app.use('/api', auditRouter);
-app.use('/api', analyticsRouter);
+app.use('/api', systemRoutes)
+app.use('/api', customRoutes)
 
 // ─── Health check ─────────────────────────────────────────────────────────────
 // Exempt from CORS (see cors.js DEFAULT_HEALTH_CHECK_PATHS) so monitoring probes
