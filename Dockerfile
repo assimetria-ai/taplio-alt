@@ -38,7 +38,7 @@ RUN npm ci --omit=dev --ignore-scripts
 # ── Stage 3: final runner ─────────────────────────────────────────────────────
 FROM node:20-alpine AS runner
 
-ARG CACHEBUST=1
+ARG CACHEBUST=2
 RUN apk add --no-cache tini nginx postgresql-client
 
 WORKDIR /app
