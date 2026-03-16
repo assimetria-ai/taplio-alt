@@ -6,7 +6,7 @@ const cookieParser = require('cookie-parser')
 const pinoHttp = require('pino-http')
 
 const logger = require('./lib/@system/Logger')
-const { cors, csrf, securityHeaders } = require('./lib/@system/Middleware')
+const { cors, csrf: { csrfCookieMiddleware, csrfProtectMiddleware }, securityHeaders } = require('./lib/@system/Middleware')
 const { apiLimiter } = require('./lib/@system/RateLimit')
 const systemRoutes = require('./routes/@system')
 const customRoutes = require('./routes/@custom')
@@ -50,7 +50,8 @@ app.use(express.json({ limit: '10mb' }))
 app.use(cookieParser())
 // CSRF: cookie middleware sets nonce, protect middleware validates on state-changing requests
 // Must run AFTER cookieParser so req.cookies is populated
-app.use('/api', csrf)
+app.use(csrfCookieMiddleware)
+app.use(csrfProtectMiddleware)
 
 if (process.env.NODE_ENV !== 'test') {
   app.use(pinoHttp({ logger }))

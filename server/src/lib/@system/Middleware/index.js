@@ -7,7 +7,10 @@ const { authenticate, requireAdmin } = require('../Helpers/auth')
 
 module.exports = {
   cors: require('./cors'),
-  csrf: { csrfCookieMiddleware, csrfProtectMiddleware },
+  csrf: {
+    csrfCookieMiddleware,
+    csrfProtectMiddleware,
+  },
   securityHeaders: require('./security'),
   validate: require('../Validation').validate,
   
@@ -31,7 +34,7 @@ module.exports = {
   // CSRF
   csrfCookieMiddleware,
   csrfProtectMiddleware,
-
+  
   // Database
   attachDatabase,
   
