@@ -1,19 +1,17 @@
 # ─────────────────────────────────────────────────────────────────────────────
-#  Assimetria Product Template — Root Dockerfile  (multi-stage, production-ready)
+#  taplio-alt — Dockerfile  (multi-stage, production-ready)
 #
-#  Produces a single image that:
-#    1. Builds the React/Vite frontend (dist/)
-#    2. Bundles the Node.js/Express backend
-#    3. Serves static assets from the backend (or a separate nginx is preferred)
+#  This product uses a root-level Vite frontend (not client/ subfolder).
+#  Structure: root = Vite React app, server/ = Express backend.
 #
-#  Typical usage
-#    docker build -t product-template .
-#    docker run -p 4000:4000 --env-file .env product-template
+#  Usage:
+#    docker build -t taplio-alt .
+#    docker run -p 4000:4000 --env-file .env taplio-alt
 #
-#  Build targets
-#    --target server-deps   → only production server deps (CI cache layer)
-#    --target client-build  → only Vite build (CI cache layer)
-#    --target runner        → final production image (default)
+#  Build targets:
+#    --target frontend-build  → only Vite build (CI cache layer)
+#    --target server-deps     → only production server deps (CI cache layer)
+#    --target runner           → final production image (default)
 # ─────────────────────────────────────────────────────────────────────────────
 
 # ── Shared base ───────────────────────────────────────────────────────────────
@@ -21,27 +19,34 @@ FROM node:20-alpine AS base
 ARG CACHEBUST=1
 RUN apk add --no-cache tini postgresql-client
 
-# ── Stage 1: server production dependencies ───────────────────────────────────
-FROM base AS server-deps
-WORKDIR /app/server
-COPY server/package*.json ./
-RUN npm ci --omit=dev --ignore-scripts
-
-# ── Stage 2: client build ─────────────────────────────────────────────────────
-FROM node:20-alpine AS client-build
-WORKDIR /app/client
+# ── Stage 1: frontend build (Vite at root level) ─────────────────────────────
+FROM node:20-alpine AS frontend-build
+WORKDIR /app
 
 # Manifests first → better layer caching
-COPY client/package*.json ./
+COPY package.json package-lock.json ./
 RUN npm ci --ignore-scripts
 
-COPY client/ ./
+# Copy frontend source + config
+COPY src/ ./src/
+COPY index.html ./
+COPY vite.config.js ./
+COPY postcss.config.js ./
+COPY tailwind.config.js ./
+COPY tsconfig.json ./
+COPY public/ ./public/
 
 # Accept API URL at build time; defaults to relative path (same host)
 ARG VITE_API_URL=/api
 ENV VITE_API_URL=${VITE_API_URL}
 
 RUN npm run build
+
+# ── Stage 2: server production dependencies ───────────────────────────────────
+FROM base AS server-deps
+WORKDIR /app/server
+COPY server/package.json server/package-lock.json ./
+RUN npm ci --omit=dev --ignore-scripts
 
 # ── Stage 3: final runner ─────────────────────────────────────────────────────
 FROM base AS runner
@@ -56,18 +61,16 @@ COPY --from=server-deps /app/server/node_modules ./server/node_modules
 
 # Server source
 COPY server/src/ ./server/src/
-COPY server/package*.json ./server/
+COPY server/package.json server/package-lock.json ./server/
 
-# Built frontend assets (served by Express as static files or a CDN)
-# Server looks for static files at server/src/../public = server/public
-COPY --from=client-build /app/client/dist ./server/public
+# Built frontend assets → served by Express as static files
+COPY --from=frontend-build /app/dist ./server/public
 
 RUN chown -R appuser:appgroup /app
 USER appuser
 
 ENV NODE_ENV=production \
-    PORT=4000 \
-    STATIC_DIR=/app/public
+    PORT=4000
 
 EXPOSE 4000
 
