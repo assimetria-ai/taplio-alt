@@ -1,7 +1,5 @@
-const crypto = require('crypto')
 const { pagination, formatPaginatedResponse } = require('./pagination')
-const csrfModule = require('./csrf')
-const { csrfProtection, generateCsrfToken } = csrfModule
+const { csrfProtection, generateCsrfToken } = require('./csrf')
 const { sorting, multiSort, formatSortClause } = require('./sorting')
 const { filtering, advancedFiltering, parseBoolean, parseNumber, parseArray, parseDate } = require('./filtering')
 const attachDatabase = require('./database')
@@ -9,15 +7,7 @@ const { authenticate, requireAdmin } = require('../Helpers/auth')
 
 module.exports = {
   cors: require('./cors'),
-  csrf: {
-    csrfCookieMiddleware: (req, res, next) => {
-      // Set a CSRF nonce cookie on every request for client consumption
-      const nonce = crypto.randomBytes(32).toString('hex')
-      res.cookie('csrf-nonce', nonce, { path: '/', secure: process.env.NODE_ENV === 'production', sameSite: 'Strict' })
-      next()
-    },
-    csrfProtectMiddleware: csrfModule.csrfProtection,
-  },
+  csrf: require('./csrf').csrfProtection,
   securityHeaders: require('./security'),
   validate: require('../Validation').validate,
   
