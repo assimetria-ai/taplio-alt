@@ -156,6 +156,13 @@ export default {
   // ─── Module Rules ────────────────────────────────────────────────────────────
   module: {
     rules: [
+      // Fix for "type":"module" in package.json: allow extension-less imports in JS files.
+      // Without this, webpack requires fully-specified paths (e.g. './Foo.jsx' not './Foo').
+      {
+        test: /\.m?js$/,
+        resolve: { fullySpecified: false },
+      },
+
       // TypeScript / TSX / JSX
       {
         test: /\.[jt]sx?$/,

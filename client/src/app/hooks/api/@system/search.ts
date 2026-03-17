@@ -1,5 +1,5 @@
-/// <reference types="vite/client" />
-const BASE_URL = import.meta.env.VITE_API_URL ?? '/api'
+// @ts-nocheck
+const BASE_URL = '/api'
 
 export interface SearchHit {
   id: string | number

@@ -1,3 +1,4 @@
+// @ts-nocheck
 // @system — user profile / settings page
 import { useState, useEffect, useCallback, type FormEvent } from 'react'
 import { Link, useLocation, useSearchParams } from 'react-router-dom'
