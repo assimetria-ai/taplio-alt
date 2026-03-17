@@ -255,7 +255,7 @@ export function CollaboratorsPage() {
           </SidebarSection>
         </Sidebar>
 
-        <main className="flex-1 overflow-auto p-4 sm:p-6 lg:p-8 max-w-5xl">
+        <main className="flex-1 overflow-auto p-8 max-w-5xl">
           {/* Page header */}
           <div className="mb-8 flex items-start justify-between">
             <div>

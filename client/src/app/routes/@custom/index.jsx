@@ -1,93 +1,67 @@
 import { Route } from 'react-router-dom'
-import { lazy } from 'react'
-import { ProtectedRoute } from '../../components/@system/ProtectedRoute/ProtectedRoute'
+import { ErrorTrackingPage } from '../../pages/app/@custom/ErrorTrackingPage'
+import { CollaboratorsPage } from '../../pages/app/@custom/CollaboratorsPage'
+import { BrandSettingsPage } from '../../pages/app/@custom/BrandSettingsPage'
+import { ChatbasePage } from '../../pages/app/@custom/ChatbasePage'
+import { EmailTrackingPage } from '../../pages/app/@custom/EmailTrackingPage'
+import { EmailPreviewPage } from '../../pages/app/@custom/EmailPreviewPage'
+import { PrivateRoute } from '@/app/components/@system/PrivateRoute/PrivateRoute'
 
-// @custom — Taplio Alt routes (LinkedIn content creation & scheduling)
-
-const TaplioDashboardPage = lazy(() =>
-  import('../../pages/app/@custom/TaplioDashboardPage').then(m => ({ default: m.TaplioDashboardPage }))
-)
-const AIPostWriterPage = lazy(() =>
-  import('../../pages/app/@custom/AIPostWriterPage').then(m => ({ default: m.AIPostWriterPage }))
-)
-const PostSchedulerPage = lazy(() =>
-  import('../../pages/app/@custom/PostSchedulerPage').then(m => ({ default: m.PostSchedulerPage }))
-)
-const ContentCalendarPage = lazy(() =>
-  import('../../pages/app/@custom/ContentCalendarPage').then(m => ({ default: m.ContentCalendarPage }))
-)
-const ContentTemplatesPage = lazy(() =>
-  import('../../pages/app/@custom/ContentTemplatesPage').then(m => ({ default: m.ContentTemplatesPage }))
-)
-const EngagementAnalyticsPage = lazy(() =>
-  import('../../pages/app/@custom/EngagementAnalyticsPage').then(m => ({ default: m.EngagementAnalyticsPage }))
-)
-const LeadGenerationPage = lazy(() =>
-  import('../../pages/app/@custom/LeadGenerationPage').then(m => ({ default: m.LeadGenerationPage }))
-)
-
+// @custom — add your product-specific routes here.
+// Wrap with <PrivateRoute> for authenticated pages.
 export const customRoutes = [
   <Route
-    key="taplio-dashboard"
-    path="/app/dashboard"
+    key="error-tracking"
+    path="/app/errors"
     element={
-      <ProtectedRoute>
-        <TaplioDashboardPage />
-      </ProtectedRoute>
+      <PrivateRoute>
+        <ErrorTrackingPage />
+      </PrivateRoute>
     }
   />,
   <Route
-    key="ai-writer"
-    path="/app/ai-writer"
+    key="collaborators"
+    path="/app/collaborators"
     element={
-      <ProtectedRoute>
-        <AIPostWriterPage />
-      </ProtectedRoute>
+      <PrivateRoute>
+        <CollaboratorsPage />
+      </PrivateRoute>
     }
   />,
   <Route
-    key="scheduler"
-    path="/app/scheduler"
+    key="brand-settings"
+    path="/app/brand"
     element={
-      <ProtectedRoute>
-        <PostSchedulerPage />
-      </ProtectedRoute>
+      <PrivateRoute>
+        <BrandSettingsPage />
+      </PrivateRoute>
     }
   />,
   <Route
-    key="calendar"
-    path="/app/calendar"
+    key="chatbase"
+    path="/app/chatbase"
     element={
-      <ProtectedRoute>
-        <ContentCalendarPage />
-      </ProtectedRoute>
+      <PrivateRoute>
+        <ChatbasePage />
+      </PrivateRoute>
     }
   />,
   <Route
-    key="templates"
-    path="/app/templates"
+    key="email-tracking"
+    path="/app/emails"
     element={
-      <ProtectedRoute>
-        <ContentTemplatesPage />
-      </ProtectedRoute>
+      <PrivateRoute role="admin">
+        <EmailTrackingPage />
+      </PrivateRoute>
     }
   />,
   <Route
-    key="analytics"
-    path="/app/analytics"
+    key="email-preview"
+    path="/app/emails/preview"
     element={
-      <ProtectedRoute>
-        <EngagementAnalyticsPage />
-      </ProtectedRoute>
-    }
-  />,
-  <Route
-    key="leads"
-    path="/app/leads"
-    element={
-      <ProtectedRoute>
-        <LeadGenerationPage />
-      </ProtectedRoute>
+      <PrivateRoute role="admin">
+        <EmailPreviewPage />
+      </PrivateRoute>
     }
   />,
 ]

@@ -1,13 +1,26 @@
 const express = require('express')
 const router = express.Router()
 
-// @custom — Taplio Alt API routes (LinkedIn content creation & scheduling)
-router.use(require('../../api/@custom/posts'))
-router.use(require('../../api/@custom/templates'))
-router.use(require('../../api/@custom/analytics'))
-router.use(require('../../api/@custom/leads'))
-router.use(require('../../api/@custom/linkedin-oauth'))
-router.use(require('../../api/@custom/ai-generate'))
-router.use(require('../../api/@custom/blog'))
+// @custom — register product-specific routers here
+// Each route is wrapped in try/catch to prevent broken @custom modules from crashing the server
+const customRoutes = [
+  '../../api/@custom/audit-logs',
+  '../../api/@custom/errors',
+  '../../api/@custom/collaborators',
+  '../../api/@custom/brands',
+  '../../api/@custom/chatbase',
+  '../../api/@custom/email-logs',
+  '../../api/@custom/blog',
+  '../../api/@custom/pages',
+  '../../api/@custom/pricing',
+]
+
+for (const route of customRoutes) {
+  try {
+    router.use(require(route))
+  } catch (err) {
+    console.warn(`[routes] Skipping @custom route ${route}: ${err.message}`)
+  }
+}
 
 module.exports = router

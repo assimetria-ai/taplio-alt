@@ -5,7 +5,7 @@ require('dotenv').config()
   const { execFileSync, spawnSync } = require('child_process')
   const path = require('path')
   const node = process.execPath
-  const runJs = path.join(__dirname, 'db/migrations/run.js')
+  const runJs = path.join(__dirname, 'db/migrations/@system/run.js')
   const dropScript = path.join(__dirname, '..', 'scripts', 'drop-schema-migrations.js')
   const log = (msg) => console.log(`[startup][${new Date().toISOString()}] ${msg}`)
   try {
@@ -24,7 +24,6 @@ require('dotenv').config()
 })()
 
 require('./lib/@system/Env') // validate env vars — exits with a clear error if required vars are missing
-const http = require('http')
 const app = require('./app')
 const logger = require('./lib/@system/Logger')
 const { connect: connectRedis } = require('./lib/@system/Redis')
@@ -53,35 +52,22 @@ async function start() {
   }
 
   // ── Scheduler ──────────────────────────────────────────────────────────
-  // Initialize custom tasks (application layer imports @custom, not @system)
   try {
     const initCustomTasks = require('./scheduler/tasks/@custom/init')
     initCustomTasks(scheduler)
-    logger.info('custom tasks initialised')
+    logger.info('scheduler: custom tasks initialised')
   } catch (err) {
-    logger.warn({ err }, 'no custom task init found or init failed — skipping')
+    logger.warn({ err }, 'scheduler: no custom init found or init failed — skipping')
   }
 
-  // ── Create HTTP server (required for GraphQL WebSocket subscriptions) ──
-  const httpServer = http.createServer(app)
-
-  // ── GraphQL setup ──────────────────────────────────────────────────────
-  try {
-    const { setupGraphQL } = require('./graphql/@custom')
-    await setupGraphQL(app, httpServer)
-    logger.info('GraphQL API initialized')
-  } catch (err) {
-    logger.warn({ err: err.message }, 'GraphQL setup failed — continuing without GraphQL')
-  }
-
-  httpServer.listen(PORT, BIND_HOST, () => {
+  const server = app.listen(PORT, BIND_HOST, () => {
     logger.info({ port: PORT, host: BIND_HOST, env: process.env.NODE_ENV ?? 'development' }, 'server started')
   })
 
   // ── Graceful shutdown ──────────────────────────────────────────────────
   async function shutdown(signal) {
     logger.info({ signal }, 'shutdown signal received')
-    httpServer.close(async () => {
+    server.close(async () => {
       await disconnectPostgres()
       logger.info('shutdown complete')
       process.exit(0)

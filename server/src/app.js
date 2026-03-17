@@ -6,30 +6,12 @@ const cookieParser = require('cookie-parser')
 const pinoHttp = require('pino-http')
 
 const logger = require('./lib/@system/Logger')
-const { cors, csrf: csrfProtection, securityHeaders } = require('./lib/@system/Middleware')
+const { cors, securityHeaders, csrfProtection, generateCsrfToken } = require('./lib/@system/Middleware')
 const { apiLimiter } = require('./lib/@system/RateLimit')
 const systemRoutes = require('./routes/@system')
-const customRoutes = require('./routes/@custom')
-
-// MIME type lookup for pre-compressed asset serving
-function getMimeType(filePath) {
-  const ext = path.extname(filePath).toLowerCase()
-  const mimeTypes = {
-    '.js': 'application/javascript',
-    '.css': 'text/css',
-    '.html': 'text/html',
-    '.json': 'application/json',
-    '.svg': 'image/svg+xml',
-    '.map': 'application/json',
-    '.ico': 'image/x-icon',
-  }
-  return mimeTypes[ext] || 'application/octet-stream'
-}
+let customRoutes; try { customRoutes = require('./routes/@custom') } catch(e) { console.warn('[app] @custom routes failed:', e.message); const express = require('express'); customRoutes = express.Router() }
 
 const app = express()
-
-// Trust the first proxy (Railway) so express-rate-limit works correctly
-app.set('trust proxy', 1)
 
 // Health check endpoints registered before all middleware (including CORS) so that
 // infrastructure health probes with no Origin header reach them without triggering
@@ -44,20 +26,23 @@ app.get('/api/health', (_req, res) => res.status(200).json({ status: 'ok' }))
 app.get('/healthz', (_req, res) => res.status(200).json({ status: 'ok' }))
 
 app.use(securityHeaders)
-// CORS only for API routes — static files and SPA catch-all must be accessible
-// via direct browser navigation (no Origin header). Previously applied globally,
-// which caused HTTP 500 on direct navigation and broke frontend health checks.
-app.use('/api', cors)
+app.use(cors)
 app.use(compression())
 app.use(express.json({ limit: '10mb' }))
 app.use(cookieParser())
-// CSRF: single double-submit-cookie middleware (generates nonce cookie + validates on
-// state-changing requests). Must run AFTER cookieParser so req.cookies is populated.
-app.use('/api', csrfProtection)
 
 if (process.env.NODE_ENV !== 'test') {
   app.use(pinoHttp({ logger }))
 }
+
+// CSRF token endpoint — clients must call this before making state-changing requests
+app.get('/api/csrf-token', (req, res) => {
+  const csrfToken = generateCsrfToken(req, res)
+  res.json({ csrfToken })
+})
+
+// CSRF protection for all state-changing requests (POST, PUT, PATCH, DELETE)
+app.use(csrfProtection)
 
 // General rate limiting for all API routes (baseline DoS protection)
 app.use('/api', apiLimiter)
@@ -66,59 +51,11 @@ app.use('/api', apiLimiter)
 app.use('/api', systemRoutes)
 app.use('/api', customRoutes)
 
-// API 404 — must be before SPA fallback so unmatched /api/* routes return JSON
-app.use('/api', (req, res) => res.status(404).json({ message: 'Not found' }))
-
 // Serve React SPA in production
-// Landing page support: if server/public/landing.html exists, serve it at root (/)
-// so Railway deploys show the marketing landing page instead of the SPA shell.
-// The SPA (dashboard) is still available at /app and all other routes.
 const publicDir = path.join(__dirname, '..', 'public')
 if (process.env.NODE_ENV === 'production' && fs.existsSync(publicDir)) {
-  const landingFile = path.join(publicDir, 'landing.html')
-  if (fs.existsSync(landingFile)) {
-    app.get('/', (_req, res) => {
-      res.sendFile(landingFile)
-    })
-  }
-  // Serve pre-compressed brotli/gzip assets when available
-  app.use((req, res, next) => {
-    // Only for GET requests to static-looking paths (with file extensions)
-    if (req.method !== 'GET' || !path.extname(req.path)) return next()
-    const filePath = path.join(publicDir, req.path)
-    const acceptEncoding = req.headers['accept-encoding'] || ''
-
-    // Try brotli first, then gzip
-    if (acceptEncoding.includes('br') && fs.existsSync(filePath + '.br')) {
-      req.url = req.url + '.br'
-      res.set('Content-Encoding', 'br')
-      res.set('Content-Type', getMimeType(filePath))
-    } else if (acceptEncoding.includes('gzip') && fs.existsSync(filePath + '.gz')) {
-      req.url = req.url + '.gz'
-      res.set('Content-Encoding', 'gzip')
-      res.set('Content-Type', getMimeType(filePath))
-    }
-    next()
-  })
-
-  // Hashed assets (contain contenthash) → immutable, 1 year cache
-  // Non-hashed assets (index.html, landing.html) → no-cache (always revalidate)
-  app.use(express.static(publicDir, {
-    setHeaders(res, filePath) {
-      // Files with content hash in name (e.g. main.a1b2c3d4.js) are immutable
-      if (/\.[a-f0-9]{8}\.(js|css|chunk\.js|chunk\.css|gz|br)$/i.test(filePath)) {
-        res.setHeader('Cache-Control', 'public, max-age=31536000, immutable')
-      } else if (/\.(png|jpg|jpeg|gif|webp|avif|svg|woff|woff2|eot|ttf|otf|ico)$/i.test(filePath)) {
-        // Static assets without hash — cache 1 day with revalidation
-        res.setHeader('Cache-Control', 'public, max-age=86400, must-revalidate')
-      } else {
-        // HTML and other files — always revalidate
-        res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate')
-      }
-    },
-  }))
+  app.use(express.static(publicDir))
   app.get('*', (req, res) => {
-    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate')
     res.sendFile(path.join(publicDir, 'index.html'))
   })
 } else {
