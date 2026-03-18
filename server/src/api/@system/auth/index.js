@@ -1,5 +1,6 @@
 // @system — auth API (aliases to sessions for backward compatibility)
 // POST   /api/auth/register         — create account
+// POST   /api/sessions/register     — alias for /api/auth/register (QA journey path, legacy clients)
 // POST   /api/auth/login            — login
 // GET    /api/auth/me               — current user
 // POST   /api/auth/forgot-password  — request password reset
@@ -13,7 +14,7 @@ const { authenticate, extractAccessToken } = require('../../../lib/@system/Helpe
 const UserRepo = require('../../../db/repos/@system/UserRepo')
 const RefreshTokenRepo = require('../../../db/repos/@system/RefreshTokenRepo')
 const { signAccessTokenAsync } = require('../../../lib/@system/Helpers/jwt')
-const { loginLimiter } = require('../../../lib/@system/RateLimit')
+const { loginLimiter, registerLimiter } = require('../../../lib/@system/RateLimit')
 const { validate } = require('../../../lib/@system/Validation')
 const { LoginBody } = require('../../../lib/@system/Validation/schemas/@system/sessions')
 const { RegisterBody } = require('../../../lib/@system/Validation/schemas/@system/user')
@@ -50,7 +51,8 @@ function setRefreshCookie(res, token) {
 }
 
 // POST /api/auth/register
-router.post('/auth/register', validate({ body: RegisterBody }), async (req, res, next) => {
+// POST /api/sessions/register — alias (QA journey path, legacy clients)
+async function handleRegister(req, res, next) {
   try {
     const { email, password, name } = req.body
 
@@ -80,7 +82,10 @@ router.post('/auth/register', validate({ body: RegisterBody }), async (req, res,
   } catch (err) {
     next(err)
   }
-})
+}
+
+router.post('/auth/register', registerLimiter, validate({ body: RegisterBody }), handleRegister)
+router.post('/sessions/register', registerLimiter, validate({ body: RegisterBody }), handleRegister)
 
 // POST /api/auth/login
 router.post('/auth/login', loginLimiter, validate({ body: LoginBody }), async (req, res, next) => {
