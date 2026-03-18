@@ -13,6 +13,19 @@ const customRoutes = [
   '../../api/@custom/blog',
   '../../api/@custom/pages',
   '../../api/@custom/pricing',
+  '../../api/@custom/posts',
+  '../../api/@custom/analytics',
+  '../../api/@custom/content-suggestions',
+  '../../api/@custom/leads',
+  '../../api/@custom/templates',
+  '../../api/@custom/ai-generate',
+  '../../api/@custom/ai-suggestions',
+  '../../api/@custom/hashtags',
+  '../../api/@custom/linkedin-oauth',
+  '../../api/@custom/search',
+  '../../api/@custom/storage',
+  '../../api/@custom/teams',
+  '../../api/@custom/clips',
 ]
 
 for (const route of customRoutes) {
