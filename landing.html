@@ -1,10 +1,651 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Splice</title>
-  <style>body{font-family:system-ui;display:flex;justify-content:center;align-items:center;min-height:100vh;margin:0;background:#f8fafc}h1{font-size:2rem;color:#1e293b}</style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Taplio — AI-Powered LinkedIn Growth</title>
+<meta name="description" content="Write scroll-stopping LinkedIn posts in seconds, schedule at peak times, and grow your audience with AI. Join 12,000+ creators using Taplio.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --primary:#F97316;--primary-dark:#EA580C;--primary-light:#FB923C;
+  --accent:#6366F1;
+  --bg-white:#ffffff;--bg-light:#fafafa;--bg-warm:#fff8f3;
+  --text-dark:#0f172a;--text-body:#334155;--text-muted:#64748b;
+  --success:#10B981;--error:#EF4444;--border:#e2e8f0;
+  --radius:8px;--radius-lg:12px;--max-w:1200px;
+}
+body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:var(--text-dark);line-height:1.6;background:var(--bg-white);-webkit-font-smoothing:antialiased}
+a{color:var(--primary);text-decoration:none}
+.container{max-width:var(--max-w);margin:0 auto;padding:0 24px}
+
+/* Buttons */
+.btn{display:inline-flex;align-items:center;gap:8px;padding:12px 28px;border-radius:var(--radius);font-size:16px;font-weight:600;cursor:pointer;border:none;transition:all 150ms ease;text-decoration:none}
+.btn-primary{background:var(--primary);color:#fff}.btn-primary:hover{background:var(--primary-dark)}
+.btn-secondary{background:transparent;border:1.5px solid var(--primary);color:var(--primary)}.btn-secondary:hover{background:rgba(249,115,22,0.06)}
+.btn-outline{background:transparent;border:1.5px solid var(--border);color:var(--text-body)}.btn-outline:hover{border-color:var(--primary);color:var(--primary)}
+
+/* ===== NAV ===== */
+nav{position:fixed;top:0;left:0;right:0;background:rgba(255,255,255,0.94);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);z-index:100;padding:0 24px}
+nav .inner{max-width:var(--max-w);margin:0 auto;display:flex;align-items:center;justify-content:space-between;height:64px}
+.nav-logo{display:flex;align-items:center;gap:10px;font-size:20px;font-weight:700;color:var(--text-dark);text-decoration:none}
+.nav-logo svg{color:var(--primary)}
+.nav-links{display:flex;gap:32px;align-items:center}
+.nav-links a{color:var(--text-body);font-size:14px;font-weight:500;text-decoration:none}
+.nav-links a:hover{color:var(--primary)}
+
+/* ===== HERO ===== */
+.hero{padding:136px 24px 96px;text-align:center;position:relative;overflow:hidden;background:var(--bg-white)}
+.hero::before{content:'';position:absolute;top:-160px;left:50%;transform:translateX(-50%);width:900px;height:900px;background:radial-gradient(circle,rgba(249,115,22,0.08) 0%,rgba(249,115,22,0.03) 40%,transparent 70%);pointer-events:none}
+.hero .badge{display:inline-flex;align-items:center;gap:6px;padding:6px 16px;border-radius:20px;background:rgba(249,115,22,0.09);color:var(--primary-dark);font-size:13px;font-weight:600;margin-bottom:24px}
+.hero h1{font-size:56px;font-weight:800;line-height:1.08;margin-bottom:20px;letter-spacing:-1.5px;max-width:740px;margin-left:auto;margin-right:auto;color:var(--text-dark)}
+.hero h1 span{background:linear-gradient(135deg,var(--primary),var(--primary-dark));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hero p{font-size:20px;color:var(--text-body);max-width:560px;margin:0 auto 36px;line-height:1.55}
+.hero .cta-group{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;margin-bottom:64px}
+.hero .social-proof{display:flex;align-items:center;justify-content:center;gap:8px;font-size:14px;color:var(--text-muted);margin-top:-20px}
+.hero .social-proof .avatars{display:flex}
+.hero .social-proof .avatars span{width:28px;height:28px;border-radius:50%;border:2px solid #fff;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;margin-left:-8px}
+.hero .social-proof .avatars span:first-child{margin-left:0}
+
+/* Post preview card */
+.hero-visual{max-width:520px;margin:0 auto;background:var(--bg-white);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px;text-align:left;box-shadow:0 8px 32px rgba(0,0,0,0.08);position:relative}
+.post-card-header{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.post-avatar{width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--primary-dark));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:16px;flex-shrink:0}
+.post-meta .name{font-size:14px;font-weight:600;color:var(--text-dark)}
+.post-meta .role{font-size:12px;color:var(--text-muted)}
+.post-body{font-size:14px;color:var(--text-body);line-height:1.6;margin-bottom:14px}
+.post-body strong{color:var(--text-dark)}
+.post-stats{display:flex;gap:20px;padding-top:10px;border-top:1px solid var(--border)}
+.post-stat{font-size:12px;color:var(--text-muted);display:flex;align-items:center;gap:4px}
+.post-stat svg{color:var(--primary)}
+.ai-badge{position:absolute;top:-12px;right:16px;background:var(--primary);color:#fff;font-size:11px;font-weight:600;padding:4px 10px;border-radius:12px;display:flex;align-items:center;gap:4px}
+
+/* ===== STATS BAR ===== */
+.stats-bar{padding:56px 24px;background:var(--bg-warm);border-top:1px solid rgba(249,115,22,0.1);border-bottom:1px solid rgba(249,115,22,0.1)}
+.stats-bar .inner{max-width:var(--max-w);margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr);gap:24px;text-align:center}
+.stat-item .value{font-size:36px;font-weight:800;color:var(--primary);letter-spacing:-1px}
+.stat-item .label{font-size:14px;color:var(--text-muted);margin-top:4px;font-weight:500}
+
+/* ===== SECTION COMMON ===== */
+.section-header{text-align:center;margin-bottom:64px}
+.section-header .label{display:inline-flex;align-items:center;gap:6px;color:var(--primary);font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:1px;margin-bottom:12px}
+.section-header h2{font-size:40px;font-weight:700;line-height:1.15;letter-spacing:-0.5px;margin-bottom:16px;color:var(--text-dark)}
+.section-header p{font-size:18px;color:var(--text-body);max-width:560px;margin:0 auto;line-height:1.55}
+
+/* ===== BENEFITS ===== */
+.benefits{padding:100px 24px;background:var(--bg-white)}
+.benefits-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:32px}
+.benefit-item{padding:28px;border-radius:var(--radius-lg);background:var(--bg-white);border:1px solid var(--border);transition:all 200ms ease}
+.benefit-item:hover{transform:translateY(-3px);box-shadow:0 8px 24px rgba(249,115,22,0.08);border-color:rgba(249,115,22,0.25)}
+.benefit-icon{width:48px;height:48px;border-radius:12px;background:rgba(249,115,22,0.08);display:flex;align-items:center;justify-content:center;color:var(--primary);margin-bottom:16px}
+.benefit-item h3{font-size:18px;font-weight:600;color:var(--text-dark);margin-bottom:8px}
+.benefit-item p{font-size:15px;color:var(--text-muted);line-height:1.6}
+
+/* ===== FEATURES ===== */
+.features{padding:100px 24px;background:var(--bg-light)}
+.features-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:24px}
+.feature-card{background:var(--bg-white);border:1px solid var(--border);border-radius:var(--radius-lg);padding:28px;transition:all 200ms ease}
+.feature-card:hover{transform:translateY(-3px);box-shadow:0 8px 24px rgba(0,0,0,0.06);border-color:rgba(249,115,22,0.2)}
+.feature-card .icon-wrap{width:44px;height:44px;border-radius:10px;background:rgba(249,115,22,0.08);display:flex;align-items:center;justify-content:center;margin-bottom:16px;color:var(--primary)}
+.feature-card h3{font-size:17px;font-weight:600;margin-bottom:8px;color:var(--text-dark)}
+.feature-card p{font-size:14px;color:var(--text-muted);line-height:1.55}
+
+/* ===== HOW IT WORKS ===== */
+.how-it-works{padding:100px 24px;background:var(--bg-white)}
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:40px;margin-top:64px}
+.step{text-align:center;padding:24px}
+.step .num{width:48px;height:48px;border-radius:50%;background:var(--primary);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;margin-bottom:20px}
+.step h3{font-size:18px;font-weight:600;margin-bottom:10px;color:var(--text-dark)}
+.step p{font-size:15px;color:var(--text-body);max-width:300px;margin:0 auto}
+
+/* ===== PRICING ===== */
+.pricing{padding:100px 24px;background:var(--bg-light)}
+.pricing-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-top:64px}
+.price-card{background:var(--bg-white);border:1px solid var(--border);border-radius:var(--radius-lg);padding:36px;display:flex;flex-direction:column}
+.price-card.featured{border:2px solid var(--primary);position:relative}
+.price-card.featured::before{content:'Most Popular';position:absolute;top:-13px;left:50%;transform:translateX(-50%);background:var(--primary);color:#fff;font-size:12px;font-weight:600;padding:4px 16px;border-radius:20px;white-space:nowrap}
+.price-card .tier{font-size:13px;font-weight:600;color:var(--primary);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px}
+.price-card .price{font-size:48px;font-weight:800;margin-bottom:4px;letter-spacing:-2px;color:var(--text-dark)}
+.price-card .price span{font-size:16px;font-weight:400;color:var(--text-muted)}
+.price-card .desc{font-size:14px;color:var(--text-muted);margin-bottom:28px}
+.price-card ul{list-style:none;flex:1;margin-bottom:28px}
+.price-card li{display:flex;align-items:center;gap:10px;font-size:14px;color:var(--text-body);padding:8px 0;border-bottom:1px solid var(--border)}
+.price-card li svg{color:var(--success);flex-shrink:0}
+
+/* ===== TESTIMONIALS ===== */
+.testimonials{padding:100px 24px;background:var(--bg-white)}
+.testimonials-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-top:64px}
+.testimonial{background:var(--bg-white);border:1px solid var(--border);border-radius:var(--radius-lg);padding:32px;transition:all 200ms ease}
+.testimonial:hover{box-shadow:0 8px 24px rgba(0,0,0,0.06)}
+.testimonial .stars{color:#F59E0B;margin-bottom:16px;display:flex;gap:2px}
+.testimonial blockquote{font-size:15px;color:var(--text-body);line-height:1.65;margin-bottom:20px;font-style:italic}
+.testimonial .author{display:flex;align-items:center;gap:12px}
+.testimonial .avatar{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--primary-dark));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:14px}
+.testimonial .info .name{font-size:14px;font-weight:600;color:var(--text-dark)}
+.testimonial .info .role{font-size:13px;color:var(--text-muted)}
+
+/* ===== CTA ===== */
+.cta-section{padding:100px 24px;background:var(--bg-white);text-align:center}
+.cta-section .inner{background:linear-gradient(135deg,rgba(249,115,22,0.05),rgba(234,88,12,0.08));border:1px solid rgba(249,115,22,0.15);border-radius:20px;padding:72px 48px;max-width:800px;margin:0 auto}
+.cta-section h2{font-size:40px;font-weight:700;margin-bottom:16px;letter-spacing:-0.5px;color:var(--text-dark)}
+.cta-section p{font-size:18px;color:var(--text-body);margin-bottom:32px;max-width:480px;margin-left:auto;margin-right:auto}
+
+/* ===== FAQS ===== */
+.faqs{padding:100px 24px;background:var(--bg-light)}
+.faq-list{max-width:720px;margin:64px auto 0;display:flex;flex-direction:column;gap:0}
+.faq-item{border-bottom:1px solid var(--border);padding:24px 0}
+.faq-item:first-child{border-top:1px solid var(--border)}
+.faq-q{font-size:17px;font-weight:600;color:var(--text-dark);cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:16px}
+.faq-a{font-size:15px;color:var(--text-body);line-height:1.65;margin-top:12px}
+
+/* ===== FOOTER ===== */
+footer{padding:48px 24px;border-top:1px solid var(--border);background:var(--bg-white)}
+footer .inner{max-width:var(--max-w);margin:0 auto;display:flex;justify-content:space-between;align-items:center}
+footer .brand{display:flex;align-items:center;gap:8px;font-weight:700;font-size:16px;color:var(--text-dark);text-decoration:none}
+footer .brand svg{color:var(--primary)}
+footer .links{display:flex;gap:24px}
+footer .links a{font-size:14px;color:var(--text-muted);text-decoration:none}
+footer .links a:hover{color:var(--primary)}
+footer .copy{font-size:13px;color:var(--text-muted)}
+
+/* ===== RESPONSIVE ===== */
+@media(max-width:1024px){
+  .features-grid{grid-template-columns:repeat(2,1fr)}
+  .benefits-grid{grid-template-columns:repeat(2,1fr)}
+  .pricing-grid{grid-template-columns:1fr 1fr}
+  .testimonials-grid{grid-template-columns:repeat(2,1fr)}
+  .stats-bar .inner{grid-template-columns:repeat(2,1fr);gap:32px}
+}
+@media(max-width:768px){
+  .hero h1{font-size:36px}
+  .hero p{font-size:17px}
+  .section-header h2{font-size:30px}
+  .features-grid{grid-template-columns:1fr}
+  .benefits-grid{grid-template-columns:1fr}
+  .steps{grid-template-columns:1fr;gap:24px}
+  .pricing-grid{grid-template-columns:1fr;max-width:400px;margin-left:auto;margin-right:auto}
+  .testimonials-grid{grid-template-columns:1fr}
+  .stats-bar .inner{grid-template-columns:repeat(2,1fr)}
+  nav .nav-links{display:none}
+  .cta-section .inner{padding:48px 24px}
+  footer .inner{flex-direction:column;gap:16px;text-align:center}
+  .hero-visual{margin:0 auto 32px}
+}
+</style>
 </head>
-<body><h1>Splice — Coming Soon</h1></body>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="inner">
+    <a class="nav-logo" href="#">
+      <svg width="28" height="28" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="3" y="6" width="42" height="12" rx="6" fill="currentColor"/>
+        <path d="M19 18 H29 L24 44 Z" fill="currentColor"/>
+      </svg>
+      Taplio
+    </a>
+    <div class="nav-links">
+      <a href="#features">Features</a>
+      <a href="#how-it-works">How It Works</a>
+      <a href="#pricing">Pricing</a>
+      <a href="#" class="btn btn-primary" style="padding:8px 20px;font-size:14px">Start Free</a>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero" id="hero">
+  <div class="container">
+    <div class="badge">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg>
+      AI-Powered LinkedIn Growth
+    </div>
+    <h1>Write less.<br><span>Grow faster.</span></h1>
+    <p>Create scroll-stopping LinkedIn posts in seconds, schedule at peak engagement times, and watch your audience grow — all on autopilot.</p>
+    <div class="cta-group">
+      <a href="#" class="btn btn-primary">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+        Start for Free
+      </a>
+      <a href="#" class="btn btn-outline">See How It Works</a>
+    </div>
+
+    <!-- Post preview -->
+    <div class="hero-visual">
+      <div class="ai-badge">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg>
+        Written by AI
+      </div>
+      <div class="post-card-header">
+        <div class="post-avatar">SC</div>
+        <div class="post-meta">
+          <div class="name">Sarah Chen</div>
+          <div class="role">Product Lead at Vercel · 1st</div>
+        </div>
+      </div>
+      <div class="post-body">
+        <strong>I went from 800 to 24,000 LinkedIn followers in 6 months.</strong><br><br>
+        Here's the exact content framework I used — and why most people get it backwards:<br><br>
+        Most creators post about what they do.<br>
+        Top creators post about what they've <em>learned</em>.<br><br>
+        The shift is subtle. The results are not.
+      </div>
+      <div class="post-stats">
+        <span class="post-stat">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 10v12"/><path d="M15 5.88 14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H4a2 2 0 0 0-2-2v-8a2 2 0 0 1 2-2h2.76a2 2 0 0 0 1.79-1.11L12 2h0a3.13 3.13 0 0 1 3 3.88Z"/></svg>
+          4,821
+        </span>
+        <span class="post-stat">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          312 comments
+        </span>
+        <span class="post-stat">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" x2="15.42" y1="13.51" y2="17.49"/><line x1="15.41" x2="8.59" y1="6.51" y2="10.49"/></svg>
+          189 reposts
+        </span>
+      </div>
+    </div>
+
+    <div class="social-proof" style="margin-top:24px">
+      <div class="avatars">
+        <span style="background:#F97316">JL</span>
+        <span style="background:#0891B2">MR</span>
+        <span style="background:#8B5CF6">AP</span>
+        <span style="background:#10B981">KS</span>
+      </div>
+      <span>Trusted by <strong>12,000+</strong> LinkedIn creators</span>
+    </div>
+  </div>
+</section>
+
+<!-- STATS BAR -->
+<section class="stats-bar">
+  <div class="stats-bar inner">
+    <div class="stat-item">
+      <div class="value">12K+</div>
+      <div class="label">Active creators</div>
+    </div>
+    <div class="stat-item">
+      <div class="value">2.4M</div>
+      <div class="label">Posts published</div>
+    </div>
+    <div class="stat-item">
+      <div class="value">340%</div>
+      <div class="label">Avg. reach increase</div>
+    </div>
+    <div class="stat-item">
+      <div class="value">4.8/5</div>
+      <div class="label">User satisfaction</div>
+    </div>
+  </div>
+</section>
+
+<!-- BENEFITS -->
+<section class="benefits" id="benefits">
+  <div class="container">
+    <div class="section-header">
+      <div class="label">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        Why Taplio
+      </div>
+      <h2>Stop staring at a blank post. Start growing.</h2>
+      <p>Taplio gives you the AI tools, scheduling intelligence, and analytics to build a LinkedIn presence that actually works.</p>
+    </div>
+    <div class="benefits-grid">
+      <div class="benefit-item">
+        <div class="benefit-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg>
+        </div>
+        <h3>Write 10x Faster</h3>
+        <p>Generate full LinkedIn posts from a topic, URL, or voice note. AI trained on thousands of viral posts learns your voice and writes the way you do.</p>
+      </div>
+      <div class="benefit-item">
+        <div class="benefit-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>
+        </div>
+        <h3>Post at the Right Time</h3>
+        <p>Taplio analyses your audience's activity patterns and schedules your posts when they're most likely to see — and engage with — your content.</p>
+      </div>
+      <div class="benefit-item">
+        <div class="benefit-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>
+        </div>
+        <h3>See What's Working</h3>
+        <p>Track impressions, engagement rate, follower growth, and which content formats perform best — so you can do more of what works and less of what doesn't.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section class="features" id="features">
+  <div class="container">
+    <div class="section-header">
+      <div class="label">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg>
+        Features
+      </div>
+      <h2>Everything you need to grow on LinkedIn</h2>
+      <p>From writing your first post to managing a full content calendar — Taplio handles the heavy lifting.</p>
+    </div>
+    <div class="features-grid">
+
+      <div class="feature-card">
+        <div class="icon-wrap">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg>
+        </div>
+        <h3>AI Post Writer</h3>
+        <p>Generate full posts from a single idea, URL, or voice note. Choose your tone — professional, casual, provocative — and refine with one click.</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="icon-wrap">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/><path d="M8 14h.01"/><path d="M12 14h.01"/><path d="M16 14h.01"/><path d="M8 18h.01"/><path d="M12 18h.01"/></svg>
+        </div>
+        <h3>Smart Scheduling</h3>
+        <p>Build a content calendar and let Taplio post automatically at peak times. Never miss a day even when you're heads-down in real work.</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="icon-wrap">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>
+        </div>
+        <h3>Carousel Builder</h3>
+        <p>Design scroll-stopping LinkedIn carousels with drag-and-drop ease. Export as a PDF post in one click — no design skills needed.</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="icon-wrap">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>
+        </div>
+        <h3>Analytics Dashboard</h3>
+        <p>Track impressions, engagement, follower growth, and click-through rate across all your posts — with trend charts and weekly digests.</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="icon-wrap">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2H3v16h5v4l4-4h5l4-4V2zM11 11V7"/><path d="M16 11V7"/></svg>
+        </div>
+        <h3>Content Repurposing</h3>
+        <p>Turn blog posts, YouTube videos, newsletters, and podcasts into ready-to-publish LinkedIn content. One piece of content, infinite posts.</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="icon-wrap">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        </div>
+        <h3>Inspiration Feed</h3>
+        <p>Browse top-performing posts from creators in your niche. Bookmark what works, remix with AI, and always have fresh ideas in your queue.</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="icon-wrap">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        </div>
+        <h3>Engagement Tracker</h3>
+        <p>Monitor comments and replies across all your posts in one inbox. Never miss a conversation, and build relationships faster at scale.</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="icon-wrap">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" x2="19" y1="8" y2="14"/><line x1="22" x2="16" y1="11" y2="11"/></svg>
+        </div>
+        <h3>Team Collaboration</h3>
+        <p>Invite ghostwriters or team members, assign posts for review, and approve content before it goes live — all without sharing credentials.</p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="how-it-works" id="how-it-works">
+  <div class="container">
+    <div class="section-header">
+      <div class="label">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        How It Works
+      </div>
+      <h2>From idea to published post in 3 minutes</h2>
+      <p>No learning curve. Just connect your LinkedIn, tell Taplio what you're about, and start creating.</p>
+    </div>
+    <div class="steps">
+      <div class="step">
+        <div class="num">1</div>
+        <h3>Connect LinkedIn</h3>
+        <p>Link your LinkedIn account in one click. Taplio analyses your existing posts to understand your voice and what resonates with your audience.</p>
+      </div>
+      <div class="step">
+        <div class="num">2</div>
+        <h3>Create with AI</h3>
+        <p>Enter a topic, URL, or voice note. The AI generates a full post — hooks, body, CTA — in your tone. Edit, remix, or publish as-is.</p>
+      </div>
+      <div class="step">
+        <div class="num">3</div>
+        <h3>Schedule &amp; Grow</h3>
+        <p>Queue posts to publish at peak times. Watch your analytics improve week over week as Taplio learns what works best for your audience.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section class="pricing" id="pricing">
+  <div class="container">
+    <div class="section-header">
+      <div class="label">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" x2="12" y1="2" y2="22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        Pricing
+      </div>
+      <h2>Start free. Scale when you're ready.</h2>
+      <p>No credit card required to start. Cancel any time.</p>
+    </div>
+    <div class="pricing-grid">
+
+      <!-- Free -->
+      <div class="price-card">
+        <div class="tier">Free</div>
+        <div class="price">$0<span>/mo</span></div>
+        <div class="desc">Perfect for getting started on LinkedIn</div>
+        <ul>
+          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>10 AI-generated posts/month</li>
+          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Basic scheduling (5 posts queued)</li>
+          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>1 LinkedIn account</li>
+          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Basic analytics (7-day)</li>
+        </ul>
+        <a href="#" class="btn btn-secondary" style="width:100%;justify-content:center">Get Started Free</a>
+      </div>
+
+      <!-- Pro -->
+      <div class="price-card featured">
+        <div class="tier">Pro</div>
+        <div class="price">$29<span>/mo</span></div>
+        <div class="desc">For serious creators building their personal brand</div>
+        <ul>
+          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Unlimited AI post generation</li>
+          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Smart scheduling (unlimited queue)</li>
+          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Carousel Builder</li>
+          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Content repurposing (URLs, video)</li>
+          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Full analytics &amp; exports</li>
+          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Inspiration Feed</li>
+          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Engagement Tracker</li>
+        </ul>
+        <a href="#" class="btn btn-primary" style="width:100%;justify-content:center">Start Pro Trial</a>
+      </div>
+
+      <!-- Agency -->
+      <div class="price-card">
+        <div class="tier">Agency</div>
+        <div class="price">$79<span>/mo</span></div>
+        <div class="desc">For teams managing multiple LinkedIn profiles</div>
+        <ul>
+          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Up to 5 LinkedIn accounts</li>
+          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Team Collaboration tools</li>
+          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Approval workflows</li>
+          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Client reporting &amp; white-label</li>
+          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Priority support</li>
+          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>All Pro features included</li>
+        </ul>
+        <a href="#" class="btn btn-secondary" style="width:100%;justify-content:center">Contact Sales</a>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section class="testimonials" id="testimonials">
+  <div class="container">
+    <div class="section-header">
+      <div class="label">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        Testimonials
+      </div>
+      <h2>Creators who grew with Taplio</h2>
+      <p>Real results from real people building real audiences on LinkedIn.</p>
+    </div>
+    <div class="testimonials-grid">
+
+      <div class="testimonial">
+        <div class="stars">
+          <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+          <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+          <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+          <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+          <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+        </div>
+        <blockquote>"I went from posting twice a month to every day — and my follower count tripled in 4 months. Taplio's AI writes the first draft, I spend 10 minutes refining it. It's genuinely the best tool I've bought this year."</blockquote>
+        <div class="author">
+          <div class="avatar">DM</div>
+          <div class="info">
+            <div class="name">David Morales</div>
+            <div class="role">SaaS Founder, 34K LinkedIn followers</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="testimonial">
+        <div class="stars">
+          <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+          <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+          <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+          <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+          <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+        </div>
+        <blockquote>"We manage LinkedIn for 8 B2B clients. Before Taplio we were drowning in spreadsheets. Now the whole team works from one place — approval flows, scheduling, analytics. Our clients love the reports."</blockquote>
+        <div class="author">
+          <div class="avatar">AL</div>
+          <div class="info">
+            <div class="name">Amara Lee</div>
+            <div class="role">Founder, Clarity Content Agency</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="testimonial">
+        <div class="stars">
+          <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+          <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+          <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+          <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+          <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+        </div>
+        <blockquote>"The carousel builder alone is worth the subscription. I used to spend 3 hours in Figma making one carousel. Now I make them in 15 minutes, they look better, and the engagement is 5x my regular posts."</blockquote>
+        <div class="author">
+          <div class="avatar">RK</div>
+          <div class="info">
+            <div class="name">Raj Kumar</div>
+            <div class="role">Product Designer, 18K LinkedIn followers</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section" id="cta">
+  <div class="container">
+    <div class="inner">
+      <h2>Ready to grow your LinkedIn?</h2>
+      <p>Join 12,000+ creators who publish consistently and grow predictably with Taplio.</p>
+      <div style="display:flex;gap:16px;justify-content:center;flex-wrap:wrap">
+        <a href="#" class="btn btn-primary">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+          Start for Free
+        </a>
+        <a href="#" class="btn btn-outline">Book a Demo</a>
+      </div>
+      <p style="margin-top:20px;font-size:13px;color:var(--text-muted)">No credit card required &middot; Free plan available &middot; Cancel any time</p>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section class="faqs" id="faqs">
+  <div class="container">
+    <div class="section-header">
+      <div class="label">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" x2="12.01" y1="17" y2="17"/></svg>
+        FAQ
+      </div>
+      <h2>Common questions</h2>
+      <p>Everything you need to know before you start growing.</p>
+    </div>
+    <div class="faq-list">
+      <div class="faq-item">
+        <div class="faq-q">Will the AI posts sound like me?</div>
+        <div class="faq-a">Yes. Taplio's AI learns from your existing LinkedIn posts to match your tone, vocabulary, and style. The more you use Taplio, the better it gets at sounding exactly like you — so readers won't know the difference.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">Does Taplio post automatically to LinkedIn?</div>
+        <div class="faq-a">Yes. Once you approve and schedule a post, Taplio publishes it automatically at your chosen time — or at the AI-recommended peak time for your audience. You stay in full control of what goes live.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">Is this against LinkedIn's terms of service?</div>
+        <div class="faq-a">Taplio uses LinkedIn's official API for all scheduling and publishing. Your account is safe. Hundreds of thousands of creators use LinkedIn scheduling tools — it's a well-established and accepted practice.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">Can I manage multiple LinkedIn profiles?</div>
+        <div class="faq-a">Yes, with the Agency plan you can manage up to 5 LinkedIn profiles from one dashboard, with separate content calendars, analytics, and team access for each account.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">What happens if I cancel?</div>
+        <div class="faq-a">You keep access until the end of your billing period. After that, you drop to the Free plan — your posts, analytics history, and settings are preserved. You never lose your data.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">Can I try Pro before paying?</div>
+        <div class="faq-a">Yes. Start on the Free plan with no credit card. When you're ready to upgrade, Pro includes a 14-day free trial so you can experience the full feature set before you're charged.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="inner">
+    <a class="brand" href="#">
+      <svg width="22" height="22" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="3" y="6" width="42" height="12" rx="6" fill="currentColor"/>
+        <path d="M19 18 H29 L24 44 Z" fill="currentColor"/>
+      </svg>
+      Taplio
+    </a>
+    <div class="links">
+      <a href="#">Features</a>
+      <a href="#">Pricing</a>
+      <a href="#">Blog</a>
+      <a href="#">Help</a>
+      <a href="#">Privacy</a>
+      <a href="#">Terms</a>
+    </div>
+    <div class="copy">&copy; 2026 Taplio. All rights reserved.</div>
+  </div>
+</footer>
+
+</body>
 </html>
