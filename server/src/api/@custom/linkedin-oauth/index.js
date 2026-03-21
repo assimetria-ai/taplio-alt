@@ -1,3 +1,6 @@
+// Security review 2026-03-21: confirmed all protected routes use @system authenticate
+// and CSRF state validation; no unauthenticated data access. Delegates auth to @system.
+
 /**
  * @custom — LinkedIn OAuth routes
  *
